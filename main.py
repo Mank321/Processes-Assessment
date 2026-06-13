@@ -32,23 +32,7 @@ class GameManager(Entity):
 
 
     def pause_game(self):
-        if self.game_state.location == 'tutorial':
-            for entity in self.game_state.tutorial_entities:
-                entity.disable()
-            self.saved_position = self.player.position
-        elif self.game_state.location == 'market':
-            for entity in self.game_state.market.entities:
-                entity.disable()
-            self.saved_position = self.player.position
-        elif self.game_state.location == 'monster_domain':
-            for entity in self.game_state.level.entities:
-                entity.disable()
-            self.saved_position = self.player.position
-        for ent in self.ui_state.entities:
-            ent.enabled = False
-        
         mouse.locked = False
-        self.sky.disable()
         main_menu.start_buttons.enabled = False
         main_menu.pause_buttons.enabled = True
         main_menu.background.enabled = True
@@ -58,27 +42,9 @@ class GameManager(Entity):
         main_menu.enabled = False
         main_menu.background.enabled = False
         mouse.locked = True
-        self.sky.enable()
-
-        if self.game_state.location == 'tutorial':
-            for entity in self.game_state.tutorial_entities:
-                entity.enable()
-
-        elif self.game_state.location == 'market':
-            for entity in self.game_state.market.entities:
-                entity.enable()
-
-        elif self.game_state.location == 'monster_domain':
-            for entity in self.game_state.level.entities:
-                entity.enable()
-
-        for ent in self.ui_state.entities:
-            ent.enabled = False
-
-        self.player.position = self.saved_position
 
     def load_tutorial(self):
-        create_tutorial_world(self.game_state)
+        create_tutorial_world(self.game_state, self.player)
 
 class GameState():
     def __init__(self):
@@ -86,7 +52,15 @@ class GameState():
 
 class UIState():
     def __init__(self, game_state, player):
-        self.entities = []
+        self.player = player
+        self.game_state = game_state
+        self.coordinate_text = Text(self.player, position=(0,0), parent=camera.ui)
+        self.entities = [self.coordinate_text]
+    
+    def update(self):
+        self.coordinate_text.text = self.player.position if self.player != None else ''
+        print(self.coordinate_text.text)
+        print('hi')
 
 class Player(Entity):
     def __init__(self, ui_state, game_state):
@@ -148,6 +122,7 @@ class Player(Entity):
         self.rotation_y += mouse.velocity[0] * 80
         camera.rotation_x = min(max(-90, camera.rotation_x), 90)
         
+        
 class Monster(Entity):
     def __init__(self, name, health, damage, speed=5):
         pass
@@ -158,20 +133,36 @@ class LevelCreator():
 
 #---------------------------------------------------#
 
-def create_tutorial_world(game_state):
-    game_state.ground = Entity(model='plane', collider='box', scale=200, texture='grass', texture_scale=(4,4))
-    game_state.tutorial_entities = [game_state.ground]
+def create_tutorial_world(game_state, player):
+    ground = Entity(model='plane', collider='box', scale=200, texture='grass', texture_scale=(4,4))
+    hands = Entity(parent=player, scale=0.05, collider='box',position=(1,0.5, 0), rotation=(1,1,-25),
+                   model='Assets/Models/Hands/handv5.fbx',
+                   texture='Assets/Models/Hands/skin.jpg', double_sided = True)
+    
+    game_state.tutorial_entities = [ground]
 
 def update():
     if held_keys['escape']:
         manager.pause_game()
 
+def pause_input(key):
+    if key == 'tab':
+        spectator_mode.enabled = not spectator_mode.enabled
+        #mouse.locked = spectator_mode.enabled
+        spectator_mode.position = manager.player.position
+        
+        application.paused = spectator_mode.enabled
+        
+        camera.parent = spectator_mode if spectator_mode.enabled else manager.player
+
 #------------------------------------------------------------#
 
 app = Ursina()
 
+window.icon = 'Assets/ursina.ico'
+spectator_mode = EditorCamera(enabled = False, ignore_paused=True)
+pause_handler = Entity(ignore_paused=True, input=pause_input)
 manager = GameManager()
 main_menu = MainMenu(manager.start_game, manager.resume_game)
-
 
 app.run()

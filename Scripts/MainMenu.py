@@ -7,10 +7,7 @@ class MainMenu(Entity):
         self.main_menu = Entity(parent=self, enabled=True)
         self.started = False
 
-        self.game_play_text = "Hello Adventuror"
-        self.battle_text = "hi"
-
-        self.background = Sprite('Assets/menu background.png', parent=camera.ui, color=color.dark_gray, z=10, scale=(0.15,0.15))
+        self.background = Entity(model='quad', texture='Assets/menu background.jpg', parent=self.main_menu, z=1, scale=(1.8,1))
 
         Text("MAIN MENU", parent=self.main_menu, y=0.4, x=0, origin=(0,0))
 
