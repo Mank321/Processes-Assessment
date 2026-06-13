@@ -70,7 +70,7 @@ class Player(Entity):
 
         self.speed = 10
         self.default_speed = self.speed
-        self.jump_height = 50
+        self.jump_height = 500
         self.gravity = 9.81**2
         self.velocity_y = 0
         self.armor = 0
@@ -135,11 +135,18 @@ class LevelCreator():
 
 def create_tutorial_world(game_state, player):
     ground = Entity(model='plane', collider='box', scale=200, texture='grass', texture_scale=(4,4))
-    hands = Entity(parent=player, scale=0.05, collider='box',position=(1,0.5, 0), rotation=(1,1,-25),
+    player.hands = Entity(parent=player, scale=0.05, collider='box',position=(1,0.5, 0), rotation=(1,1,-25),
                    model='Assets/Models/Hands/handv5.fbx',
                    texture='Assets/Models/Hands/skin.jpg', double_sided = True)
+    wall = Entity(scale=(0.05,0.1,0.05), collider='box', position=(-150,0,-220),
+                  model='Assets/Models/Wall/wall.fbx',
+                  texture='Assets/Models/Wall/texture.png', double_sided=True)
+    tree = Entity(scale=(0.1,0.1,0.1), position=(5,7,0), collider='box',
+                  model='Assets/Models/Tree/tree.fbx',
+                  texture='Assets/Models/Tree/texture.png')
     
-    game_state.tutorial_entities = [ground]
+    
+    game_state.tutorial_entities = [ground, wall]
 
 def update():
     if held_keys['escape']:
