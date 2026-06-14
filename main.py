@@ -136,6 +136,8 @@ class Player(Entity):
         if not hit_info.hit:
             move_amount = movement * self.speed * time.dt
             self.position += move_amount
+        else:
+            print(hit_info.entity)
         
         
 class Monster(Entity):
@@ -163,14 +165,17 @@ class Tree(Entity):
 def create_tutorial_world(game_state, player):
     ground = Entity(model='plane', collider='box', scale=200, texture='grass', texture_scale=(4,4))
     player.hands = Entity(model='Assets/Models/Hands/handv5.fbx',texture='Assets/Models/Hands/skin.jpg',
-                          parent=player, scale=0.05, collider='box',position=(1,0.5, 0), rotation=(1,1,-25), double_sided = True)
+                          parent=player, scale=0.05, collider='box',position=(1,0.5, -1), rotation=(1,1,-25), double_sided = True)
     wall = Entity(model='Assets/Models/Wall/wall.fbx', texture='Assets/Models/Wall/texture.png',
-                  double_sided=True,scale=(0.01,0.02,0.01), collider='mesh', position=(-30,0,-10))
+                  double_sided=True,scale=(0.01,0.01,0.01), collider='mesh', position=(-30,5,-10))
     
-    game_state.tutorial_entities = [ground, wall]
+    arch = Entity(model='Assets/Models/Gate/gate.fbx', texture='Assets/Models/Gate/texture.png',
+                  double_sided=True, scale=(0.02,0.03,0.015), collider='box', position=(0,0,20), rotation_y=180)
+    
+    game_state.tutorial_entities = [ground, wall, arch]
     game_state.tutorial_colliders = []
     for i in range(10):
-        pos = Vec3(random.randint(0,100), 0, random.randint(0,100))
+        pos = Vec3(random.randint(-45,45), 0, random.randint(-10,80))
         tree=Tree(game_state, pos)
         game_state.tutorial_entities.append(tree)
         game_state.tutorial_colliders.append(tree.collision_box)
