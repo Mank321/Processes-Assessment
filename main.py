@@ -20,10 +20,7 @@ class GameManager(Entity):
         self.game_state = GameState()
         self.ui_state = UIState(self.game_state, None)
         self.player = Player(self.ui_state, self.game_state)
-        self.ui_state.player = self.player 
-        
-        # Set the current level to be tutorial
-        self.game_state.location = 'tutorial'
+        self.ui_state.player = self.player         
 
         # Load the tutorial world at the beginning 
         self.load_tutorial()
@@ -44,7 +41,37 @@ class GameManager(Entity):
         mouse.locked = True
 
     def load_tutorial(self):
-        create_tutorial_world(self.game_state, self.player)
+        if hasattr(self.game_state, 'market_entities'):# and self.game_state.market_entities not None:
+            for entity in self.game_state.market_entities:
+                entity.disable()
+            for entity in self.game_state.market_collisions:
+                entity.disable()
+        if hasattr(self.game_state, 'tutorial_entities'):
+            for entity in self.game_state.tutorial_entities:
+                entity.enable()
+            for entity in self.game_state.tutorial_collisions:
+                entity.enable()
+        else:
+            create_tutorial_world(self.game_state, self.player)
+
+        self.game_state.location = 'tutorial'
+        self.player.position = (0,0,0)
+    
+    def load_market(self):
+        if self.game_state.location == 'tutorial':
+            for entity in self.game_state.tutorial_entities:
+                entity.disable()
+            for entity in self.game_state.tutorial_collisions:
+                entity.disable()
+        if hasattr(self.game_state, 'market_entities'):
+            for entity in self.game_state.market_entities:
+                entity.enable()
+            for entity in self.game_state.market_collisions:
+                entity.enable()
+        else:
+            create_market_world(self.game_state)
+        self.game_state.location = 'market'
+        self.player.position = (0,0,0)
 
 class GameState():
     def __init__(self):
@@ -95,9 +122,12 @@ class Player(Entity):
         mouse.locked = True
     
     def update(self):
+        """."""
+        # A cooldown for using the gates
         if self.transition_cooldown > 0:
             self.transition_cooldown -= time.dt
         
+        # Allowing jumping only when the player is on the ground
         ground_ray = raycast(self.world_position + Vec3(0,0.1,0), self.down, distance=1.1, ignore=[self])
         self.grounded = ground_ray.hit
         
@@ -110,34 +140,43 @@ class Player(Entity):
         
         self.y += self.velocity_y * time.dt
         
+        # Double speed while sprinting
         if held_keys['left shift']:
             self.speed = self.default_speed * 2
         else:
             self.speed = self.default_speed
         
-        
+        # Move the camera to keep up with where the player is watching
         camera.rotation_x -= mouse.velocity[1] * 80
         self.rotation_y += mouse.velocity[0] * 80
         camera.rotation_x = min(max(-90, camera.rotation_x), 90)
 
-
+        # Handle the player movement
         movement = Vec3(self.forward * (held_keys['w'] - held_keys['s'])
                         + self.right * (held_keys['d'] - held_keys['a'])).normalized()
         
-        if hasattr(self.game_state, 'tutorial_colliders'):
+        # Change hitbox colours when colliding for testing purposes
+        if hasattr(self.game_state, 'tutorial_colliders') and self.game_state.debug_mode:
             for collider in self.game_state.tutorial_colliders:
                 if self.intersects(collider).hit:
                     collider.color = color.red
                 else:
                     collider.color = color.white
-
+        
+        # Check if nothing is infront of the player before moving
         ignore = [self, self.hand] if hasattr(self, 'hand') else [self]
         hit_info = raycast(self.world_position, movement, distance=0.1, debug=True, ignore=ignore)
         if not hit_info.hit:
             move_amount = movement * self.speed * time.dt
             self.position += move_amount
         else:
-            print(hit_info.entity)
+            name = hit_info.entity.name
+            if name.startswith('gate'):
+                new_location = name.split('.')[1]
+                if new_location == 'market':
+                    manager.load_market()
+                elif new_location == 'tutorial':
+                    pass
         
         
 class Monster(Entity):
@@ -159,7 +198,16 @@ class Tree(Entity):
                                     position=(0,125,0), scale=(70,250,70),
                                     collider='box', visible=game_state.debug_mode,
                                     wireframe=True)
-        
+
+class Gate(Entity):
+    def __init__(self, game_state, position, name):
+        super().__init__(model='Assets/Models/Gate/gate.fbx', texture='Assets/Models/Gate/texture.png',
+                         double_sided=True, scale=(0.02,0.03,0.015), rotation_y=180, position=position)
+
+        self.collision_box = Entity(model='cube', parent=self, name=name,
+                                    position=(0,150,0), scale=(200,300,100),
+                                    collider='box', visible=game_state.debug_mode,
+                                    wireframe=True)
 #---------------------------------------------------#
 
 def create_tutorial_world(game_state, player):
@@ -169,12 +217,17 @@ def create_tutorial_world(game_state, player):
     wall = Entity(model='Assets/Models/Wall/wall.fbx', texture='Assets/Models/Wall/texture.png',
                   double_sided=True,scale=(0.01,0.01,0.01), collider='mesh', position=(-30,5,-10))
     
-    arch = Entity(model='Assets/Models/Gate/gate.fbx', texture='Assets/Models/Gate/texture.png',
-                  double_sided=True, scale=(0.02,0.03,0.015), collider='box', position=(0,0,20), rotation_y=180)
+    gate = Gate(game_state, position=(0,0,30), name='gate.market')
+
+    desc = '             Welcome to the dungeon!\n\nUse the mouse to move around\nPress "W" to move forward, "S" to move backward\nPress "A" to move right and "D" to move left\nPress the spacebar to jump'
+    text1 = Text(parent=scene, text=desc, position=(-8,5,9), scale=30, color=color.white)
     
-    game_state.tutorial_entities = [ground, wall, arch]
-    game_state.tutorial_colliders = []
-    for i in range(10):
+    desc = 'Attack the monster up ahead by left clicking!\n                     Try not to get hit!'
+    text2 = Text(parent=scene, text=desc, position=(-8,4,19), scale=30, color=color.white)
+    
+    game_state.tutorial_entities = [ground, wall, gate, text1, text2]
+    game_state.tutorial_colliders = [gate.collision_box]
+    for i in range(1):
         pos = Vec3(random.randint(-45,45), 0, random.randint(-10,80))
         tree=Tree(game_state, pos)
         game_state.tutorial_entities.append(tree)
