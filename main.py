@@ -48,7 +48,7 @@ class GameManager(Entity):
 
 class GameState():
     def __init__(self):
-        pass
+        self.debug_mode = True
 
 class UIState():
     def __init__(self, game_state, player):
@@ -64,13 +64,16 @@ class UIState():
 
 class Player(Entity):
     def __init__(self, ui_state, game_state):
-        super().__init__(model='cube', scale=(1,2,1), position=(0,1,0), collider='box', visible_self=False)
+        super().__init__(model='cube', scale=(1,2,1), position=(0,1,0),
+                         collider='box', visible_self=game_state.debug_mode,
+                         color=color.orange)
+
         self.ui_state = ui_state
         self.game_state = game_state
 
         self.speed = 10
         self.default_speed = self.speed
-        self.jump_height = 500
+        self.jump_height = 30
         self.gravity = 9.81**2
         self.velocity_y = 0
         self.armor = 0
@@ -95,8 +98,8 @@ class Player(Entity):
         if self.transition_cooldown > 0:
             self.transition_cooldown -= time.dt
         
-        ray = raycast(self.world_position + Vec3(0,0.1,0), self.down, distance=1.1, ignore=[self])
-        self.grounded = ray.hit
+        ground_ray = raycast(self.world_position + Vec3(0,0.1,0), self.down, distance=1.1, ignore=[self])
+        self.grounded = ground_ray.hit
         
         if self.grounded:
             self.velocity_y = max(0, self.velocity_y)
@@ -112,15 +115,27 @@ class Player(Entity):
         else:
             self.speed = self.default_speed
         
-        movement = Vec3(self.forward * (held_keys['w'] - held_keys['s'])
-                        + self.right * (held_keys['d'] - held_keys['a'])).normalized()
-        
-        move_amount = movement * self.speed * time.dt
-        self.position += move_amount
         
         camera.rotation_x -= mouse.velocity[1] * 80
         self.rotation_y += mouse.velocity[0] * 80
         camera.rotation_x = min(max(-90, camera.rotation_x), 90)
+
+
+        movement = Vec3(self.forward * (held_keys['w'] - held_keys['s'])
+                        + self.right * (held_keys['d'] - held_keys['a'])).normalized()
+        
+        if hasattr(self.game_state, 'tutorial_colliders'):
+            for collider in self.game_state.tutorial_colliders:
+                if self.intersects(collider).hit:
+                    collider.color = color.red
+                else:
+                    collider.color = color.white
+
+        ignore = [self, self.hand] if hasattr(self, 'hand') else [self]
+        hit_info = raycast(self.world_position, movement, distance=0.1, debug=True, ignore=ignore)
+        if not hit_info.hit:
+            move_amount = movement * self.speed * time.dt
+            self.position += move_amount
         
         
 class Monster(Entity):
@@ -131,22 +146,37 @@ class LevelCreator():
     def __init__(self):
         pass
 
+class Tree(Entity):
+    def __init__(self, game_state, position):
+        super().__init__(model='Assets/Models/Tree/treev2.fbx',
+                         texture='Assets/Models/Tree/texture.png',
+                         scale=(0.05,0.04,0.05), position=position,
+                         double_sided=True, name='tree')
+
+        self.collision_box = Entity(model='cube', parent=self,
+                                    position=(0,125,0), scale=(70,250,70),
+                                    collider='box', visible=game_state.debug_mode,
+                                    wireframe=True)
+        
 #---------------------------------------------------#
 
 def create_tutorial_world(game_state, player):
     ground = Entity(model='plane', collider='box', scale=200, texture='grass', texture_scale=(4,4))
-    player.hands = Entity(parent=player, scale=0.05, collider='box',position=(1,0.5, 0), rotation=(1,1,-25),
-                   model='Assets/Models/Hands/handv5.fbx',
-                   texture='Assets/Models/Hands/skin.jpg', double_sided = True)
-    wall = Entity(scale=(0.05,0.1,0.05), collider='box', position=(-150,0,-220),
-                  model='Assets/Models/Wall/wall.fbx',
-                  texture='Assets/Models/Wall/texture.png', double_sided=True)
-    tree = Entity(scale=(0.1,0.1,0.1), position=(5,7,0), collider='box',
-                  model='Assets/Models/Tree/tree.fbx',
-                  texture='Assets/Models/Tree/texture.png')
-    
+    player.hands = Entity(model='Assets/Models/Hands/handv5.fbx',texture='Assets/Models/Hands/skin.jpg',
+                          parent=player, scale=0.05, collider='box',position=(1,0.5, 0), rotation=(1,1,-25), double_sided = True)
+    wall = Entity(model='Assets/Models/Wall/wall.fbx', texture='Assets/Models/Wall/texture.png',
+                  double_sided=True,scale=(0.01,0.02,0.01), collider='mesh', position=(-30,0,-10))
     
     game_state.tutorial_entities = [ground, wall]
+    game_state.tutorial_colliders = []
+    for i in range(10):
+        pos = Vec3(random.randint(0,100), 0, random.randint(0,100))
+        tree=Tree(game_state, pos)
+        game_state.tutorial_entities.append(tree)
+        game_state.tutorial_colliders.append(tree.collision_box)
+        game_state.tutorial_entities.append(tree.collision_box)
+        
+    
 
 def update():
     if held_keys['escape']:
