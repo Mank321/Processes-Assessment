@@ -7,7 +7,7 @@ When switching scenes, I got an error that manager.new_scene didn't exist. I fix
 setting market_world and tutorial_world to None at the very begining, then in the switch_scenes
 function, I checked if the new_scene was None, then checked the old_scene's gate name to discover
 what the new_scene should be, then initialized the correct scene.
-I had to change the entities lists from game_state to the new class, 
+I had to change the entities lists from game_state to the new class, in the collision detectors.
 
 It went from:
 def load_market(self):
@@ -28,3 +28,26 @@ def load_market(self):
         self.player.position = (0,0,0)
 
 To:
+def switch_scenes(self, new_scene, old_scene):
+        """."""
+        scene = old_scene.gate.name.split('.')[1]
+
+        if new_scene == None:
+            if scene == 'market':
+                self.market_world = MarketWorld(self.game_state)
+                new_scene = self.market_world
+
+        new_scene.enable()
+        for entity in new_scene.entities:
+            entity.enable()
+        for entity in new_scene.colliders:
+            entity.enable()
+        old_scene.disable()
+        for entity in old_scene.entities:
+            entity.disable()
+        for entity in old_scene.colliders:
+            entity.disable()
+        
+        print_on_screen(f'--{scene.title()}--', position=(-0.1,0.45), scale=3, duration=2)
+        self.game_state.location = scene
+        self.player.position = (0,0,0)

@@ -27,6 +27,7 @@ class GameManager(Entity):
         # Load the tutorial world at the beginning 
         self.tutorial_world = TutorialWorld(self.game_state)
 
+        self.game_state.location = 'tutorial'
         self.sky = Sky()
 
 
@@ -63,8 +64,9 @@ class GameManager(Entity):
             entity.disable()
         
         print_on_screen(f'--{scene.title()}--', position=(-0.1,0.45), scale=3, duration=2)
-        self.game_state.location = 'market'
+        self.game_state.location = scene
         self.player.position = (0,0,0)
+        self.player.rotation = (0,0,0)
 
 
 class GameState():
@@ -154,8 +156,11 @@ class Player(Entity):
                         + self.right * (held_keys['d'] - held_keys['a'])).normalized()
         
         # Change hitbox colours when colliding for testing purposes
-        if hasattr(self.game_state, 'tutorial_colliders') and self.game_state.debug_mode:
-            for collider in self.game_state.tutorial_colliders:
+        dict = {'tutorial': manager.tutorial_world,
+                'market': manager.market_world}
+        colliders = dict[self.game_state.location].colliders
+        if self.game_state.debug_mode:
+            for collider in colliders:
                 if self.intersects(collider).hit:
                     collider.color = color.red
                 else:
@@ -243,7 +248,7 @@ class MarketWorld(Entity):
         self.wall = Entity(model='Assets/Models/Wall/wall.fbx', texture='Assets/Models/Wall/texture.png',
                     double_sided=True,scale=(0.01,0.01,0.01), collider='mesh', position=(-30,5,-10))
 
-        self.gate = Gate(game_state, position=(0,0,30), name='gate.tutorial')
+        self.gate = Gate(game_state, position=(0,0,-5), name='gate.tutorial')
 
         self.entities = [self.ground, self.wall, self.gate, self.gate.collision_box]
         self.colliders = [self.gate.collision_box]
