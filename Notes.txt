@@ -1,0 +1,30 @@
+14-15 June - When making the scene changing program, I wrote up a function to load the tutorial,
+and a seperate function to load the market. I later found this to be repetitive as
+I would need to create a function for each level. So I decided to compress the functions
+into one that could handle everything. This lead me to creating a class each for the tutorial,
+market, and monster levels, which should allow me to turn everything on and off easily. 
+When switching scenes, I got an error that manager.new_scene didn't exist. I fixed this by
+setting market_world and tutorial_world to None at the very begining, then in the switch_scenes
+function, I checked if the new_scene was None, then checked the old_scene's gate name to discover
+what the new_scene should be, then initialized the correct scene.
+I had to change the entities lists from game_state to the new class, 
+
+It went from:
+def load_market(self):
+        if self.game_state.location == 'tutorial':
+            for entity in self.game_state.tutorial_entities:
+                entity.disable()
+            for entity in self.game_state.tutorial_colliders:
+                entity.disable()
+        if hasattr(self.game_state, 'market_entities'):
+            for entity in self.game_state.market_entities:
+                entity.enable()
+            for entity in self.game_state.market_colliders:
+                entity.enable()
+        else:
+            create_market_world(self.game_state)
+        print_on_screen('-Market-', position=(-0.1,0.45), scale=3, duration=3)
+        self.game_state.location = 'market'
+        self.player.position = (0,0,0)
+
+To:

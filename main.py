@@ -9,6 +9,8 @@ class GameManager(Entity):
         self.player = None
         self.ui_state = None 
         self.game_state = None
+        self.tutorial_world = None
+        self.market_world = None
 
     def start_game(self):
         """."""
@@ -23,7 +25,7 @@ class GameManager(Entity):
         self.ui_state.player = self.player         
 
         # Load the tutorial world at the beginning 
-        self.load_tutorial()
+        self.tutorial_world = TutorialWorld(self.game_state)
 
         self.sky = Sky()
 
@@ -39,39 +41,31 @@ class GameManager(Entity):
         main_menu.enabled = False
         main_menu.background.enabled = False
         mouse.locked = True
-
-    def load_tutorial(self):
-        if hasattr(self.game_state, 'market_entities'):# and self.game_state.market_entities not None:
-            for entity in self.game_state.market_entities:
-                entity.disable()
-            for entity in self.game_state.market_collisions:
-                entity.disable()
-        if hasattr(self.game_state, 'tutorial_entities'):
-            for entity in self.game_state.tutorial_entities:
-                entity.enable()
-            for entity in self.game_state.tutorial_collisions:
-                entity.enable()
-        else:
-            create_tutorial_world(self.game_state, self.player)
-
-        self.game_state.location = 'tutorial'
-        self.player.position = (0,0,0)
     
-    def load_market(self):
-        if self.game_state.location == 'tutorial':
-            for entity in self.game_state.tutorial_entities:
-                entity.disable()
-            for entity in self.game_state.tutorial_collisions:
-                entity.disable()
-        if hasattr(self.game_state, 'market_entities'):
-            for entity in self.game_state.market_entities:
-                entity.enable()
-            for entity in self.game_state.market_collisions:
-                entity.enable()
-        else:
-            create_market_world(self.game_state)
+    def switch_scenes(self, new_scene, old_scene):
+        """."""
+        scene = old_scene.gate.name.split('.')[1]
+
+        if new_scene == None:
+            if scene == 'market':
+                self.market_world = MarketWorld(self.game_state)
+                new_scene = self.market_world
+            
+        new_scene.enable()
+        for entity in new_scene.entities:
+            entity.enable()
+        for entity in new_scene.colliders:
+            entity.enable()
+        old_scene.disable()
+        for entity in old_scene.entities:
+            entity.disable()
+        for entity in old_scene.colliders:
+            entity.disable()
+        
+        print_on_screen(f'--{scene.title()}--', position=(-0.1,0.45), scale=3, duration=2)
         self.game_state.location = 'market'
         self.player.position = (0,0,0)
+
 
 class GameState():
     def __init__(self):
@@ -120,6 +114,10 @@ class Player(Entity):
         camera.parent = self
         camera.fov = 100
         mouse.locked = True
+
+        self.hand = Entity(model='Assets/Models/Hands/handv5.fbx',texture='Assets/Models/Hands/skin.jpg',
+                            parent=self, scale=0.05, collider='box',position=(1,0.5, -1), rotation=(1,1,-25), double_sided = True)
+
     
     def update(self):
         """."""
@@ -164,7 +162,7 @@ class Player(Entity):
                     collider.color = color.white
         
         # Check if nothing is infront of the player before moving
-        ignore = [self, self.hand] if hasattr(self, 'hand') else [self]
+        ignore = [self, self.hand]
         hit_info = raycast(self.world_position, movement, distance=0.1, debug=True, ignore=ignore)
         if not hit_info.hit:
             move_amount = movement * self.speed * time.dt
@@ -174,9 +172,9 @@ class Player(Entity):
             if name.startswith('gate'):
                 new_location = name.split('.')[1]
                 if new_location == 'market':
-                    manager.load_market()
+                    manager.switch_scenes(manager.market_world, manager.tutorial_world)
                 elif new_location == 'tutorial':
-                    pass
+                    manager.switch_scenes(manager.tutorial_world, manager.market_world)
         
         
 class Monster(Entity):
@@ -203,39 +201,54 @@ class Gate(Entity):
     def __init__(self, game_state, position, name):
         super().__init__(model='Assets/Models/Gate/gate.fbx', texture='Assets/Models/Gate/texture.png',
                          double_sided=True, scale=(0.02,0.03,0.015), rotation_y=180, position=position)
-
-        self.collision_box = Entity(model='cube', parent=self, name=name,
+        
+        self.name = name
+        self.collision_box = Entity(model='cube', parent=self, name=self.name,
                                     position=(0,150,0), scale=(200,300,100),
                                     collider='box', visible=game_state.debug_mode,
                                     wireframe=True)
-#---------------------------------------------------#
-
-def create_tutorial_world(game_state, player):
-    ground = Entity(model='plane', collider='box', scale=200, texture='grass', texture_scale=(4,4))
-    player.hands = Entity(model='Assets/Models/Hands/handv5.fbx',texture='Assets/Models/Hands/skin.jpg',
-                          parent=player, scale=0.05, collider='box',position=(1,0.5, -1), rotation=(1,1,-25), double_sided = True)
-    wall = Entity(model='Assets/Models/Wall/wall.fbx', texture='Assets/Models/Wall/texture.png',
-                  double_sided=True,scale=(0.01,0.01,0.01), collider='mesh', position=(-30,5,-10))
-    
-    gate = Gate(game_state, position=(0,0,30), name='gate.market')
-
-    desc = '             Welcome to the dungeon!\n\nUse the mouse to move around\nPress "W" to move forward, "S" to move backward\nPress "A" to move right and "D" to move left\nPress the spacebar to jump'
-    text1 = Text(parent=scene, text=desc, position=(-8,5,9), scale=30, color=color.white)
-    
-    desc = 'Attack the monster up ahead by left clicking!\n                     Try not to get hit!'
-    text2 = Text(parent=scene, text=desc, position=(-8,4,19), scale=30, color=color.white)
-    
-    game_state.tutorial_entities = [ground, wall, gate, text1, text2]
-    game_state.tutorial_colliders = [gate.collision_box]
-    for i in range(1):
-        pos = Vec3(random.randint(-45,45), 0, random.randint(-10,80))
-        tree=Tree(game_state, pos)
-        game_state.tutorial_entities.append(tree)
-        game_state.tutorial_colliders.append(tree.collision_box)
-        game_state.tutorial_entities.append(tree.collision_box)
         
-    
 
+class TutorialWorld(Entity):
+    def __init__(self, game_state):
+        super().__init__()
+        #self.game_state = game_state
+        self.ground = Entity(model='plane', collider='box', scale=200, texture='grass', texture_scale=(4,4))
+
+        self.wall = Entity(model='Assets/Models/Wall/wall.fbx', texture='Assets/Models/Wall/texture.png',
+                    double_sided=True,scale=(0.01,0.01,0.01), collider='mesh', position=(-30,5,-10))
+        
+        self.gate = Gate(game_state, position=(0,0,30), name='gate.market')
+
+        self.desc1 = '             Welcome to the dungeon!\n\nUse the mouse to move around\nPress "W" to move forward, "S" to move backward\nPress "A" to move right and "D" to move left\nPress the spacebar to jump'
+        self.text1 = Text(parent=scene, text=self.desc1, position=(-8,5,9), scale=30, color=color.white)
+        
+        self.desc2 = 'Attack the monster up ahead by left clicking!\n                     Try not to get hit!'
+        self.text2 = Text(parent=scene, text=self.desc2, position=(-8,4,19), scale=30, color=color.white)
+        
+        self.entities = [self.ground, self.wall, self.gate, self.text1, self.text2]
+        self.colliders = [self.gate.collision_box]
+        for i in range(1):
+            pos = Vec3(random.randint(-45,45), 0, random.randint(-10,80))
+            tree=Tree(game_state, pos)
+            self.entities.append(tree)
+            self.colliders.append(tree.collision_box)
+            self.entities.append(tree.collision_box)
+
+class MarketWorld(Entity):
+    def __init__(self, game_state):
+        super().__init__()
+        self.ground = Entity(model='plane', collider='box', scale=200, texture='grass', texture_scale=(4,4))
+        
+        self.wall = Entity(model='Assets/Models/Wall/wall.fbx', texture='Assets/Models/Wall/texture.png',
+                    double_sided=True,scale=(0.01,0.01,0.01), collider='mesh', position=(-30,5,-10))
+
+        self.gate = Gate(game_state, position=(0,0,30), name='gate.tutorial')
+
+        self.entities = [self.ground, self.wall, self.gate, self.gate.collision_box]
+        self.colliders = [self.gate.collision_box]
+
+#---------------------------------------------------#
 def update():
     if held_keys['escape']:
         manager.pause_game()
