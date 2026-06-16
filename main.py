@@ -62,7 +62,7 @@ class GameManager(Entity):
             entity.disable()
         for entity in old_scene.colliders:
             entity.disable()
-        
+
         print_on_screen(f'--{scene.title()}--', position=(-0.1,0.45), scale=3, duration=2)
         self.game_state.location = scene
         self.player.position = (0,0,0)
@@ -71,7 +71,7 @@ class GameManager(Entity):
 
 class GameState():
     def __init__(self):
-        self.debug_mode = True
+        self.debug_mode = False
 
 class UIState():
     def __init__(self, game_state, player):
@@ -221,7 +221,7 @@ class TutorialWorld(Entity):
         self.ground = Entity(model='plane', collider='box', scale=200, texture='grass', texture_scale=(4,4))
 
         self.wall = Entity(model='Assets/Models/Wall/wall.fbx', texture='Assets/Models/Wall/texture.png',
-                    double_sided=True,scale=(0.01,0.01,0.01), collider='mesh', position=(-30,5,-10))
+                    double_sided=True,scale=(0.005,0.01,0.005), collider='mesh', position=(-15,5,-10))
         
         self.gate = Gate(game_state, position=(0,0,30), name='gate.market')
 
@@ -233,12 +233,30 @@ class TutorialWorld(Entity):
         
         self.entities = [self.ground, self.wall, self.gate, self.text1, self.text2]
         self.colliders = [self.gate.collision_box]
+        self.map = ['        TTTTTTTT        ',
+                    '       TTTT  TTTT       ',
+                    '      TTTT    TTTT      ',
+                    '      TT        TT      ',
+                    '      TT        TT      ',
+                    '      TT        TT      ',
+                    '      TT        TT      ',
+                    '      TT        TT      ',
+                    '      TT        TT      ',
+                    '      TTT      TTT      ',
+                    '       TTT    TTT       ',
+                    '        TTTTTTTT        ']
+        self.map.reverse()
+        for z, row in enumerate(self.map):
+            for x, col in enumerate(row):
+                if col == 'T':
+                    tree=Tree(game_state, ((x*4)-45, 0, (z*4)-7))
+                    self.entities.append(tree)
+                    self.colliders.append(tree.collision_box)
+                    self.entities.append(tree.collision_box)
+
         for i in range(1):
             pos = Vec3(random.randint(-45,45), 0, random.randint(-10,80))
-            tree=Tree(game_state, pos)
-            self.entities.append(tree)
-            self.colliders.append(tree.collision_box)
-            self.entities.append(tree.collision_box)
+
 
 class MarketWorld(Entity):
     def __init__(self, game_state):
