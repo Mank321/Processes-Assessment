@@ -71,7 +71,7 @@ class GameManager(Entity):
 
 class GameState():
     def __init__(self):
-        self.debug_mode = False
+        self.debug_mode = True
 
 class UIState():
     def __init__(self, game_state, player):
@@ -106,6 +106,7 @@ class Player(Entity):
         self.level = 1
         self.levelup_req = 10 * self.level
         self.xp = 0
+        self.stamina = 5
         self.inventory = None
 
         self.transition_cooldown = 0
@@ -183,8 +184,57 @@ class Player(Entity):
         
         
 class Monster(Entity):
-    def __init__(self, name, health, damage, speed=5):
-        pass
+    def __init__(self, game_state, name='monster', health=10, damage=1, position=Vec3(0,0,0), scale=1, rotation=Vec3(0,0,0), speed=50):
+        super().__init__(model=f'Assets/Models/{name.title()}/{name}.fbx',
+                       texture=f'Assets/Models/{name.title()}/texture.png',
+                       position=position, double_sided=True, scale=scale,
+                       rotation=rotation, name=name)
+
+        self.collision_box = Entity(model='cube', parent=self, position=(0,200,0),
+                                    scale=(100,400,170), collider='box',
+                                    visible=game_state.debug_mode,
+                                    wireframe=True)
+        
+        self.name = name
+        self.healt = health
+        self.damage = damage
+        self.position = position
+        self.scale = scale
+        self.rotation = rotation
+        self.speed = speed
+
+    def distance_check(self):
+        self.distance = distance(self, manager.player)
+        if 1 < self.distance <= 100:
+            self.look_at_2d(manager.player, 'y')
+            self.position += self.forward * time.dt * self.speed
+
+        if self.distance <= 2:
+            manager.player.health -= self.damage * time.dt
+            print(manager.player.health)
+            #self.position += self.back * time.dt * self.speed * 50
+            #self.animate_position(self.position + self.back * time.dt * self.speed * 50, duration=1)
+
+    def on_click(self):
+        """ This triggers when the mouse clicks the monster """
+        self.distance = distance(self, manager.player)
+        if self.distance <= 10:
+            self.health -= manager.player.damage
+            print(f"Monster Health: {self.health}")
+
+            # Flash Red Effect
+            self.color = color.red
+            self.animate_color(color.green, duration=0.2)
+            
+            if self.health <= 0:
+                print("Monster Defeated!")
+                destroy(self)
+                manager.player.loot += self.worth
+                print(manager.player.loot)
+
+    def update(self):
+        self.distance_check()
+
 
 class LevelCreator():
     def __init__(self):
@@ -221,7 +271,7 @@ class TutorialWorld(Entity):
         self.ground = Entity(model='plane', collider='box', scale=200, texture='grass', texture_scale=(4,4))
 
         self.wall = Entity(model='Assets/Models/Wall/wall.fbx', texture='Assets/Models/Wall/texture.png',
-                    double_sided=True,scale=(0.005,0.01,0.005), collider='mesh', position=(-15,5,-10))
+                    double_sided=True,scale=(0.005,0.01,0.005), collider='mesh', position=(0,5,10))
         
         self.gate = Gate(game_state, position=(0,0,30), name='gate.market')
 
@@ -231,8 +281,10 @@ class TutorialWorld(Entity):
         self.desc2 = 'Attack the monster up ahead by left clicking!\n                     Try not to get hit!'
         self.text2 = Text(parent=scene, text=self.desc2, position=(-8,4,19), scale=30, color=color.white)
         
-        self.entities = [self.ground, self.wall, self.gate, self.text1, self.text2]
-        self.colliders = [self.gate.collision_box]
+        self.monster = Monster(game_state, name='centaur', health=10, damage=1, position=Vec3(0,0,25), scale=Vec3(0.02,0.02,0.015), rotation=Vec3(0,180,0))
+        
+        self.entities = [self.ground, self.wall, self.gate, self.text1, self.text2, self.monster]
+        self.colliders = [self.gate.collision_box, self.monster.collision_box]
         self.map = ['        TTTTTTTT        ',
                     '       TTTT  TTTT       ',
                     '      TTTT    TTTT      ',
@@ -277,7 +329,7 @@ def update():
         manager.pause_game()
 
 def pause_input(key):
-    if key == 'tab':
+    if key == 'tab' and main_menu.started:
         spectator_mode.enabled = not spectator_mode.enabled
         #mouse.locked = spectator_mode.enabled
         spectator_mode.position = manager.player.position
