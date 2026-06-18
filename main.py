@@ -87,7 +87,7 @@ class UIState():
 
 class Player(Entity):
     def __init__(self, ui_state, game_state):
-        super().__init__(model='cube', scale=(1,2,1), position=(0,1,0),
+        super().__init__(model='cube', scale=(1,2.5,1), position=(0,1,0),
                          collider='box', visible_self=game_state.debug_mode,
                          color=color.orange)
 
@@ -108,6 +108,8 @@ class Player(Entity):
         self.xp = 0
         self.stamina = 5
         self.inventory = None
+        self.reach = 10
+        self.distance = float('inf')
 
         self.transition_cooldown = 0
         self.move_sequence = None
@@ -181,10 +183,20 @@ class Player(Entity):
                     manager.switch_scenes(manager.market_world, manager.tutorial_world)
                 elif new_location == 'tutorial':
                     manager.switch_scenes(manager.tutorial_world, manager.market_world)
+
+        if self.health <= 0:
+            self.death()
+
+        def death(self):
+            self.position = Vec3(0,5,0)
+            self.health = self.maxhealth
+            #if manager.game_state.location != 'tutorial world':
+            #    manager.switch_scenes(manager.market_world, manager.)
+                
         
         
 class Monster(Entity):
-    def __init__(self, game_state, name='monster', health=10, damage=1, position=Vec3(0,0,0), scale=1, rotation=Vec3(0,0,0), speed=50):
+    def __init__(self, game_state, name='monster', health=10, damage=1, position=Vec3(0,0,0), scale=1, rotation=Vec3(0,0,0), speed=50, sight=10):
         super().__init__(model=f'Assets/Models/{name.title()}/{name}.fbx',
                        texture=f'Assets/Models/{name.title()}/texture.png',
                        position=position, double_sided=True, scale=scale,
@@ -193,47 +205,53 @@ class Monster(Entity):
         self.collision_box = Entity(model='cube', parent=self, position=(0,200,0),
                                     scale=(100,400,170), collider='box',
                                     visible=game_state.debug_mode,
-                                    wireframe=True)
+                                    wireframe=True, name='monst')
         
         self.name = name
-        self.healt = health
+        self.health = health
         self.damage = damage
         self.position = position
         self.scale = scale
         self.rotation = rotation
         self.speed = speed
+        self.closeness = 2
+        self.sight = sight
 
     def distance_check(self):
+        """."""
         self.distance = distance(self, manager.player)
-        if 1 < self.distance <= 100:
+        if self.closeness < self.distance <= manager.player.reach * self.sight:
             self.look_at_2d(manager.player, 'y')
             self.position += self.forward * time.dt * self.speed
 
-        if self.distance <= 2:
+        if self.distance <= self.closeness:
             manager.player.health -= self.damage * time.dt
             print(manager.player.health)
-            #self.position += self.back * time.dt * self.speed * 50
-            #self.animate_position(self.position + self.back * time.dt * self.speed * 50, duration=1)
 
     def on_click(self):
-        """ This triggers when the mouse clicks the monster """
+        """This triggers when the mouse clicks the monster."""
         self.distance = distance(self, manager.player)
-        if self.distance <= 10:
+        if self.distance <= manager.player.reach:
             self.health -= manager.player.damage
             print(f"Monster Health: {self.health}")
 
             # Flash Red Effect
+            origin_colour = self.color
             self.color = color.red
-            self.animate_color(color.green, duration=0.2)
+            self.animate_color(origin_colour, duration=0.2)
             
             if self.health <= 0:
                 print("Monster Defeated!")
                 destroy(self)
-                manager.player.loot += self.worth
-                print(manager.player.loot)
+                #manager.player.loot += self.worth
+                #print(manager.player.loot)
 
     def update(self):
         self.distance_check()
+
+    def input(self, key):
+        if key == 'left mouse up':
+            self.on_click()
 
 
 class LevelCreator():
@@ -266,7 +284,7 @@ class Gate(Entity):
 class Stall(Entity):
     def __init__(self, game_state):
         super().__init__(model='Assets/Models/Stall/stall1.fbx', texture='Assets/Models/Stall/stall_texture.png',
-                         double_sided=True,scale=(0.1,0.24,0.1), position=(10,0,0))
+                         double_sided=True,scale=(0.1,0.22,0.1), position=(10,0,0))
 
         self.props = Entity(model='Assets/Models/Stall/props.fbx', texture='Assets/Models/Stall/props_texture.png',
                             parent=self, double_sided=True,scale=(1,1,1), position=(0,0,0))
@@ -295,7 +313,10 @@ class TutorialWorld(Entity):
         self.desc2 = 'Attack the monster up ahead by left clicking!\n                     Try not to get hit!'
         self.text2 = Text(parent=scene, text=self.desc2, position=(-8,4,19), scale=30, color=color.white)
         
-        self.monster = Monster(game_state, name='centaur', health=10, damage=1, position=Vec3(0,0,25), scale=Vec3(0.02,0.02,0.015), rotation=Vec3(0,180,0))
+        self.monster = Monster(game_state, name='centaur', health=10,
+                               damage=1, position=Vec3(0,0,25),
+                               scale=Vec3(0.02,0.024,0.015),
+                               rotation=Vec3(0,180,0), sight=10)
         
         self.entities = [self.ground, self.wall, self.gate, self.text1, self.text2, self.monster]
         self.colliders = [self.gate.collision_box, self.monster.collision_box]
