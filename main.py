@@ -262,6 +262,20 @@ class Gate(Entity):
                                     position=(0,150,0), scale=(200,300,100),
                                     collider='box', visible=game_state.debug_mode,
                                     wireframe=True)
+
+class Stall(Entity):
+    def __init__(self, game_state):
+        super().__init__(model='Assets/Models/Stall/stall1.fbx', texture='Assets/Models/Stall/stall_texture.png',
+                         double_sided=True,scale=(0.1,0.24,0.1), position=(10,0,0))
+
+        self.props = Entity(model='Assets/Models/Stall/props.fbx', texture='Assets/Models/Stall/props_texture.png',
+                            parent=self, double_sided=True,scale=(1,1,1), position=(0,0,0))
+
+        self.collision_box = Entity(model='cube', parent=self, name=self.name,
+                                    position=(0,0,0), scale=(40,50,40),
+                                    collider='box', visible=game_state.debug_mode,
+                                    wireframe=True)
+        self.merchant = Entity()
         
 
 class TutorialWorld(Entity):
@@ -319,9 +333,11 @@ class MarketWorld(Entity):
                     double_sided=True,scale=(0.01,0.01,0.01), collider='mesh', position=(-30,5,-10))
 
         self.gate = Gate(game_state, position=(0,0,-5), name='gate.tutorial')
+        
+        self.stall = Stall(game_state)
 
-        self.entities = [self.ground, self.wall, self.gate, self.gate.collision_box]
-        self.colliders = [self.gate.collision_box]
+        self.entities = [self.ground, self.wall, self.gate, self.gate.collision_box, self.stall, self.stall.collision_box]
+        self.colliders = [self.gate.collision_box, self.stall.collision_box]
 
 #---------------------------------------------------#
 def update():
