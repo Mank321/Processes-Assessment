@@ -1,5 +1,8 @@
 from ursina import *
+from ursina.prefabs.health_bar import HealthBar
+from Scripts.HealthBar import HealthBar
 from Scripts.MainMenu import MainMenu
+
 
 class GameManager(Entity):
     """."""
@@ -37,11 +40,15 @@ class GameManager(Entity):
         main_menu.pause_buttons.enabled = True
         main_menu.background.enabled = True
         main_menu.enabled = True
+        for entity in self.ui_state.entities:
+            entity.disable()
 
     def resume_game(self):
         main_menu.enabled = False
         main_menu.background.enabled = False
         mouse.locked = True
+        for entity in self.ui_state.entities:
+            entity.enable()
     
     def switch_scenes(self, new_scene, old_scene):
         """."""
@@ -73,17 +80,24 @@ class GameState():
     def __init__(self):
         self.debug_mode = True
 
-class UIState():
+class UIState(Entity):
     def __init__(self, game_state, player):
+        super().__init__()
         self.player = player
         self.game_state = game_state
-        self.coordinate_text = Text(self.player, position=(0,0), parent=camera.ui)
-        self.entities = [self.coordinate_text]
-    
+        #self.coordinate_text = Text(self.player, position=(0,0), parent=camera.ui)
+        self.player_health_bar = HealthBar(max_value=20,value=20,position=(-0.85, -0.4),colour=color.red,scale=(0.4,0.05))
+        self.player_gold_bar = HealthBar(max_value=10,value=0,position=(-0.85, -0.35),colour=color.gold,scale=(0.4,0.05))
+
+        self.entities = [self.player_health_bar, self.player_gold_bar]#self.coordinate_text, ]
+
     def update(self):
-        self.coordinate_text.text = self.player.position if self.player != None else ''
-        print(self.coordinate_text.text)
-        print('hi')
+        if self.player != None:
+            #self.player_health_bar.max_value = self.player.max_health
+            #self.player_health_bar.value = self.player.health
+            self.player_gold_bar.max_value = self.player.max_gold
+            self.player_gold_bar.value = self.player.gold
+        #self.coordinate_text.text = self.player.position if self.player != None else ''
 
 class Player(Entity):
     def __init__(self, ui_state, game_state):
@@ -107,8 +121,10 @@ class Player(Entity):
         self.levelup_req = 10 * self.level
         self.xp = 0
         self.stamina = 5
+        self.gold = 0
+        self.max_gold = 10
         self.inventory = None
-        self.reach = 10
+        self.reach = 5
         self.distance = float('inf')
 
         self.transition_cooldown = 0
@@ -123,7 +139,13 @@ class Player(Entity):
         self.hand = Entity(model='Assets/Models/Hands/handv5.fbx',texture='Assets/Models/Hands/skin.jpg',
                             parent=self, scale=0.05, collider='box',position=(1,0.5, -1), rotation=(1,1,-25), double_sided = True)
 
-    
+    def death(self):
+            self.position = Vec3(0,10,0)
+            self.health = self.max_health
+            self.ui_state.player_health_bar.value = self.max_health
+            #if manager.game_state.location != 'tutorial world':
+            #    manager.switch_scenes(manager.market_world, manager.)
+
     def update(self):
         """."""
         # A cooldown for using the gates
@@ -186,12 +208,6 @@ class Player(Entity):
 
         if self.health <= 0:
             self.death()
-
-        def death(self):
-            self.position = Vec3(0,5,0)
-            self.health = self.maxhealth
-            #if manager.game_state.location != 'tutorial world':
-            #    manager.switch_scenes(manager.market_world, manager.)
                 
         
         
@@ -220,20 +236,21 @@ class Monster(Entity):
     def distance_check(self):
         """."""
         self.distance = distance(self, manager.player)
-        if self.closeness < self.distance <= manager.player.reach * self.sight:
+        if self.closeness < self.distance <= self.sight:
             self.look_at_2d(manager.player, 'y')
             self.position += self.forward * time.dt * self.speed
 
         if self.distance <= self.closeness:
-            manager.player.health -= self.damage * time.dt
-            print(manager.player.health)
+            invoke(setattr, manager.player, 'health', manager.player.health - self.damage, delay=1)
+            #manager.player.health -= self.damage * time.dt
+            manager.ui_state.player_health_bar.max_value = manager.player.max_health
+            manager.ui_state.player_health_bar.value = manager.player.health
 
     def on_click(self):
         """This triggers when the mouse clicks the monster."""
         self.distance = distance(self, manager.player)
         if self.distance <= manager.player.reach:
             self.health -= manager.player.damage
-            print(f"Monster Health: {self.health}")
 
             # Flash Red Effect
             origin_colour = self.color
@@ -241,10 +258,8 @@ class Monster(Entity):
             self.animate_color(origin_colour, duration=0.2)
             
             if self.health <= 0:
-                print("Monster Defeated!")
                 destroy(self)
                 #manager.player.loot += self.worth
-                #print(manager.player.loot)
 
     def update(self):
         self.distance_check()
