@@ -94,16 +94,16 @@ class UIState(Entity):
         #self.coordinate_text = Text(self.player, position=(0,0), parent=camera.ui)
         self.player_health_bar = HealthBar(max_value=20,value=20,position=(-0.85, -0.39),colour=color.red,scale=(0.4,0.05))
         self.player_gold_bar = HealthBar(max_value=10,value=0,position=(-0.85, -0.33),colour=color.gold,scale=(0.4,0.05))
-        self.player_experience_bar = HealthBar(max_value=10, value=0, position=(-0.89, -0.43), colour=color.green, scale=(1.8, 0.07))
+        self.player_experience_bar = HealthBar(max_value=10, value=0, position=(-0.89, -0.45), colour=color.green, scale=(1.8, 0.05))
 
-        self.entities = [self.player_health_bar, self.player_gold_bar]#self.coordinate_text, ]
+        self.entities = [self.player_health_bar, self.player_gold_bar, self.player_experience_bar]#self.coordinate_text, ]
 
     def update(self):
         if self.player != None:
             self.player_gold_bar.max_value = self.player.max_gold
             self.player_gold_bar.value = self.player.gold
             self.player_experience_bar.max_value = self.player.levelup_req
-        #self.coordinate_text.text = self.player.position if self.player != None else ''
+            self.player_experience_bar.value = self.player.xp
 
 class Player(Entity):
     def __init__(self, ui_state, game_state):
@@ -146,11 +146,14 @@ class Player(Entity):
                             parent=self, scale=0.05, collider='box',position=(1,0.5, -1), rotation=(1,1,-25), double_sided = True)
 
     def death(self):
-            self.position = Vec3(0,10,0)
-            self.health = self.max_health
-            self.ui_state.player_health_bar.value = self.max_health
-            #if manager.game_state.location != 'tutorial world':
-            #    manager.switch_scenes(manager.market_world, manager.)
+        self.position = Vec3(0,10,0)
+        self.health = self.max_health
+        self.ui_state.player_health_bar.value = self.max_health
+        #if manager.game_state.location != 'tutorial world':
+        #    manager.switch_scenes(manager.market_world, manager.)
+    
+    def levelup(self):
+        pass
 
     def update(self):
         """."""
@@ -418,8 +421,8 @@ manager = GameManager()
 main_menu = MainMenu(manager.start_game, manager.resume_game)
 
 def input(key):
-    if key == 'c':
-        manager.game_state.debug_mode.enabled = not manager.game_state.debug_mode.enabled
+    if key == 'c' and hasattr(manager.game_state, 'debug_mode'):
+        manager.game_state.debug_mode = not manager.game_state.debug_mode
     if key == 'x':
         manager.player.xp += 1
 
