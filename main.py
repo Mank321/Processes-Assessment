@@ -1,5 +1,4 @@
 from ursina import *
-from ursina.prefabs.health_bar import HealthBar
 from Scripts.HealthBar import HealthBar
 from Scripts.MainMenu import MainMenu
 
@@ -50,8 +49,10 @@ class GameManager(Entity):
         for entity in self.ui_state.entities:
             entity.enable()
     
-    def switch_scenes(self, new_scene, old_scene):
+    def switch_scenes(self, gate):
         """."""
+        new_scene = gate.name.split('.')[2]
+        old_scene = gate.name.split('.')[1]
         scene = old_scene.gate.name.split('.')[1]
 
         if new_scene == None:
@@ -65,10 +66,6 @@ class GameManager(Entity):
         for entity in new_scene.colliders:
             entity.enable()
         old_scene.disable()
-        for entity in old_scene.entities:
-            entity.disable()
-        for entity in old_scene.colliders:
-            entity.disable()
 
         print_on_screen(f'--{scene.title()}--', position=(-0.1,0.45), scale=3, duration=2)
         self.game_state.location = scene
@@ -93,8 +90,6 @@ class UIState(Entity):
 
     def update(self):
         if self.player != None:
-            #self.player_health_bar.max_value = self.player.max_health
-            #self.player_health_bar.value = self.player.health
             self.player_gold_bar.max_value = self.player.max_gold
             self.player_gold_bar.value = self.player.gold
         #self.coordinate_text.text = self.player.position if self.player != None else ''
@@ -181,9 +176,9 @@ class Player(Entity):
                         + self.right * (held_keys['d'] - held_keys['a'])).normalized()
         
         # Change hitbox colours when colliding for testing purposes
-        dict = {'tutorial': manager.tutorial_world,
+        dictionary = {'tutorial': manager.tutorial_world,
                 'market': manager.market_world}
-        colliders = dict[self.game_state.location].colliders
+        colliders = dictionary[self.game_state.location].colliders
         if self.game_state.debug_mode:
             for collider in colliders:
                 if self.intersects(collider).hit:
@@ -200,11 +195,7 @@ class Player(Entity):
         else:
             name = hit_info.entity.name
             if name.startswith('gate'):
-                new_location = name.split('.')[1]
-                if new_location == 'market':
-                    manager.switch_scenes(manager.market_world, manager.tutorial_world)
-                elif new_location == 'tutorial':
-                    manager.switch_scenes(manager.tutorial_world, manager.market_world)
+                manager.switch_scenes(hit_info.entity)
 
         if self.health <= 0:
             self.death()
@@ -212,16 +203,16 @@ class Player(Entity):
         
         
 class Monster(Entity):
-    def __init__(self, game_state, name='monster', health=10, damage=1, position=Vec3(0,0,0), scale=1, rotation=Vec3(0,0,0), speed=50, sight=10):
+    def __init__(self, game_state, parent,name='monster', health=10, damage=1, worth=1, speed=50, sight=10, position=Vec3(0,0,0), scale=1, rotation=Vec3(0,0,0)):
         super().__init__(model=f'Assets/Models/{name.title()}/{name}.fbx',
                        texture=f'Assets/Models/{name.title()}/texture.png',
                        position=position, double_sided=True, scale=scale,
-                       rotation=rotation, name=name)
+                       rotation=rotation, name=name, parent=parent)
 
         self.collision_box = Entity(model='cube', parent=self, position=(0,200,0),
                                     scale=(100,400,170), collider='box',
                                     visible=game_state.debug_mode,
-                                    wireframe=True, name='monst')
+                                    wireframe=True, name=f'{name}.collider')
         
         self.name = name
         self.health = health
@@ -232,6 +223,9 @@ class Monster(Entity):
         self.speed = speed
         self.closeness = 2
         self.sight = sight
+        self.worth = worth
+
+        self.game_state = game_state
 
     def distance_check(self):
         """."""
@@ -242,8 +236,6 @@ class Monster(Entity):
 
         if self.distance <= self.closeness:
             invoke(setattr, manager.player, 'health', manager.player.health - self.damage, delay=1)
-            #manager.player.health -= self.damage * time.dt
-            manager.ui_state.player_health_bar.max_value = manager.player.max_health
             manager.ui_state.player_health_bar.value = manager.player.health
 
     def on_click(self):
@@ -258,8 +250,12 @@ class Monster(Entity):
             self.animate_color(origin_colour, duration=0.2)
             
             if self.health <= 0:
+                if self.game_state.location == 'tutorial world':
+                    manager.tutorial_world.entities.remove(self)
+                    manager.tutorial_world.colliders.remove(self.collision_boxwwww)
                 destroy(self)
-                #manager.player.loot += self.worth
+                manager.player.gold += self.worth
+                manager.ui_state.player_gold_bar.value += self.worth
 
     def update(self):
         self.distance_check()
@@ -274,11 +270,11 @@ class LevelCreator():
         pass
 
 class Tree(Entity):
-    def __init__(self, game_state, position):
+    def __init__(self, game_state, position, parent):
         super().__init__(model='Assets/Models/Tree/treev2.fbx',
                          texture='Assets/Models/Tree/texture.png',
                          scale=(0.05,0.04,0.05), position=position,
-                         double_sided=True, name='tree')
+                         double_sided=True, name='tree', parent=parent)
 
         self.collision_box = Entity(model='cube', parent=self,
                                     position=(0,125,0), scale=(70,250,70),
@@ -286,8 +282,8 @@ class Tree(Entity):
                                     wireframe=True)
 
 class Gate(Entity):
-    def __init__(self, game_state, position, name):
-        super().__init__(model='Assets/Models/Gate/gate.fbx', texture='Assets/Models/Gate/texture.png',
+    def __init__(self, game_state, position, name, parent):
+        super().__init__(parent=parent,model='Assets/Models/Gate/gate.fbx', texture='Assets/Models/Gate/texture.png',
                          double_sided=True, scale=(0.02,0.03,0.015), rotation_y=180, position=position)
         
         self.name = name
@@ -297,8 +293,8 @@ class Gate(Entity):
                                     wireframe=True)
 
 class Stall(Entity):
-    def __init__(self, game_state):
-        super().__init__(model='Assets/Models/Stall/stall1.fbx', texture='Assets/Models/Stall/stall_texture.png',
+    def __init__(self, game_state, parent):
+        super().__init__(parent=parent,model='Assets/Models/Stall/stall1.fbx', texture='Assets/Models/Stall/stall_texture.png',
                          double_sided=True,scale=(0.1,0.22,0.1), position=(10,0,0))
 
         self.props = Entity(model='Assets/Models/Stall/props.fbx', texture='Assets/Models/Stall/props_texture.png',
@@ -315,26 +311,26 @@ class TutorialWorld(Entity):
     def __init__(self, game_state):
         super().__init__()
         #self.game_state = game_state
-        self.ground = Entity(model='plane', collider='box', scale=200, texture='grass', texture_scale=(4,4))
+        self.ground = Entity(parent=self,model='plane', collider='box', scale=200, texture='grass', texture_scale=(4,4))
 
-        self.wall = Entity(model='Assets/Models/Wall/wall.fbx', texture='Assets/Models/Wall/texture.png',
+        self.wall = Entity(parent=self,model='Assets/Models/Wall/wall.fbx', texture='Assets/Models/Wall/texture.png',
                     double_sided=True,scale=(0.005,0.01,0.005), collider='mesh', position=(0,5,10))
         
-        self.gate = Gate(game_state, position=(0,0,30), name='gate.market')
+        self.gate = Gate(game_state, parent=self, position=(0,0,30), name='gate.tutorial.market')
 
         self.desc1 = '             Welcome to the dungeon!\n\nUse the mouse to move around\nPress "W" to move forward, "S" to move backward\nPress "A" to move right and "D" to move left\nPress the spacebar to jump'
-        self.text1 = Text(parent=scene, text=self.desc1, position=(-8,5,9), scale=30, color=color.white)
+        self.text1 = Text(parent=self, text=self.desc1, position=(-8,5,9), scale=30, color=color.white)
         
         self.desc2 = 'Attack the monster up ahead by left clicking!\n                     Try not to get hit!'
-        self.text2 = Text(parent=scene, text=self.desc2, position=(-8,4,19), scale=30, color=color.white)
-        
-        self.monster = Monster(game_state, name='centaur', health=10,
+        self.text2 = Text(parent=self, text=self.desc2, position=(-8,4,19), scale=30, color=color.white)
+
+        self.monster = Monster(game_state, parent=self,name='centaur', health=10,
                                damage=1, position=Vec3(0,0,25),
                                scale=Vec3(0.02,0.024,0.015),
-                               rotation=Vec3(0,180,0), sight=10)
+                               rotation=Vec3(0,180,0))
         
-        self.entities = [self.ground, self.wall, self.gate, self.text1, self.text2, self.monster]
-        self.colliders = [self.gate.collision_box, self.monster.collision_box]
+        #self.entities = [self.ground, self.wall, self.gate, self.text1, self.text2, self.monster]
+        self.colliders = [self.gate.collision_box]#, self.monster.collision_box]
         self.map = ['        TTTTTTTT        ',
                     '       TTTT  TTTT       ',
                     '      TTTT    TTTT      ',
@@ -351,29 +347,27 @@ class TutorialWorld(Entity):
         for z, row in enumerate(self.map):
             for x, col in enumerate(row):
                 if col == 'T':
-                    tree=Tree(game_state, ((x*4)-45, 0, (z*4)-7))
-                    self.entities.append(tree)
-                    self.colliders.append(tree.collision_box)
-                    self.entities.append(tree.collision_box)
-
-        for i in range(1):
-            pos = Vec3(random.randint(-45,45), 0, random.randint(-10,80))
+                    Tree(game_state, ((x*4)-45, 0, (z*4)-7),parent=self)
+                    #self.entities.append(tree)
+                    #self.colliders.append(tree.collision_box)
+                    #self.entities.append(tree.collision_box)
 
 
 class MarketWorld(Entity):
     def __init__(self, game_state):
         super().__init__()
-        self.ground = Entity(model='plane', collider='box', scale=200, texture='grass', texture_scale=(4,4))
+        self.ground = Entity(parent=self,model='plane', collider='box', scale=200, texture='grass', texture_scale=(4,4))
         
-        self.wall = Entity(model='Assets/Models/Wall/wall.fbx', texture='Assets/Models/Wall/texture.png',
+        self.wall = Entity(parent=self,model='Assets/Models/Wall/wall.fbx', texture='Assets/Models/Wall/texture.png',
                     double_sided=True,scale=(0.01,0.01,0.01), collider='mesh', position=(-30,5,-10))
 
-        self.gate = Gate(game_state, position=(0,0,-5), name='gate.tutorial')
-        
-        self.stall = Stall(game_state)
+        self.tutorial_gate = Gate(game_state, parent=self,position=(0,0,-5), name='gate.market.tutorial')
+        self.centaur_gate = Gate(game_state, parent=self,position=(0,0,-10), name='gate.market.centaur')
 
-        self.entities = [self.ground, self.wall, self.gate, self.gate.collision_box, self.stall, self.stall.collision_box]
-        self.colliders = [self.gate.collision_box, self.stall.collision_box]
+        self.stall = Stall(game_state,parent=self)
+
+        self.entities = [self.ground, self.wall, self.tutorial_gate, self.tutorial_gate.collision_box, self.centaur_gate, self.centaur_gate.collision_box, self.stall, self.stall.collision_box]
+        self.colliders = [self.tutorial_gate.collision_box, self.stall.collision_box, self.centaur_gate.collision_box]
 
 #---------------------------------------------------#
 def update():

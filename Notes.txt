@@ -1,3 +1,4 @@
+WORLD RENDERING PROBLEMS
 14-15 June - When making the scene changing program, I wrote up a function to load the tutorial,
 and a seperate function to load the market. I later found this to be repetitive as
 I would need to create a function for each level. So I decided to compress the functions
@@ -52,26 +53,41 @@ def switch_scenes(self, new_scene, old_scene):
         self.game_state.location = scene
         self.player.position = (0,0,0)
 
+-
+When I added a second gate in the market that would lead to the monsters, 
 
+WORLD CREATION PROBLEMS
 When creating the forest in the tutorial area, I started with a massive list containing the pre-chosen position of each tree. Then I looped through the list to plant each
 tree. This was incredibly inefficient, so I create a 2d map array which had the entire forest plotted out in a dozen lines. I initially filled the entire area in with
 over a thousand trees, but this tanked the framerate down to 20fps, so I knew I couldn't do it that way without breaking a requirement.
 Instead, I shrunk the forest down to a minimum size with just having the trees as border walls, and shrunk the main perimeter wall to fit the new forest size.
 It took a bit of time to get the exact coordinates right and the tree spacing and map array. 
 
+COMBAT SYSTEM PROBLEMS
 When creating the combat system, I added in the monster, gave it a hitbox, damage, and health, and gave it movement and distance checks, allowing it to move up to the player
 and attack them when close enough, taking away 1 health point per second. But when I tried to have the player attack the monster in retaliation, nothing happened. After a bit
 of debugging, I realised I was checking to see if the mouse.hovered_entity had health. I initially thought the entity was the monster itself, but it was actually the collision
 box that the player was hitting, as I discovered when I gave the collision box a name and printed it when attacking. I thought of adding the monster stats right into the
 collision box entities, but that felt wrong, so I attempted to create an on_click method for the monster, but that ended up not being called, or calling as soon as the player
 was in range. I thought about going back to the collision box idea, but thought of an idea to fix the monster not being instantly destroyed by only calling the on_click method
-when the player actually clicked on the monster. I still ran into a problem where the code was trying to find a monster that had been destroyed.
+when the player actually clicked on the monster. I still ran into a problem where the code was trying to find a monster that had been destroyed when checking for collisions.
+To fix this, I decided to allow the player to walk through monsters, meaning I didn't need to check their hitbox
+-
+When trying to use a gate, since the monster was destroyed, it couldn't be disabled, creating errors. To fix this, I tried changing the switch_scenes method from using an entities
+list given by TutorialWorld, to going through every child of TutorialWorld itself, and going through every child of those children to catch the collision boxes. This allowed
+me to go through the gate, but didn't disable anything. Instead, I parented everything in the world to the TutorialWorld entity, allowing me to disable everything with one line.
 
-While working on the game, I would sometimes change computers. Sometimes, I'd build a feature, save it,
+COMPUTER/DEVICE AND SOFTWARE PROBLEMS
+While working on the game, I would sometimes change computers. I'd build a feature, save it,
 then pull it on another computer, and the feature would be slightly different(wall in different position, centaur destruction bug not appearing),
 but when I returned to the computer I made the feature on, even after changing nothing, or 'fixing' it to make it return to normal,
 the feature returned to what it was, even after saving properly.
+-
+Although I often did work on VSC, I would sometimes get swap to thonny to debug. This would however sometimes cause problems. I would get crashes in thonny I never got in VSC.
+For example, when building the combat system, and the hit boxes were destroyed, thonny would raise an error in the player for loop where it checked every collider in the world,
+monster included which no longer existed. But VSC never raised such an error.
 
+USER INTERFACE PROBLEMS
 When coding the UI, I wanted to display the health as a resourcebar on screen, so I used the built-in
 ursina healthbar prefab. Initially, so that the player took damage every second, the damage was multiplied
 by time.dt, but that resulted in multiple decimal places. So I created an invoke function delayed by a second

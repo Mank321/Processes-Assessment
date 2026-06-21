@@ -3,8 +3,8 @@ from ursina import *
 class HealthBar(Entity):
     def __init__(self, max_value, value, position, scale, colour=color.red, bg_colour=color.black, text_size=1, origin=(-.5,.5), roundness=0.1):
         super().__init__()
-        self.bg = Entity(parent=camera.ui, model='quad', color=color.black, scale=scale, position=position, origin=origin)
-        self.bar = Entity(parent=camera.ui, model='quad', color=color.red, scale=scale, position=position, origin=origin, z=-.005)
+        self.bg = Entity(parent=camera.ui, model='quad', color=bg_colour, scale=scale, position=position, origin=origin)
+        self.bar = Entity(parent=camera.ui, model='quad', color=colour, scale=scale, position=position, origin=origin, z=-.005)
 
         self.max_value = max_value
         self.value = value
