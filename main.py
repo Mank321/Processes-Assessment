@@ -13,6 +13,7 @@ class GameManager(Entity):
         self.game_state = None
         self.tutorial_world = None
         self.market_world = None
+        self.centaur_world = None
 
     def start_game(self):
         """."""
@@ -51,24 +52,32 @@ class GameManager(Entity):
     
     def switch_scenes(self, gate):
         """."""
-        new_scene = gate.name.split('.')[2]
-        old_scene = gate.name.split('.')[1]
-        scene = old_scene.gate.name.split('.')[1]
+        new_scene_name = gate.name.split('.')[2]
+        old_scene_name = gate.name.split('.')[1]
+        
+        self.scenes = {'tutorial': self.tutorial_world, 'market': self.market_world,
+                       'centaur': self.centaur_world}
+        
+        new_scene = self.scenes[new_scene_name]
+        old_scene = self.scenes[old_scene_name]
 
         if new_scene == None:
-            if scene == 'market':
+            if new_scene_name == 'market':
                 self.market_world = MarketWorld(self.game_state)
                 new_scene = self.market_world
-            
+            elif new_scene_name == 'centaur':
+                self.centaur_world = LevelCreator(self.game_state, name='Centaur World')
+                new_scene = self.centaur_world
+
         new_scene.enable()
-        for entity in new_scene.entities:
-            entity.enable()
-        for entity in new_scene.colliders:
-            entity.enable()
+        #for entity in new_scene.entities:
+        #    entity.enable()
+        #for entity in new_scene.colliders:
+         #   entity.enable()
         old_scene.disable()
 
-        print_on_screen(f'--{scene.title()}--', position=(-0.1,0.45), scale=3, duration=2)
-        self.game_state.location = scene
+        print_on_screen(f'--{new_scene_name.title()}--', position=(-0.1,0.45), scale=3, duration=2)
+        self.game_state.location = new_scene_name
         self.player.position = (0,0,0)
         self.player.rotation = (0,0,0)
 
@@ -83,8 +92,9 @@ class UIState(Entity):
         self.player = player
         self.game_state = game_state
         #self.coordinate_text = Text(self.player, position=(0,0), parent=camera.ui)
-        self.player_health_bar = HealthBar(max_value=20,value=20,position=(-0.85, -0.4),colour=color.red,scale=(0.4,0.05))
-        self.player_gold_bar = HealthBar(max_value=10,value=0,position=(-0.85, -0.35),colour=color.gold,scale=(0.4,0.05))
+        self.player_health_bar = HealthBar(max_value=20,value=20,position=(-0.85, -0.39),colour=color.red,scale=(0.4,0.05))
+        self.player_gold_bar = HealthBar(max_value=10,value=0,position=(-0.85, -0.33),colour=color.gold,scale=(0.4,0.05))
+        self.player_experience_bar = HealthBar(max_value=10, value=0, position=(-0.89, -0.43), colour=color.green, scale=(1.8, 0.07))
 
         self.entities = [self.player_health_bar, self.player_gold_bar]#self.coordinate_text, ]
 
@@ -92,6 +102,7 @@ class UIState(Entity):
         if self.player != None:
             self.player_gold_bar.max_value = self.player.max_gold
             self.player_gold_bar.value = self.player.gold
+            self.player_experience_bar.max_value = self.player.levelup_req
         #self.coordinate_text.text = self.player.position if self.player != None else ''
 
 class Player(Entity):
@@ -177,7 +188,8 @@ class Player(Entity):
         
         # Change hitbox colours when colliding for testing purposes
         dictionary = {'tutorial': manager.tutorial_world,
-                'market': manager.market_world}
+                      'market': manager.market_world,
+                      'centaur': manager.centaur_world}
         colliders = dictionary[self.game_state.location].colliders
         if self.game_state.debug_mode:
             for collider in colliders:
@@ -210,7 +222,7 @@ class Monster(Entity):
                        rotation=rotation, name=name, parent=parent)
 
         self.collision_box = Entity(model='cube', parent=self, position=(0,200,0),
-                                    scale=(100,400,170), collider='box',
+                                    scale=(100,400,170), #collider='box',
                                     visible=game_state.debug_mode,
                                     wireframe=True, name=f'{name}.collider')
         
@@ -247,7 +259,8 @@ class Monster(Entity):
             # Flash Red Effect
             origin_colour = self.color
             self.color = color.red
-            self.animate_color(origin_colour, duration=0.2)
+            invoke(setattr, self, 'color', origin_colour, delay=0.2)
+            #self.animate_color(origin_colour, duration=0.2)
             
             if self.health <= 0:
                 if self.game_state.location == 'tutorial world':
@@ -256,6 +269,8 @@ class Monster(Entity):
                 destroy(self)
                 manager.player.gold += self.worth
                 manager.ui_state.player_gold_bar.value += self.worth
+                manager.player.xp += self.worth
+                manager.ui_state.player_experience_bar.value += self.worth
 
     def update(self):
         self.distance_check()
@@ -264,10 +279,6 @@ class Monster(Entity):
         if key == 'left mouse up':
             self.on_click()
 
-
-class LevelCreator():
-    def __init__(self):
-        pass
 
 class Tree(Entity):
     def __init__(self, game_state, position, parent):
@@ -315,6 +326,7 @@ class TutorialWorld(Entity):
 
         self.wall = Entity(parent=self,model='Assets/Models/Wall/wall.fbx', texture='Assets/Models/Wall/texture.png',
                     double_sided=True,scale=(0.005,0.01,0.005), collider='mesh', position=(0,5,10))
+        #Entity(model='cube', position=(0,5,10))
         
         self.gate = Gate(game_state, parent=self, position=(0,0,30), name='gate.tutorial.market')
 
@@ -369,6 +381,17 @@ class MarketWorld(Entity):
         self.entities = [self.ground, self.wall, self.tutorial_gate, self.tutorial_gate.collision_box, self.centaur_gate, self.centaur_gate.collision_box, self.stall, self.stall.collision_box]
         self.colliders = [self.tutorial_gate.collision_box, self.stall.collision_box, self.centaur_gate.collision_box]
 
+class LevelCreator(Entity):
+    def __init__(self, game_state, name):
+        super().__init__()
+            
+        self.ground = Entity(model='plane', texture='grass', collider='box', scale=200, texture_scale=(4,4))
+        
+        self.name = name
+        
+        self.market_gate = Gate(game_state, parent=self, position=(0,0,-10), name='gate.centaur.market')
+        
+        self.colliders = [self.market_gate.collision_box]
 #---------------------------------------------------#
 def update():
     if held_keys['escape']:
@@ -393,5 +416,11 @@ spectator_mode = EditorCamera(enabled = False, ignore_paused=True)
 pause_handler = Entity(ignore_paused=True, input=pause_input)
 manager = GameManager()
 main_menu = MainMenu(manager.start_game, manager.resume_game)
+
+def input(key):
+    if key == 'c':
+        manager.game_state.debug_mode.enabled = not manager.game_state.debug_mode.enabled
+    if key == 'x':
+        manager.player.xp += 1
 
 app.run()
