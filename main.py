@@ -2,7 +2,6 @@ from ursina import *
 from Scripts.HealthBar import HealthBar
 from Scripts.MainMenu import MainMenu
 
-
 class GameManager(Entity):
     """."""
     def __init__(self):
@@ -14,6 +13,14 @@ class GameManager(Entity):
         self.tutorial_world = None
         self.market_world = None
         self.centaur_world = None
+
+        self.centaur_stats = {'name': 'Centaur',
+                              'health': 10,
+                              'damage': 1,
+                              'worth':1,
+                              'speed':50,
+                              'sight':10,
+                              'attack_speed': 10}
 
     def start_game(self):
         """."""
@@ -236,7 +243,7 @@ class Player(Entity):
         
         
 class Monster(Entity):
-    def __init__(self, game_state, parent,name='monster', health=10, damage=1, worth=1, speed=50, sight=10, attack_speed=10, position=Vec3(0,0,0), scale=1, rotation=Vec3(0,0,0)):
+    def __init__(self, game_state, parent, name='monster', health=10, damage=1, worth=1, speed=50, sight=10, attack_speed=10, position=Vec3(0,0,0), scale=1, rotation=Vec3(0,0,0)):
         super().__init__(model=f'Assets/Models/{name.title()}/{name}.fbx',
                        texture=f'Assets/Models/{name.title()}/texture.png',
                        position=position, double_sided=True, scale=scale,
@@ -327,7 +334,7 @@ class Gate(Entity):
 class Stall(Entity):
     def __init__(self, game_state, parent):
         super().__init__(parent=parent,model='Assets/Models/Stall/stall1.fbx', texture='Assets/Models/Stall/stall_texture.png',
-                         double_sided=True,scale=(0.1,0.22,0.1), position=(10,0,0))
+                         double_sided=True, scale=(0.1,0.22,0.1), position=(10,0,0))
 
         self.props = Entity(model='Assets/Models/Stall/props.fbx', texture='Assets/Models/Stall/props_texture.png',
                             parent=self, double_sided=True,scale=(1,1,1), position=(0,0,0))
