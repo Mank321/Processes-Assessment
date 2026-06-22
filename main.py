@@ -66,7 +66,7 @@ class GameManager(Entity):
                 self.market_world = MarketWorld(self.game_state)
                 new_scene = self.market_world
             elif new_scene_name == 'centaur':
-                self.centaur_world = LevelCreator(self.game_state, name='Centaur World')
+                self.centaur_world = LevelCreator(self.game_state, monster_stats=self.centaur_stats)
                 new_scene = self.centaur_world
 
         new_scene.enable()
@@ -92,6 +92,7 @@ class UIState(Entity):
         self.player = player
         self.game_state = game_state
         #self.coordinate_text = Text(self.player, position=(0,0), parent=camera.ui)
+        self.damage_text = Text(parent=camera.ui, text='hi', origin=(0,0))
         self.player_health_bar = HealthBar(max_value=20,value=20,position=(-0.85, -0.39),colour=color.red,scale=(0.4,0.05))
         self.player_gold_bar = HealthBar(max_value=10,value=0,position=(-0.85, -0.33),colour=color.gold,scale=(0.4,0.05))
         self.player_experience_bar = HealthBar(max_value=10, value=0, position=(-0.89, -0.45), colour=color.green, scale=(1.8, 0.05))
@@ -102,8 +103,11 @@ class UIState(Entity):
         if self.player != None:
             self.player_gold_bar.max_value = self.player.max_gold
             self.player_gold_bar.value = self.player.gold
+            self.player_health_bar.max_value = self.player.max_health
+            self.player_health_bar.value = round(self.player.health)
             self.player_experience_bar.max_value = self.player.levelup_req
             self.player_experience_bar.value = self.player.xp
+
 
 class Player(Entity):
     def __init__(self, ui_state, game_state):
@@ -127,14 +131,12 @@ class Player(Entity):
         self.levelup_req = 10 * self.level
         self.xp = 0
         self.stamina = 5
+        self.max_stamina = self.stamina
         self.gold = 0
         self.max_gold = 10
         self.inventory = None
         self.reach = 5
         self.distance = float('inf')
-
-        self.transition_cooldown = 0
-        self.move_sequence = None
         
         camera.position = (0,1,0)
         camera.rotation = (0,0,0)
@@ -148,19 +150,36 @@ class Player(Entity):
     def death(self):
         self.position = Vec3(0,10,0)
         self.health = self.max_health
-        self.ui_state.player_health_bar.value = self.max_health
         #if manager.game_state.location != 'tutorial world':
         #    manager.switch_scenes(manager.market_world, manager.)
     
+    def check_max_gold(self):
+        if self.gold >= self.max_gold:
+            self.gold=self.max_gold
+    
+    def check_max_health(self):
+        if self.health >= self.max_health:
+            self.health = self.max_health
+
     def levelup(self):
-        pass
+        """."""
+        self.xp = 0
+        self.level += 1
+        self.levelup_req *= 2
+        self.max_stamina += 2
+        self.damage += 1
+        self.max_health += 2
+        self.health = self.max_health
+        self.ui_state.update()
 
     def update(self):
         """."""
-        # A cooldown for using the gates
-        if self.transition_cooldown > 0:
-            self.transition_cooldown -= time.dt
+        if self.xp >= self.levelup_req:
+            self.levelup()
         
+        self.check_max_gold()
+        self.check_max_health()
+
         # Allowing jumping only when the player is on the ground
         ground_ray = raycast(self.world_position + Vec3(0,0.1,0), self.down, distance=1.1, ignore=[self])
         self.grounded = ground_ray.hit
@@ -213,12 +232,11 @@ class Player(Entity):
                 manager.switch_scenes(hit_info.entity)
 
         if self.health <= 0:
-            self.death()
-                
+            self.death()         
         
         
 class Monster(Entity):
-    def __init__(self, game_state, parent,name='monster', health=10, damage=1, worth=1, speed=50, sight=10, position=Vec3(0,0,0), scale=1, rotation=Vec3(0,0,0)):
+    def __init__(self, game_state, parent,name='monster', health=10, damage=1, worth=1, speed=50, sight=10, attack_speed=10, position=Vec3(0,0,0), scale=1, rotation=Vec3(0,0,0)):
         super().__init__(model=f'Assets/Models/{name.title()}/{name}.fbx',
                        texture=f'Assets/Models/{name.title()}/texture.png',
                        position=position, double_sided=True, scale=scale,
@@ -239,6 +257,7 @@ class Monster(Entity):
         self.closeness = 2
         self.sight = sight
         self.worth = worth
+        self.attack_speed = attack_speed
 
         self.game_state = game_state
 
@@ -250,8 +269,7 @@ class Monster(Entity):
             self.position += self.forward * time.dt * self.speed
 
         if self.distance <= self.closeness:
-            invoke(setattr, manager.player, 'health', manager.player.health - self.damage, delay=1)
-            manager.ui_state.player_health_bar.value = manager.player.health
+            manager.player.health -= self.damage * time.dt * self.attack_speed
 
     def on_click(self):
         """This triggers when the mouse clicks the monster."""
@@ -385,12 +403,12 @@ class MarketWorld(Entity):
         self.colliders = [self.tutorial_gate.collision_box, self.stall.collision_box, self.centaur_gate.collision_box]
 
 class LevelCreator(Entity):
-    def __init__(self, game_state, name):
+    def __init__(self, game_state, monster_stats):
         super().__init__()
             
         self.ground = Entity(model='plane', texture='grass', collider='box', scale=200, texture_scale=(4,4))
         
-        self.name = name
+        self.name = monster_stats['name']
         
         self.market_gate = Gate(game_state, parent=self, position=(0,0,-10), name='gate.centaur.market')
         
@@ -425,5 +443,7 @@ def input(key):
         manager.game_state.debug_mode = not manager.game_state.debug_mode
     if key == 'x':
         manager.player.xp += 1
+    if key == 'g':
+        manager.player.gold += 1
 
 app.run()
