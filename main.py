@@ -3,13 +3,33 @@ from Scripts.HealthBar import HealthBar
 from Scripts.MainMenu import MainMenu
 
 CENTAUR_STATS = {'name': 'Centaur',
-                              'health': 10,
-                              'damage': 1,
-                              'worth':1,
-                              'speed':100,
-                              'sight':10,
-                              'attack_speed': 1,
-                              'scale': Vec3(0.02,0.024,0.015)}
+                 'health': 10,
+                 'damage': 1,
+                 'worth':1,
+                 'speed':100,
+                 'sight':10,
+                 'attack_speed': 1,
+                 'scale': Vec3(0.02,0.024,0.015),
+                 'collider_scale': Vec3(100,400,170)}
+
+BASILISK_STATS = {'name': 'Basilisk',
+                'health': 10,
+                'damage': 1,
+                'worth':1,
+                'speed':10,
+                'sight':10,
+                'attack_speed': 1,
+                'scale': Vec3(1,2,0.5)}
+
+GORGON_STATS = {'name': 'Gorgon',
+                'health': 10,
+                'damage': 1,
+                'worth':1,
+                'speed':100,
+                'sight':10,
+                'attack_speed': 1,
+                'scale': Vec3(0.015,0.025,0.015)}
+
 class GameManager(Entity):
     """."""
     def __init__(self):
@@ -83,7 +103,7 @@ class GameManager(Entity):
                 self.market_world = MarketWorld(self.game_state)
                 new_scene = self.market_world
             elif new_scene_name == 'centaur':
-                self.centaur_world = LevelCreator(self.game_state, monster_stats=CENTAUR_STATS)
+                self.centaur_world = LevelCreator(self.game_state, monster_stats=GORGON_STATS)
                 new_scene = self.centaur_world
 
         new_scene.enable()
@@ -260,7 +280,7 @@ class Monster(Entity):
                        rotation=rotation, name=monster_stats["name"], parent=parent)
 
         self.collision_box = Entity(model='cube', parent=self, position=(0,200,0),
-                                    scale=(100,400,170), #collider='box',
+                                    scale=scale, #collider='box',
                                     visible=game_state.debug_mode,
                                     wireframe=True, name=f'{monster_stats["name"].title()}.collider')
 
@@ -374,9 +394,7 @@ class TutorialWorld(Entity):
         self.desc2 = 'Attack the monster up ahead by left clicking!\n                     Try not to get hit!'
         self.text2 = Text(parent=self, text=self.desc2, position=(-8,4,19), scale=30, color=color.white)
 
-        self.monster = Monster(game_state, parent=self, monster_stats=CENTAUR_STATS, position=Vec3(0,0,25),
-                               scale=Vec3(0.02,0.024,0.015),
-                               rotation=Vec3(0,180,0))
+        self.monster = Monster(game_state, parent=self, monster_stats=BASILISK_STATS, position=Vec3(0,0,25), rotation=Vec3(0,180,0))
         
         #self.entities = [self.ground, self.wall, self.gate, self.text1, self.text2, self.monster]
         self.colliders = [self.gate.collision_box]#, self.monster.collision_box]

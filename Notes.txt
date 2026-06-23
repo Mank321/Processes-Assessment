@@ -59,6 +59,9 @@ since there were multiple. This led to the switch_scenes method no longer workin
 changed the name of the gates from gate.{destination}, to gate.{origin}.{distination}. I then changed
 the method to set old_scene to the variable containing the old world using a dictionary, and set the new_scene to a 
 variable containing the new world. But I had to check if the new world had been created yet.
+-
+When I started adding in more monsters, I added medusa, which worked fine, then I added the basilisk, which was tiny. I tried changing the scale, but that made the collision
+box grow massively. I eventually figured out that the collision box had hard-coded position and scale variables that we designed for the centaur
 
 WORLD CREATION PROBLEMS
 FIXED: When creating the forest in the tutorial area, I started with a massive list containing the pre-chosen position of each tree. Then I looped through the list to plant each
