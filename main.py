@@ -8,18 +8,23 @@ CENTAUR_STATS = {'name': 'Centaur',
                  'worth':1,
                  'speed':100,
                  'sight':10,
+                 'closeness':2,
                  'attack_speed': 1,
                  'scale': Vec3(0.02,0.024,0.015),
-                 'collider_scale': Vec3(100,400,170)}
+                 'collider_scale': Vec3(100,250,170),
+                 'collider_position': Vec3(0,125,0)}
 
 BASILISK_STATS = {'name': 'Basilisk',
                 'health': 10,
                 'damage': 1,
                 'worth':1,
-                'speed':10,
-                'sight':10,
+                'speed':35000,
+                'sight':13,
+                'closeness': 5.5,
                 'attack_speed': 1,
-                'scale': Vec3(1,2,0.5)}
+                'scale': Vec3(0.0001,0.0002,0.0001),
+                'collider_scale': Vec3(10000,40000,100000),
+                'collider_position': Vec3(1,20000,1)}
 
 GORGON_STATS = {'name': 'Gorgon',
                 'health': 10,
@@ -27,8 +32,11 @@ GORGON_STATS = {'name': 'Gorgon',
                 'worth':1,
                 'speed':100,
                 'sight':10,
+                'closeness':1.5,
                 'attack_speed': 1,
-                'scale': Vec3(0.015,0.025,0.015)}
+                'scale': Vec3(0.015,0.025,0.015),
+                'collider_scale': Vec3(100,200,100),
+                'collider_position': Vec3(0,100,0)}
 
 class GameManager(Entity):
     """."""
@@ -46,7 +54,7 @@ class GameManager(Entity):
             'Tutorial',
             'Market',
             'Centaur',
-            '',
+            'Basilisk',
             'Gorgon',
             'Cyclops',
             'Giant',
@@ -103,14 +111,10 @@ class GameManager(Entity):
                 self.market_world = MarketWorld(self.game_state)
                 new_scene = self.market_world
             elif new_scene_name == 'centaur':
-                self.centaur_world = LevelCreator(self.game_state, monster_stats=GORGON_STATS)
+                self.centaur_world = LevelCreator(self.game_state, monster_stats=CENTAUR_STATS)
                 new_scene = self.centaur_world
 
         new_scene.enable()
-        #for entity in new_scene.entities:
-        #    entity.enable()
-        #for entity in new_scene.colliders:
-         #   entity.enable()
         old_scene.disable()
 
         print_on_screen(f'--{new_scene_name.title()}--', position=(-0.1,0.45), scale=3, duration=2)
@@ -273,14 +277,14 @@ class Player(Entity):
         
         
 class Monster(Entity):
-    def __init__(self, game_state, parent, monster_stats, position=Vec3(0,0,0), scale=1, rotation=Vec3(0,0,0)):
+    def __init__(self, game_state, parent, monster_stats, position=Vec3(0,0,0), rotation=Vec3(0,0,0)):
         super().__init__(model=f'Assets/Models/{monster_stats["name"].title()}/monster.fbx',
                        texture=f'Assets/Models/{monster_stats["name"].title()}/texture.png',
-                       position=position, double_sided=True, scale=scale,
+                       position=position, double_sided=True, scale=monster_stats['scale'],
                        rotation=rotation, name=monster_stats["name"], parent=parent)
 
-        self.collision_box = Entity(model='cube', parent=self, position=(0,200,0),
-                                    scale=scale, #collider='box',
+        self.collision_box = Entity(model='cube', parent=self, position=monster_stats['collider_position'],
+                                    scale=monster_stats['collider_scale'], #collider='box',
                                     visible=game_state.debug_mode,
                                     wireframe=True, name=f'{monster_stats["name"].title()}.collider')
 
@@ -291,7 +295,7 @@ class Monster(Entity):
         self.worth = monster_stats['worth']
         self.speed = monster_stats['speed']
         self.attack_speed = monster_stats['attack_speed']
-        self.closeness = 2
+        self.closeness = monster_stats['closeness']
         self.position = position
         self.scale = monster_stats['scale']
         self.rotation = rotation
@@ -311,7 +315,7 @@ class Monster(Entity):
     def on_click(self):
         """This triggers when the mouse clicks the monster."""
         self.distance = distance(self, manager.player)
-        if self.distance <= manager.player.reach:
+        if self.distance <= manager.player.reach + self.closeness:
             self.health -= manager.player.damage
 
             # Flash Red Effect
@@ -394,7 +398,7 @@ class TutorialWorld(Entity):
         self.desc2 = 'Attack the monster up ahead by left clicking!\n                     Try not to get hit!'
         self.text2 = Text(parent=self, text=self.desc2, position=(-8,4,19), scale=30, color=color.white)
 
-        self.monster = Monster(game_state, parent=self, monster_stats=BASILISK_STATS, position=Vec3(0,0,25), rotation=Vec3(0,180,0))
+        self.monster = Monster(game_state, parent=self, monster_stats=CENTAUR_STATS, position=Vec3(0,0,25), rotation=Vec3(0,180,0))
         
         #self.entities = [self.ground, self.wall, self.gate, self.text1, self.text2, self.monster]
         self.colliders = [self.gate.collision_box]#, self.monster.collision_box]
@@ -444,16 +448,17 @@ class LevelCreator(Entity):
         
         self.name = monster_stats['name']
         
-        for i in range(50):
+        for i in range(20):
             x = random.randint(-100,100)
             z = random.randint(-100,100)
-            Monster(game_state, parent=self, monster_stats=monster_stats, position=(x,0,z), scale=monster_stats['scale'])
+            Monster(game_state, parent=self, monster_stats=monster_stats, position=(x,0,z), rotation=(0,random.randint(-360,360),0))
 
         self.location = game_state.location
 
-        self.market_gate = Gate(game_state, parent=self, position=(0,0,-10), name='gate.centaur.market')
+        self.return_gate = Gate(game_state, parent=self, position=(0,0,-10), name=f'gate.{self.location}.market')
+        self.next_gate = Gate(game_state, parent=self, position=(0,0,10), name=f'gate.{1}.{self.location}')
         
-        self.colliders = [self.market_gate.collision_box]
+        self.colliders = [self.return_gate.collision_box]
 #---------------------------------------------------#
 def update():
     if held_keys['escape']:
