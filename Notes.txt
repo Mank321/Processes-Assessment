@@ -60,9 +60,10 @@ changed the name of the gates from gate.{destination}, to gate.{origin}.{distina
 the method to set old_scene to the variable containing the old world using a dictionary, and set the new_scene to a 
 variable containing the new world. But I had to check if the new world had been created yet.
 -
-FIXED: When I started adding in more monsters, I added medusa, which worked fine, then I added the basilisk, which was tiny. I tried changing the scale, but that made the collision
-box grow massively. I eventually figured out that the collision box had hard-coded position and scale variables that were designed for the centaur.
-To fix this, I added in collider_scale and collider_position into the monster stats.
+FIXED: When I added the two gates to the LevelCreator class, I had to figure out where the gates went, since the class could be initialized as any level and needed a gate
+that returned the player to the previous world, and one that sent them to the next world. To fix this, I checked the player location, then got its index in the locations
+list and added/subtracted 1 to get the new worlds. But the next world would take me to the first world, and the previous gate took me to the tutorial. After debugging, I
+realised I was setting the player location after I'd created the class. To fix this, I simply updated the player location before I created the world.
 
 WORLD CREATION PROBLEMS
 FIXED: When creating the forest in the tutorial area, I started with a massive list containing the pre-chosen position of each tree. Then I looped through the list to plant each
@@ -84,6 +85,10 @@ To fix this, I decided to allow the player to walk through monsters, meaning I d
 FIXED: When trying to use a gate, since the monster was destroyed, it couldn't be disabled, creating errors. To fix this, I tried changing the switch_scenes method from using an entities
 list given by TutorialWorld, to going through every child of TutorialWorld itself, and going through every child of those children to catch the collision boxes. This allowed
 me to go through the gate, but didn't disable anything. Instead, I parented everything in the world to the TutorialWorld entity, allowing me to disable everything with one line.
+-
+FIXED: When I started adding in more monsters, I added medusa, which worked fine, then I added the basilisk, which was tiny. I tried changing the scale, but that made the collision
+box grow massively. I eventually figured out that the collision box had hard-coded position and scale variables that were designed for the centaur.
+To fix this, I added in collider_scale and collider_position into the monster stats.
 
 PLAYER SYSTEMS
 FIXED: When building the levelup system, I created a healthbar in the UI, and created a method to levelup. When leveling up,

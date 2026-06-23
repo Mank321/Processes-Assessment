@@ -49,6 +49,9 @@ class GameManager(Entity):
         self.tutorial_world = None
         self.market_world = None
         self.centaur_world = None
+        self.basilisk_world = None
+        self.gorgon_world = None
+        self.cyclops_world = None
 
         self.locations = [
             'Tutorial',
@@ -99,9 +102,11 @@ class GameManager(Entity):
         """."""
         new_scene_name = gate.name.split('.')[2]
         old_scene_name = gate.name.split('.')[1]
+        self.game_state.location = new_scene_name
         
         self.scenes = {'tutorial': self.tutorial_world, 'market': self.market_world,
-                       'centaur': self.centaur_world}
+                       'centaur': self.centaur_world, 'basilisk': self.basilisk_world,
+                       'gorgon': self.gorgon_world, 'cyclops': self.cyclops_world}
         
         new_scene = self.scenes[new_scene_name]
         old_scene = self.scenes[old_scene_name]
@@ -113,14 +118,21 @@ class GameManager(Entity):
             elif new_scene_name == 'centaur':
                 self.centaur_world = LevelCreator(self.game_state, monster_stats=CENTAUR_STATS)
                 new_scene = self.centaur_world
+            elif new_scene_name == 'basilisk':
+                self.basilisk_world = LevelCreator(self.game_state, monster_stats=BASILISK_STATS)
+                new_scene = self.basilisk_world
+            elif new_scene_name == 'gorgon':
+                self.gorgon_world = LevelCreator(self.game_state, monster_stats=GORGON_STATS)
+                new_scene = self.gorgon_world
 
         new_scene.enable()
         old_scene.disable()
 
         print_on_screen(f'--{new_scene_name.title()}--', position=(-0.1,0.45), scale=3, duration=2)
-        self.game_state.location = new_scene_name
+        
         self.player.position = (0,0,0)
         self.player.rotation = (0,0,0)
+        print('Current location V1 ',self.game_state.location)
 
 
 class GameState():
@@ -252,7 +264,10 @@ class Player(Entity):
         # Change hitbox colours when colliding for testing purposes
         dictionary = {'tutorial': manager.tutorial_world,
                       'market': manager.market_world,
-                      'centaur': manager.centaur_world}
+                      'centaur': manager.centaur_world,
+                      'basilisk': manager.basilisk_world,
+                      'gorgon': manager.basilisk_world}
+
         colliders = dictionary[self.game_state.location].colliders
         if self.game_state.debug_mode:
             for collider in colliders:
@@ -454,9 +469,19 @@ class LevelCreator(Entity):
             Monster(game_state, parent=self, monster_stats=monster_stats, position=(x,0,z), rotation=(0,random.randint(-360,360),0))
 
         self.location = game_state.location
+        print('Current Location V2 ', self.location)
 
-        self.return_gate = Gate(game_state, parent=self, position=(0,0,-10), name=f'gate.{self.location}.market')
-        self.next_gate = Gate(game_state, parent=self, position=(0,0,10), name=f'gate.{1}.{self.location}')
+        self.next_scene = manager.locations.index(self.location.title()) + 1
+        self.next_scene = manager.locations[self.next_scene].lower()
+        print('Next location ',self.next_scene)
+        
+        self.previous_scene = manager.locations.index(self.location.title()) - 1
+        self.previous_scene = manager.locations[self.previous_scene].lower()
+        print('Previous Location',self.previous_scene)
+        
+
+        self.return_gate = Gate(game_state, parent=self, position=(0,0,-10), name=f'gate.{self.location}.{self.previous_scene}')
+        self.next_gate = Gate(game_state, parent=self, position=(0,0,10), name=f'gate.{self.location}.{self.next_scene}')
         
         self.colliders = [self.return_gate.collision_box]
 #---------------------------------------------------#
