@@ -136,7 +136,6 @@ class GameManager(Entity):
         
         self.player.position = (0,0,0)
         self.player.rotation = (0,0,0)
-        print('Current location V1 ',self.game_state.location)
 
 
 class GameState():
@@ -297,7 +296,7 @@ class Player(Entity):
         
         
 class Monster(Entity):
-    def __init__(self, game_state, parent, monster_stats, position=Vec3(0,0,0), rotation=Vec3(0,0,0)):
+    def __init__(self, game_state, parent, monster_stats, is_boss=False, position=Vec3(0,0,0), rotation=Vec3(0,0,0)):
         super().__init__(model=f'Assets/Models/{monster_stats["name"].title()}/monster.fbx',
                        texture=f'Assets/Models/{monster_stats["name"].title()}/texture.png',
                        position=position, double_sided=True, scale=monster_stats['scale'],
@@ -308,6 +307,7 @@ class Monster(Entity):
                                     visible=game_state.debug_mode,
                                     wireframe=True, name=f'{monster_stats["name"].title()}.collider')
 
+        self.game_state = game_state
         self.name = monster_stats['name']
         self.health = monster_stats['health']
         self.damage = monster_stats['damage']
@@ -319,8 +319,17 @@ class Monster(Entity):
         self.position = position
         self.scale = monster_stats['scale']
         self.rotation = rotation
+        self.is_boss = is_boss
 
-        self.game_state = game_state
+        if self.is_boss:
+            self.damage *= 2
+            self.health *= 5
+            self.sight *= 1.5
+            self.scale *= 1.5
+            self.collision_box.scale *= 1.5
+            self.speed *= 2
+            self.closeness *= 1.5
+            self.worth *= 10
 
     def distance_check(self):
         """."""
@@ -342,17 +351,15 @@ class Monster(Entity):
             origin_colour = self.color
             self.color = color.red
             invoke(setattr, self, 'color', origin_colour, delay=0.2)
-            #self.animate_color(origin_colour, duration=0.2)
             
             if self.health <= 0:
-                if self.game_state.location == 'tutorial world':
-                    manager.tutorial_world.entities.remove(self)
-                    manager.tutorial_world.colliders.remove(self.collision_boxwwww)
-                destroy(self)
+                if self.is_boss:
+                    print_on_screen(f'{self.name.title()} boss Defeated!', color=color.red, position=(-0.4,0.4), scale=3, duration=2)
                 manager.player.gold += self.worth
                 manager.ui_state.player_gold_bar.value += self.worth
                 manager.player.xp += self.worth
                 manager.ui_state.player_experience_bar.value += self.worth
+                destroy(self)
 
     def update(self):
         self.distance_check()
@@ -403,12 +410,10 @@ class Stall(Entity):
 class TutorialWorld(Entity):
     def __init__(self, game_state):
         super().__init__()
-        #self.game_state = game_state
         self.ground = Entity(parent=self,model='plane', collider='box', scale=200, texture='grass', texture_scale=(4,4))
 
         self.wall = Entity(parent=self,model='Assets/Models/Wall/wall.fbx', texture='Assets/Models/Wall/texture.png',
                     double_sided=True,scale=(0.005,0.01,0.005), collider='mesh', position=(0,5,10))
-        #Entity(model='cube', position=(0,5,10))
         
         self.gate = Gate(game_state, parent=self, position=(0,0,30), name='gate.tutorial.market')
 
@@ -420,8 +425,7 @@ class TutorialWorld(Entity):
 
         self.monster = Monster(game_state, parent=self, monster_stats=CENTAUR_STATS, position=Vec3(0,0,25), rotation=Vec3(0,180,0))
         
-        #self.entities = [self.ground, self.wall, self.gate, self.text1, self.text2, self.monster]
-        self.colliders = [self.gate.collision_box]#, self.monster.collision_box]
+        self.colliders = [self.gate.collision_box]
         self.map = ['        TTTTTTTT        ',
                     '       TTTT  TTTT       ',
                     '      TTTT    TTTT      ',
@@ -439,9 +443,6 @@ class TutorialWorld(Entity):
             for x, col in enumerate(row):
                 if col == 'T':
                     Tree(game_state, ((x*4)-45, 0, (z*4)-7),parent=self)
-                    #self.entities.append(tree)
-                    #self.colliders.append(tree.collision_box)
-                    #self.entities.append(tree.collision_box)
 
 
 class MarketWorld(Entity):
@@ -453,7 +454,7 @@ class MarketWorld(Entity):
                     double_sided=True,scale=(0.01,0.01,0.01), collider='mesh', position=(-30,5,-10))
 
         self.tutorial_gate = Gate(game_state, parent=self,position=(0,0,-5), name='gate.market.tutorial')
-        self.centaur_gate = Gate(game_state, parent=self,position=(0,0,-10), name='gate.market.centaur')
+        self.centaur_gate = Gate(game_state, parent=self,position=(0,0,20), name='gate.market.centaur')
 
         self.stall = Stall(game_state,parent=self)
 
@@ -474,20 +475,18 @@ class LevelCreator(Entity):
             Monster(game_state, parent=self, monster_stats=monster_stats, position=(x,0,z), rotation=(0,random.randint(-360,360),0))
 
         self.location = game_state.location
-        print('Current Location V2 ', self.location)
 
         self.next_scene = manager.locations.index(self.location.title()) + 1
         self.next_scene = manager.locations[self.next_scene].lower()
-        print('Next location ',self.next_scene)
         
         self.previous_scene = manager.locations.index(self.location.title()) - 1
-        self.previous_scene = manager.locations[self.previous_scene].lower()
-        print('Previous Location',self.previous_scene)
-        
+        self.previous_scene = manager.locations[self.previous_scene].lower()        
 
         self.return_gate = Gate(game_state, parent=self, position=(0,0,-10), name=f'gate.{self.location}.{self.previous_scene}')
-        self.next_gate = Gate(game_state, parent=self, position=(0,0,10), name=f'gate.{self.location}.{self.next_scene}')
+        self.next_gate = Gate(game_state, parent=self, position=(0,-10,60), name=f'gate.{self.location}.{self.next_scene}')
         
+        self.boss = Monster(game_state, parent=self, monster_stats=monster_stats, is_boss=True, position=Vec3(0,0,50))
+
         self.colliders = [self.return_gate.collision_box]
 #---------------------------------------------------#
 def update():
@@ -497,11 +496,8 @@ def update():
 def pause_input(key):
     if key == 'tab' and main_menu.started:
         spectator_mode.enabled = not spectator_mode.enabled
-        #mouse.locked = spectator_mode.enabled
         spectator_mode.position = manager.player.position
-        
         application.paused = spectator_mode.enabled
-        
         camera.parent = spectator_mode if spectator_mode.enabled else manager.player
 
 #------------------------------------------------------------#
