@@ -296,7 +296,7 @@ class Player(Entity):
         
         
 class Monster(Entity):
-    def __init__(self, game_state, parent, monster_stats, is_boss=False, position=Vec3(0,0,0), rotation=Vec3(0,0,0)):
+    def __init__(self, game_state, parent, monster_stats, is_boss=False, gate=None, position=Vec3(0,0,0), rotation=Vec3(0,0,0)):
         super().__init__(model=f'Assets/Models/{monster_stats["name"].title()}/monster.fbx',
                        texture=f'Assets/Models/{monster_stats["name"].title()}/texture.png',
                        position=position, double_sided=True, scale=monster_stats['scale'],
@@ -320,6 +320,7 @@ class Monster(Entity):
         self.scale = monster_stats['scale']
         self.rotation = rotation
         self.is_boss = is_boss
+        self.gate = gate
 
         if self.is_boss:
             self.damage *= 2
@@ -339,7 +340,9 @@ class Monster(Entity):
             self.position += self.forward * time.dt * self.speed
 
         if self.distance <= self.closeness:
-            manager.player.health -= self.damage * time.dt * self.attack_speed
+            damage_delt = self.damage - manager.player.armor
+            if damage_delt >= 1:
+                manager.player.health -= damage_delt * time.dt * self.attack_speed
 
     def on_click(self):
         """This triggers when the mouse clicks the monster."""
@@ -348,13 +351,12 @@ class Monster(Entity):
             self.health -= manager.player.damage
 
             # Flash Red Effect
-            origin_colour = self.color
-            self.color = color.red
-            invoke(setattr, self, 'color', origin_colour, delay=0.2)
+            self.blink(color.red)
             
             if self.health <= 0:
                 if self.is_boss:
                     print_on_screen(f'{self.name.title()} boss Defeated!', color=color.red, position=(-0.4,0.4), scale=3, duration=2)
+                    self.gate.animate_position((self.gate.x,0,self.gate.z), duration=1, curve=curve.in_out_sine)
                 manager.player.gold += self.worth
                 manager.ui_state.player_gold_bar.value += self.worth
                 manager.player.xp += self.worth
@@ -485,9 +487,9 @@ class LevelCreator(Entity):
         self.return_gate = Gate(game_state, parent=self, position=(0,0,-10), name=f'gate.{self.location}.{self.previous_scene}')
         self.next_gate = Gate(game_state, parent=self, position=(0,-10,60), name=f'gate.{self.location}.{self.next_scene}')
         
-        self.boss = Monster(game_state, parent=self, monster_stats=monster_stats, is_boss=True, position=Vec3(0,0,50))
+        self.boss = Monster(game_state, parent=self, monster_stats=monster_stats, is_boss=True, gate=self.next_gate, position=Vec3(0,0,50))
 
-        self.colliders = [self.return_gate.collision_box]
+        self.colliders = [self.return_gate.collision_box, self.next_gate.collision_box]
 #---------------------------------------------------#
 def update():
     if held_keys['escape']:
