@@ -88,13 +88,17 @@ class GameManager(Entity):
         main_menu.pause_buttons.enabled = True
         main_menu.background.enabled = True
         main_menu.enabled = True
-        for entity in self.ui_state.entities:
-            entity.disable()
+        main_menu.background.z = -1
+        #for entity in self.ui_state.entities:
+        #    for child in entity.children:
+        #        child.disable()
+        #    entity.disable()
 
     def resume_game(self):
         main_menu.enabled = False
         main_menu.background.enabled = False
         mouse.locked = True
+        main_menu.background.z = 1
         for entity in self.ui_state.entities:
             entity.enable()
     
@@ -145,10 +149,10 @@ class UIState(Entity):
         self.player = player
         self.game_state = game_state
         #self.coordinate_text = Text(self.player, position=(0,0), parent=camera.ui)
-        self.damage_text = Text(parent=camera.ui, text='hi', origin=(0,0))
-        self.player_health_bar = HealthBar(max_value=20,value=20,position=(-0.85, -0.39),colour=color.red,scale=(0.4,0.05))
-        self.player_gold_bar = HealthBar(max_value=10,value=0,position=(-0.85, -0.33),colour=color.gold,scale=(0.4,0.05))
-        self.player_experience_bar = HealthBar(max_value=10, value=0, position=(-0.89, -0.45), colour=color.green, scale=(1.8, 0.05))
+        self.damage_text = Text(parent=camera.ui, text='', position=(-0.85,-.22,0), size=0.06)
+        self.player_health_bar = HealthBar(max_value=20,value=20,position=(-0.85, -0.39,0),colour=color.red,scale=(0.4,0.05))
+        self.player_gold_bar = HealthBar(max_value=10,value=0,position=(-0.85, -0.33,0),colour=color.gold,scale=(0.4,0.05))
+        self.player_experience_bar = HealthBar(max_value=10, value=0, position=(-0.89, -0.45,0), colour=color.green, scale=(1.8, 0.05))
 
         self.entities = [self.player_health_bar, self.player_gold_bar, self.player_experience_bar]#self.coordinate_text, ]
 
@@ -160,6 +164,7 @@ class UIState(Entity):
             self.player_health_bar.value = round(self.player.health)
             self.player_experience_bar.max_value = self.player.levelup_req
             self.player_experience_bar.value = self.player.xp
+            self.damage_text.text = f'Damage: {self.player.damage}'
 
 
 class Player(Entity):

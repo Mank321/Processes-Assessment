@@ -9,17 +9,17 @@ class MainMenu(Entity):
 
         self.background = Entity(model='quad', texture='Assets/menu background.jpg', parent=self.main_menu, z=1, scale=(1.8,1))
 
-        Text("MAIN MENU", parent=self.main_menu, y=0.4, x=0, origin=(0,0))
+        Text("MAIN MENU", parent=self.main_menu, y=0.4, x=0, z=-10, origin=(0,0))
 
         self.start_buttons = ButtonList(button_dict={
             "Start": Func(start_func),
             "Exit": Func(lambda: application.quit())
-        },y=0,parent=self.main_menu)
+        },y=0, z=-10,parent=self.main_menu)
 
         self.pause_buttons = ButtonList(button_dict={
             "Resume": Func(resume_func),
             "Exit": Func(lambda: application.quit())
-        },y=0,parent=self.main_menu, enabled=False)
+        },y=0, z=-10, parent=self.main_menu, enabled=False)
     
     def switch(self, new_menu, old_menu):
         new_menu.enable()
