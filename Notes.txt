@@ -124,3 +124,15 @@ visually update when the player was moving, so the gold bar would start at 10 an
 the health bar would say 2 but look like it was 15. To fix this, I created my own healthbar class. It 
 took multiple attempts, and many trials such as getting everything overlapping correctly, I even thought
 about returning to the prefab, but I figured it out
+-
+When building the death screen, I started by created the menu from scratch, but then realised I could
+create a new instance of the main menu class and call is death screen. I added in some extra parameters
+so it would have different wording than the main menu, and set the revive button to call player.death().
+I had to figure out how to get the background ontop of the other resource bars, for which I settled
+with giving it a higher z. I then ran into a problem in player.death() where the death screen couldn't
+be disabled and returned an Attribute error. To fix this, I did some debugging, and realised I was
+trying to disable the function death_screen(), instead of the menu death_menu. I then ran into a 
+problem where if the xp was higher than 0, the death screen wouldnt appear. It also wouldn't appear a second
+time. I eventually fixed this by initializing the menu at the start without a start function, then
+assigning it the first time the player died. Another bug appeared because I wanted to pause the game
+when the player died, so I had to apply ignore_paused to the buttons so they could be pressed.

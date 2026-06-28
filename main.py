@@ -89,18 +89,12 @@ class GameManager(Entity):
         main_menu.background.enabled = True
         main_menu.enabled = True
         main_menu.background.z = -1
-        #for entity in self.ui_state.entities:
-        #    for child in entity.children:
-        #        child.disable()
-        #    entity.disable()
 
     def resume_game(self):
         main_menu.enabled = False
         main_menu.background.enabled = False
         mouse.locked = True
         main_menu.background.z = 1
-        for entity in self.ui_state.entities:
-            entity.enable()
     
     def switch_scenes(self, gate):
         """."""
@@ -147,13 +141,20 @@ class UIState(Entity):
         super().__init__()
         self.player = player
         self.game_state = game_state
-        #self.coordinate_text = Text(self.player, position=(0,0), parent=camera.ui)
         self.damage_text = Text(parent=camera.ui, text='', position=(-0.85,-.22,0), size=0.06)
         self.player_health_bar = HealthBar(max_value=20,value=20,position=(-0.85, -0.39,0),colour=color.red,scale=(0.4,0.05))
         self.player_gold_bar = HealthBar(max_value=10,value=0,position=(-0.85, -0.33,0),colour=color.gold,scale=(0.4,0.05))
         self.player_experience_bar = HealthBar(max_value=10, value=0, position=(-0.89, -0.45,0), colour=color.green, scale=(1.8, 0.05))
 
-        self.entities = [self.player_health_bar, self.player_gold_bar, self.player_experience_bar]#self.coordinate_text, ]
+        self.death_screen_background = Entity(parent=camera.ui, model='quad', color=(255,0,0, 0.4), scale=(2,2), position=(0,0,-1), enabled=False)
+        self.death_menu = MainMenu(None, None, bg=self.death_screen_background, header='You Died', text='Respawn', enabled=False)
+
+
+    def death_screen(self):
+        mouse.locked = False
+        self.death_menu.enabled = True
+        self.death_menu.background.enabled = True
+        application.paused = True
 
     def update(self):
         if self.player != None:
@@ -164,6 +165,10 @@ class UIState(Entity):
             self.player_experience_bar.max_value = self.player.levelup_req
             self.player_experience_bar.value = self.player.xp
             self.damage_text.text = f'Damage: {self.player.damage}'
+        if hasattr(self.player, 'health') and self.player.health <= 0 and not self.death_menu.enabled:
+            if self.death_menu.start_function is None:
+                self.death_menu.start_function = self.player.death
+            self.death_screen()
 
 
 class Player(Entity):
@@ -181,7 +186,7 @@ class Player(Entity):
         self.gravity = 9.81**2
         self.velocity_y = 0
         self.armor = 0
-        self.health = 20
+        self.health = 2
         self.max_health = self.health
         self.damage = 1
         self.level = 1
@@ -205,10 +210,16 @@ class Player(Entity):
                             parent=self, scale=0.05, collider='box',position=(1,0.5, -1), rotation=(1,1,-25), double_sided = True)
 
     def death(self):
+        application.paused = False
         self.position = Vec3(0,10,0)
         self.health = self.max_health
-        #if manager.game_state.location != 'tutorial world':
-        #    manager.switch_scenes(manager.market_world, manager.)
+        self.xp // 2
+        if self.level >= 1:
+            self.level -= 1
+
+        self.ui_state.death_menu.enabled = False
+        self.ui_state.death_menu.background.enabled = False
+        mouse.locked = True
     
     def check_max_gold(self):
         if self.gold >= self.max_gold:
@@ -257,9 +268,10 @@ class Player(Entity):
             self.speed = self.default_speed
         
         # Move the camera to keep up with where the player is watching
-        camera.rotation_x -= mouse.velocity[1] * 80
-        self.rotation_y += mouse.velocity[0] * 80
-        camera.rotation_x = min(max(-90, camera.rotation_x), 90)
+        if mouse.locked:
+            camera.rotation_x -= mouse.velocity[1] * 80
+            self.rotation_y += mouse.velocity[0] * 80
+            camera.rotation_x = min(max(-90, camera.rotation_x), 90)
 
         # Handle the player movement
         movement = Vec3(self.forward * (held_keys['w'] - held_keys['s'])
@@ -290,9 +302,6 @@ class Player(Entity):
             name = hit_info.entity.name
             if name.startswith('gate'):
                 manager.switch_scenes(hit_info.entity)
-
-        if self.health <= 0:
-            self.death()         
         
         
 class Monster(Entity):
@@ -460,7 +469,6 @@ class MarketWorld(Entity):
 
         self.stall = Stall(game_state,parent=self)
 
-        self.entities = [self.ground, self.wall, self.tutorial_gate, self.tutorial_gate.collision_box, self.centaur_gate, self.centaur_gate.collision_box, self.stall, self.stall.collision_box]
         self.colliders = [self.tutorial_gate.collision_box, self.stall.collision_box, self.centaur_gate.collision_box]
 
 class LevelCreator(Entity):
