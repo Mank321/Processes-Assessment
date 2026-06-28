@@ -66,47 +66,27 @@ list and added/subtracted 1 to get the new worlds. But the next world would take
 realised I was setting the player location after I'd created the class. To fix this, I simply updated the player location before I created the world.
 
 WORLD CREATION PROBLEMS
-FIXED: When creating the forest in the tutorial area, I started with a massive list containing the pre-chosen position of each tree. Then I looped through the list to plant each
-tree. This was incredibly inefficient, so I create a 2d map array which had the entire forest plotted out in a dozen lines. I initially filled the entire area in with
+FIXED: When creating the forest in the tutorial area, I started with a massive list containing the pre-chosen position of each tree. Then I looped through the list to plant each tree. This was incredibly inefficient, so I create a 2d map array which had the entire forest plotted out in a dozen lines. I initially filled the entire area in with
 over a thousand trees, but this tanked the framerate down to 20fps, so I knew I couldn't do it that way without breaking a requirement.
 Instead, I shrunk the forest down to a minimum size with just having the trees as border walls, and shrunk the main perimeter wall to fit the new forest size.
 It took a bit of time to get the exact coordinates right and the tree spacing and map array. 
 
 COMBAT SYSTEM PROBLEMS
-FIXED: When creating the combat system, I added in the monster, gave it a hitbox, damage, and health, and gave it movement and distance checks, allowing it to move up to the player
-and attack them when close enough, taking away 1 health point per second. But when I tried to have the player attack the monster in retaliation, nothing happened. After a bit
-of debugging, I realised I was checking to see if the mouse.hovered_entity had health. I initially thought the entity was the monster itself, but it was actually the collision
-box that the player was hitting, as I discovered when I gave the collision box a name and printed it when attacking. I thought of adding the monster stats right into the
-collision box entities, but that felt wrong, so I attempted to create an on_click method for the monster, but that ended up not being called, or calling as soon as the player
-was in range. I thought about going back to the collision box idea, but thought of an idea to fix the monster not being instantly destroyed by only calling the on_click method
-when the player actually clicked on the monster. I still ran into a problem where the code was trying to find a monster that had been destroyed when checking for collisions.
-To fix this, I decided to allow the player to walk through monsters, meaning I didn't need to check their hitbox
+FIXED: When creating the combat system, I added in the monster, gave it a hitbox, damage, and health, and gave it movement and distance checks, allowing it to move up to the player and attack them when close enough, taking away 1 health point per second. But when I tried to have the player attack the monster in retaliation, nothing happened. After a bit of debugging, I realised I was checking to see if the mouse.hovered_entity had health. I initially thought the entity was the monster itself, but it was actually the collision box that the player was hitting, as I discovered when I gave the collision box a name and printed it when attacking. I thought of adding the monster stats right into the collision box entities, but that felt wrong, so I attempted to create an on_click method for the monster, but that ended up not being called, or calling as soon as the player was in range. I thought about going back to the collision box idea, but thought of an idea to fix the monster not being instantly destroyed by only calling the on_click method when the player actually clicked on the monster. I still ran into a problem where the code was trying to find a monster that had been destroyed when checking for collisions. To fix this, I decided to allow the player to walk through monsters, meaning I didn't need to check their hitbox
 -
-FIXED: When trying to use a gate, since the monster was destroyed, it couldn't be disabled, creating errors. To fix this, I tried changing the switch_scenes method from using an entities
-list given by TutorialWorld, to going through every child of TutorialWorld itself, and going through every child of those children to catch the collision boxes. This allowed
-me to go through the gate, but didn't disable anything. Instead, I parented everything in the world to the TutorialWorld entity, allowing me to disable everything with one line.
+FIXED: When trying to use a gate, since the monster was destroyed, it couldn't be disabled, creating errors. To fix this, I tried changing the switch_scenes method from using an entities list given by TutorialWorld, to going through every child of TutorialWorld itself, and going through every child of those children to catch the collision boxes. This allowed me to go through the gate, but didn't disable anything. Instead, I parented everything in the world to the TutorialWorld entity, allowing me to disable everything with one line.
 -
-FIXED: When I started adding in more monsters, I added medusa, which worked fine, then I added the basilisk, which was tiny. I tried changing the scale, but that made the collision
-box grow massively. I eventually figured out that the collision box had hard-coded position and scale variables that were designed for the centaur.
+FIXED: When I started adding in more monsters, I added medusa, which worked fine, then I added the basilisk, which was tiny. I tried changing the scale, but that made the collision box grow massively. I eventually figured out that the collision box had hard-coded position and scale variables that were designed for the centaur.
 To fix this, I added in collider_scale and collider_position into the monster stats.
 
 PLAYER SYSTEMS
-FIXED: When building the levelup system, I created a healthbar in the UI, and created a method to levelup. When leveling up,
-the player's health returns to max, and when printed out, it does. But on screen, and when fighting a monster,
-the UI healthbar doesn't change at all, neither the value or max_value. Through debugging, I discovered
-the problem came from the invoke() function from the monster class that deals damage to the player. I intially replaced
-it with a simple health -= damage * time.dt, but this resulted in many decimal places. So in the ui_state update method,
-I simply made it display a rounded number.
+FIXED: When building the levelup system, I created a healthbar in the UI, and created a method to levelup. When leveling up, the player's health returns to max, and when printed out, it does. But on screen, and when fighting a monster, the UI healthbar doesn't change at all, neither the value or max_value. Through debugging, I discovered
+the problem came from the invoke() function from the monster class that deals damage to the player. I intially replaced it with a simple health -= damage * time.dt, but this resulted in many decimal places. So in the ui_state update method, I simply made it display a rounded number.
 
 COMPUTER/DEVICE AND SOFTWARE PROBLEMS
-NOT-FIXED: While working on the game, I would sometimes change computers. I'd build a feature, save it,
-then pull it on another computer, and the feature would be slightly different(wall in different position, portals rotated 90 degrees in market),
-but when I returned to the computer I made the feature on, even after changing nothing, or 'fixing' it to make it return to normal,
-the feature returned to what it was, even after saving properly.
+NOT-FIXED: While working on the game, I would sometimes change computers. I'd build a feature, save it, then pull it on another computer, and the feature would be slightly different(wall in different position, portals rotated 90 degrees in market), but when I returned to the computer I made the feature on, even after changing nothing, or 'fixing' it to make it return to normal, the feature returned to what it was, even after saving properly.
 -
-NOT-CRITICAL: Although I often did work on VSC, I would sometimes get swap to thonny to debug. This would however sometimes cause problems. I would get crashes in thonny I never got in VSC.
-For example, when building the combat system, and the hit boxes were destroyed, thonny would raise an error in the player for loop where it checked every collider in the world,
-monster included which no longer existed. But VSC never raised such an error.
+NOT-CRITICAL: Although I often did work on VSC, I would sometimes get swap to thonny to debug. This would however sometimes cause problems. I would get crashes in thonny I never got in VSC. For example, when building the combat system, and the hit boxes were destroyed, thonny would raise an error in the player for loop where it checked every collider in the world, monster included which no longer existed. But VSC never raised such an error.
 -
 FIXED: I was working on the game one day at school, then went home and worked on it on my PC. As soon as I tried to go to the market, the game
 crashed, stating the stall_texture could not load texture. After much debugging and experimenting with paths, I realised the prop texture, which was
@@ -125,7 +105,7 @@ the health bar would say 2 but look like it was 15. To fix this, I created my ow
 took multiple attempts, and many trials such as getting everything overlapping correctly, I even thought
 about returning to the prefab, but I figured it out
 -
-When building the death screen, I started by created the menu from scratch, but then realised I could
+FIXED: When building the death screen, I started by created the menu from scratch, but then realised I could
 create a new instance of the main menu class and call is death screen. I added in some extra parameters
 so it would have different wording than the main menu, and set the revive button to call player.death().
 I had to figure out how to get the background ontop of the other resource bars, for which I settled

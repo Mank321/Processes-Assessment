@@ -134,7 +134,7 @@ class GameManager(Entity):
 
 class GameState():
     def __init__(self):
-        self.debug_mode = True
+        self.debug_mode = False
 
 class UIState(Entity):
     def __init__(self, game_state, player):

@@ -1,5 +1,6 @@
 from ursina import Entity, Text, camera, Sprite, color, ButtonList, Func, application, Button, Ursina
 
+app = Ursina()
 ORIGIN_BACKGROUND = Entity(model='quad', texture='Assets/menu background.jpg', z=1, scale=(1.8,1))
 
 class MainMenu(Entity):
