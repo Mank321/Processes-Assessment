@@ -46,12 +46,7 @@ class GameManager(Entity):
         self.player = None
         self.ui_state = None 
         self.game_state = None
-        self.tutorial_world = None
-        self.market_world = None
-        self.centaur_world = None
-        self.basilisk_world = None
-        self.gorgon_world = None
-        self.cyclops_world = None
+        self.world = None
 
         self.locations = [
             'Tutorial',
@@ -76,9 +71,8 @@ class GameManager(Entity):
         self.ui_state.player = self.player         
 
         # Load the tutorial world at the beginning 
-        self.tutorial_world = TutorialWorld(self.game_state)
-
-        self.game_state.location = 'tutorial'
+        self.world = World(self.game_state)
+        
         self.sky = Sky()
 
 
@@ -95,41 +89,6 @@ class GameManager(Entity):
         main_menu.background.enabled = False
         mouse.locked = True
         main_menu.background.z = 1
-    
-    def switch_scenes(self, gate):
-        """."""
-        new_scene_name = gate.name.split('.')[2]
-        old_scene_name = gate.name.split('.')[1]
-        self.game_state.location = new_scene_name
-        
-        self.scenes = {'tutorial': self.tutorial_world, 'market': self.market_world,
-                       'centaur': self.centaur_world, 'basilisk': self.basilisk_world,
-                       'gorgon': self.gorgon_world, 'cyclops': self.cyclops_world}
-        
-        new_scene = self.scenes[new_scene_name]
-        old_scene = self.scenes[old_scene_name]
-
-        if new_scene == None:
-            if new_scene_name == 'market':
-                self.market_world = MarketWorld(self.game_state)
-                new_scene = self.market_world
-            elif new_scene_name == 'centaur':
-                self.centaur_world = LevelCreator(self.game_state, monster_stats=CENTAUR_STATS)
-                new_scene = self.centaur_world
-            elif new_scene_name == 'basilisk':
-                self.basilisk_world = LevelCreator(self.game_state, monster_stats=BASILISK_STATS)
-                new_scene = self.basilisk_world
-            elif new_scene_name == 'gorgon':
-                self.gorgon_world = LevelCreator(self.game_state, monster_stats=GORGON_STATS)
-                new_scene = self.gorgon_world
-
-        new_scene.enable()
-        old_scene.disable()
-
-        print_on_screen(f'--{new_scene_name.title()}--', position=(-0.1,0.45), scale=3, duration=2)
-        
-        self.player.position = (0,0,0)
-        self.player.rotation = (0,0,0)
 
 
 class GameState():
@@ -298,10 +257,6 @@ class Player(Entity):
         if not hit_info.hit:
             move_amount = movement * self.speed * time.dt
             self.position += move_amount
-        else:
-            name = hit_info.entity.name
-            if name.startswith('gate'):
-                manager.switch_scenes(hit_info.entity)
         
         
 class Monster(Entity):
@@ -392,16 +347,6 @@ class Tree(Entity):
                                     collider='box', visible=game_state.debug_mode,
                                     wireframe=True)
 
-class Gate(Entity):
-    def __init__(self, game_state, position, name, parent):
-        super().__init__(parent=parent,model='Assets/Models/Gate/gate.fbx', texture='Assets/Models/Gate/texture.png',
-                         double_sided=True, scale=(0.02,0.03,0.015), rotation_y=180, position=position)
-        
-        self.name = name
-        self.collision_box = Entity(model='cube', parent=self, name=self.name,
-                                    position=(0,150,0), scale=(200,300,100),
-                                    collider='box', visible=game_state.debug_mode,
-                                    wireframe=True)
 
 class Stall(Entity):
     def __init__(self, game_state, parent):
@@ -418,25 +363,17 @@ class Stall(Entity):
         self.merchant = Entity()
         
 
-class TutorialWorld(Entity):
+class World(Entity):
     def __init__(self, game_state):
         super().__init__()
         self.ground = Entity(parent=self,model='plane', collider='box', scale=200, texture='grass', texture_scale=(4,4))
-
         self.wall = Entity(parent=self,model='Assets/Models/Wall/wall.fbx', texture='Assets/Models/Wall/texture.png',
                     double_sided=True,scale=(0.005,0.01,0.005), collider='mesh', position=(0,5,10))
-        
-        self.gate = Gate(game_state, parent=self, position=(0,0,30), name='gate.tutorial.market')
-
         self.desc1 = '             Welcome to the dungeon!\n\nUse the mouse to move around\nPress "W" to move forward, "S" to move backward\nPress "A" to move right and "D" to move left\nPress the spacebar to jump'
         self.text1 = Text(parent=self, text=self.desc1, position=(-8,5,9), scale=30, color=color.white)
-        
         self.desc2 = 'Attack the monster up ahead by left clicking!\n                     Try not to get hit!'
         self.text2 = Text(parent=self, text=self.desc2, position=(-8,4,19), scale=30, color=color.white)
-
         self.monster = Monster(game_state, parent=self, monster_stats=CENTAUR_STATS, position=Vec3(0,0,25), rotation=Vec3(0,180,0))
-        
-        self.colliders = [self.gate.collision_box]
         self.map = ['        TTTTTTTT        ',
                     '       TTTT  TTTT       ',
                     '      TTTT    TTTT      ',
@@ -455,49 +392,23 @@ class TutorialWorld(Entity):
                 if col == 'T':
                     Tree(game_state, ((x*4)-45, 0, (z*4)-7),parent=self)
 
-
-class MarketWorld(Entity):
-    def __init__(self, game_state):
-        super().__init__()
-        self.ground = Entity(parent=self,model='plane', collider='box', scale=200, texture='grass', texture_scale=(4,4))
-        
-        self.wall = Entity(parent=self,model='Assets/Models/Wall/wall.fbx', texture='Assets/Models/Wall/texture.png',
-                    double_sided=True,scale=(0.01,0.01,0.01), collider='mesh', position=(-30,5,-10))
-
-        self.tutorial_gate = Gate(game_state, parent=self,position=(0,0,-5), name='gate.market.tutorial')
-        self.centaur_gate = Gate(game_state, parent=self,position=(0,0,20), name='gate.market.centaur')
-
         self.stall = Stall(game_state,parent=self)
 
-        self.colliders = [self.tutorial_gate.collision_box, self.stall.collision_box, self.centaur_gate.collision_box]
-
-class LevelCreator(Entity):
-    def __init__(self, game_state, monster_stats):
-        super().__init__()
-            
-        self.ground = Entity(parent=self, model='plane', texture='grass', collider='box', scale=200, texture_scale=(4,4))
-        
-        self.name = monster_stats['name']
-        
         for i in range(20):
             x = random.randint(-100,100)
             z = random.randint(-100,100)
-            Monster(game_state, parent=self, monster_stats=monster_stats, position=(x,0,z), rotation=(0,random.randint(-360,360),0))
-
-        self.location = game_state.location
-
-        self.next_scene = manager.locations.index(self.location.title()) + 1
-        self.next_scene = manager.locations[self.next_scene].lower()
-        
-        self.previous_scene = manager.locations.index(self.location.title()) - 1
-        self.previous_scene = manager.locations[self.previous_scene].lower()        
-
-        self.return_gate = Gate(game_state, parent=self, position=(0,0,-10), name=f'gate.{self.location}.{self.previous_scene}')
-        self.next_gate = Gate(game_state, parent=self, position=(0,-10,60), name=f'gate.{self.location}.{self.next_scene}')
+            Monster(game_state, parent=self, monster_stats=CENTAUR_STATS, position=(x,0,z), rotation=(0,random.randint(-360,360),0))
+        for i in range(20):
+            x = random.randint(-100,100)
+            z = random.randint(-100,100)
+            Monster(game_state, parent=self, monster_stats=CENTAUR_STATS, position=(x,0,z), rotation=(0,random.randint(-360,360),0))
+        for i in range(20):
+            x = random.randint(-100,100)
+            z = random.randint(-100,100)
+            Monster(game_state, parent=self, monster_stats=CENTAUR_STATS, position=(x,0,z), rotation=(0,random.randint(-360,360),0))
         
         self.boss = Monster(game_state, parent=self, monster_stats=monster_stats, is_boss=True, gate=self.next_gate, position=Vec3(0,0,50))
-
-        self.colliders = [self.return_gate.collision_box, self.next_gate.collision_box]
+        self.colliders = [self.gate.collision_box, self.tutorial_gate.collision_box, self.stall.collision_box, self.centaur_gate.collision_box, self.return_gate.collision_box, self.next_gate.collision_box]
 #---------------------------------------------------#
 def update():
     if held_keys['escape']:
