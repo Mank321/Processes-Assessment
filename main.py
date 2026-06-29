@@ -465,7 +465,9 @@ class MarketWorld(Entity):
                     double_sided=True,scale=(0.01,0.01,0.01), collider='mesh', position=(-30,5,-10))
 
         self.tutorial_gate = Gate(game_state, parent=self,position=(0,0,-5), name='gate.market.tutorial')
-        self.centaur_gate = Gate(game_state, parent=self,position=(0,0,20), name='gate.market.centaur')
+        self.centaur_gate = Gate(game_state, parent=self,position=(-10,0,20), name='gate.market.centaur')
+        self.centaur_gate = Gate(game_state, parent=self,position=(0,0,20), name='gate.market.gorgon')
+        self.centaur_gate = Gate(game_state, parent=self,position=(10,0,20), name='gate.market.basilisk')
 
         self.stall = Stall(game_state,parent=self)
 
