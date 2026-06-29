@@ -132,7 +132,7 @@ class UIState(Entity):
 
 class Player(Entity):
     def __init__(self, ui_state, game_state):
-        super().__init__(model='cube', scale=(1,2.5,1), position=(0,1,0),
+        super().__init__(model='cube', scale=(1,2.5,1), position=(0,1,-100),
                          collider='box', visible_self=game_state.debug_mode,
                          color=color.orange)
 
@@ -237,13 +237,7 @@ class Player(Entity):
                         + self.right * (held_keys['d'] - held_keys['a'])).normalized()
         
         # Change hitbox colours when colliding for testing purposes
-        dictionary = {'tutorial': manager.tutorial_world,
-                      'market': manager.market_world,
-                      'centaur': manager.centaur_world,
-                      'basilisk': manager.basilisk_world,
-                      'gorgon': manager.basilisk_world}
-
-        colliders = dictionary[self.game_state.location].colliders
+        colliders = manager.world.colliders
         if self.game_state.debug_mode:
             for collider in colliders:
                 if self.intersects(collider).hit:
@@ -349,9 +343,9 @@ class Tree(Entity):
 
 
 class Stall(Entity):
-    def __init__(self, game_state, parent):
+    def __init__(self, game_state, parent, position=(10,0,0)):
         super().__init__(parent=parent,model='Assets/Models/Stall/stall1.fbx', texture='Assets/Models/Stall/stall_texture.png',
-                         double_sided=True, scale=(0.1,0.22,0.1), position=(10,0,0))
+                         double_sided=True, scale=(0.1,0.22,0.1), position=position)
 
         self.props = Entity(model='Assets/Models/Stall/props.fbx', texture='Assets/Models/Stall/props_texture.png',
                             parent=self, double_sided=True,scale=(1,1,1), position=(0,0,0))
@@ -366,15 +360,14 @@ class Stall(Entity):
 class World(Entity):
     def __init__(self, game_state):
         super().__init__()
-        self.ground = Entity(parent=self,model='plane', collider='box', scale=200, texture='grass', texture_scale=(4,4))
-        self.wall = Entity(parent=self,model='Assets/Models/Wall/wall.fbx', texture='Assets/Models/Wall/texture.png',
-                    double_sided=True,scale=(0.005,0.01,0.005), collider='mesh', position=(0,5,10))
+        # Tutorial Section
+        self.ground = Entity(parent=self,model='plane', collider='box', scale=1000, texture='grass', texture_scale=(4,4))
         self.desc1 = '             Welcome to the dungeon!\n\nUse the mouse to move around\nPress "W" to move forward, "S" to move backward\nPress "A" to move right and "D" to move left\nPress the spacebar to jump'
-        self.text1 = Text(parent=self, text=self.desc1, position=(-8,5,9), scale=30, color=color.white)
+        self.text1 = Text(parent=self, text=self.desc1, position=(-8,5,-91), scale=30, color=color.white)
         self.desc2 = 'Attack the monster up ahead by left clicking!\n                     Try not to get hit!'
-        self.text2 = Text(parent=self, text=self.desc2, position=(-8,4,19), scale=30, color=color.white)
-        self.monster = Monster(game_state, parent=self, monster_stats=CENTAUR_STATS, position=Vec3(0,0,25), rotation=Vec3(0,180,0))
-        self.map = ['        TTTTTTTT        ',
+        self.text2 = Text(parent=self, text=self.desc2, position=(-8,4,-89), scale=30, color=color.white)
+        self.monster = Monster(game_state, parent=self, monster_stats=CENTAUR_STATS, position=Vec3(0,0,-75), rotation=Vec3(0,180,0))
+        self.map = ['        TTT  TTT        ',
                     '       TTTT  TTTT       ',
                     '      TTTT    TTTT      ',
                     '      TT        TT      ',
@@ -390,25 +383,26 @@ class World(Entity):
         for z, row in enumerate(self.map):
             for x, col in enumerate(row):
                 if col == 'T':
-                    Tree(game_state, ((x*4)-45, 0, (z*4)-7),parent=self)
+                    Tree(game_state, ((x*4)-45, 0, (z*4)-107),parent=self)
 
-        self.stall = Stall(game_state,parent=self)
+        # Market Section
+        self.stall = Stall(game_state,parent=self, position=(0,0,-40))
 
+        # Monster Sections
         for i in range(20):
             x = random.randint(-100,100)
             z = random.randint(-100,100)
-            Monster(game_state, parent=self, monster_stats=CENTAUR_STATS, position=(x,0,z), rotation=(0,random.randint(-360,360),0))
+            Monster(game_state, parent=self, monster_stats=CENTAUR_STATS, position=(x,0,z+100), rotation=(0,random.randint(-360,360),0))
         for i in range(20):
             x = random.randint(-100,100)
             z = random.randint(-100,100)
-            Monster(game_state, parent=self, monster_stats=CENTAUR_STATS, position=(x,0,z), rotation=(0,random.randint(-360,360),0))
+            Monster(game_state, parent=self, monster_stats=GORGON_STATS, position=(x,0,z+200), rotation=(0,random.randint(-360,360),0))
         for i in range(20):
             x = random.randint(-100,100)
             z = random.randint(-100,100)
-            Monster(game_state, parent=self, monster_stats=CENTAUR_STATS, position=(x,0,z), rotation=(0,random.randint(-360,360),0))
+            Monster(game_state, parent=self, monster_stats=BASILISK_STATS, position=(x,0,z+300), rotation=(0,random.randint(-360,360),0))
         
-        self.boss = Monster(game_state, parent=self, monster_stats=monster_stats, is_boss=True, gate=self.next_gate, position=Vec3(0,0,50))
-        self.colliders = [self.gate.collision_box, self.tutorial_gate.collision_box, self.stall.collision_box, self.centaur_gate.collision_box, self.return_gate.collision_box, self.next_gate.collision_box]
+        self.colliders = [self.stall.collision_box]
 #---------------------------------------------------#
 def update():
     if held_keys['escape']:
