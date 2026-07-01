@@ -14,22 +14,10 @@ CENTAUR_STATS = {'name': 'Centaur',
                  'collider_scale': Vec3(100,250,170),
                  'collider_position': Vec3(0,125,0)}
 
-BASILISK_STATS = {'name': 'Basilisk',
-                'health': 10,
-                'damage': 1,
-                'worth':1,
-                'speed':35000,
-                'sight':13,
-                'closeness': 5.5,
-                'attack_speed': 1,
-                'scale': Vec3(0.0001,0.0002,0.0001),
-                'collider_scale': Vec3(10000,40000,100000),
-                'collider_position': Vec3(1,20000,1)}
-
 GORGON_STATS = {'name': 'Gorgon',
-                'health': 10,
-                'damage': 1,
-                'worth':1,
+                'health': 100,
+                'damage': 10,
+                'worth':10,
                 'speed':100,
                 'sight':10,
                 'closeness':1.5,
@@ -37,6 +25,18 @@ GORGON_STATS = {'name': 'Gorgon',
                 'scale': Vec3(0.015,0.025,0.015),
                 'collider_scale': Vec3(100,200,100),
                 'collider_position': Vec3(0,100,0)}
+
+BASILISK_STATS = {'name': 'Basilisk',
+                'health': 1000,
+                'damage': 100,
+                'worth':20,
+                'speed':35000,
+                'sight':13,
+                'closeness': 5.5,
+                'attack_speed': 1,
+                'scale': Vec3(0.0001,0.0002,0.0001),
+                'collider_scale': Vec3(10000,40000,100000),
+                'collider_position': Vec3(1,20000,1)}
 
 class GameManager(Entity):
     """."""
@@ -98,8 +98,13 @@ class GameManager(Entity):
     
     def switch_scenes(self, gate):
         """."""
-        new_scene_name = gate.name.split('.')[2]
-        old_scene_name = gate.name.split('.')[1]
+        if hasattr(gate, 'name'):
+            new_scene_name = gate.name.split('.')[2]
+            old_scene_name = gate.name.split('.')[1]
+        else:
+            new_scene_name = gate.split('.')[1]
+            old_scene_name = gate.split('.')[0]
+
         self.game_state.location = new_scene_name
         
         self.scenes = {'tutorial': self.tutorial_world, 'market': self.market_world,
@@ -149,6 +154,13 @@ class UIState(Entity):
         self.death_screen_background = Entity(parent=camera.ui, model='quad', color=(255,0,0, 0.4), scale=(2,2), position=(0,0,-1), enabled=False)
         self.death_menu = MainMenu(None, None, bg=self.death_screen_background, header='You Died', text='Respawn', enabled=False)
 
+        self.teleport_hud = Panel(parent=camera.ui, color=color.black, enabled=False, scale=(0.7,0.6), position=(0,0,1))
+        self.teleport_hud_text = Text(parent=self.teleport_hud, text='Teleport to the following', color=color.red, text_scale=10, origin=(0,0,0), position=(0,0.4,-5))
+        self.teleport_tutorial_button = Button(parent=self.teleport_hud, text='Tutorial', text_size=2, color=color.lime, scale=(0.6,0.15), position=(0,0.3,-1))
+        self.teleport_market_button = Button(parent=self.teleport_hud, text='Market', text_size=2, color=color.lime, scale=(0.6,0.15), position=(0,0.1,-1))
+        self.teleport_centaur_button = Button(parent=self.teleport_hud, text='Centaur', text_size=2, color=color.lime, scale=(0.6,0.15), position=(0,-0.1,-1))
+        self.teleport_gorgon_button = Button(parent=self.teleport_hud, text='Gorgon', text_size=2, color=color.lime, scale=(0.6,0.15), position=(0,-0.3,-3), disabled=True)
+        self.teleport_basilisk_button = Button(parent=self.teleport_hud, text='Basilisk', text_size=2, color=color.lime, scale=(0.6,0.15), position=(0,-0.5,-1))
 
     def death_screen(self):
         mouse.locked = False
@@ -158,6 +170,11 @@ class UIState(Entity):
 
     def update(self):
         if self.player != None:
+            self.teleport_tutorial_button.on_click = lambda: self.player.teleport('tutorial')
+            self.teleport_market_button.on_click = lambda: self.player.teleport('market')
+            self.teleport_centaur_button.on_click = lambda: self.player.teleport('centaur')
+            self.teleport_gorgon_button.on_click = lambda: self.player.teleport('gorgon')
+            self.teleport_basilisk_button.on_click = lambda: self.player.teleport('basilisk')
             self.player_gold_bar.max_value = self.player.max_gold
             self.player_gold_bar.value = self.player.gold
             self.player_health_bar.max_value = self.player.max_health
@@ -165,10 +182,16 @@ class UIState(Entity):
             self.player_experience_bar.max_value = self.player.levelup_req
             self.player_experience_bar.value = self.player.xp
             self.damage_text.text = f'Damage: {self.player.damage}'
-        if hasattr(self.player, 'health') and self.player.health <= 0 and not self.death_menu.enabled:
-            if self.death_menu.start_function is None:
-                self.death_menu.start_function = self.player.death
-            self.death_screen()
+
+            if self.player.health <= 0 and not self.death_menu.enabled:
+                if self.death_menu.start_function is None:
+                    self.death_menu.start_function = self.player.death
+                self.death_screen()
+            
+    def input(self, key):
+        if key == 't':
+            self.teleport_hud.enabled = not self.teleport_hud.enabled
+            mouse.locked = not self.teleport_hud.enabled
 
 
 class Player(Entity):
@@ -239,6 +262,9 @@ class Player(Entity):
         self.max_health += 2
         self.health = self.max_health
         self.ui_state.update()
+    
+    def teleport(self, location):
+        manager.switch_scenes(f'{self.game_state.location}.{location}')
 
     def update(self):
         """."""
@@ -282,7 +308,7 @@ class Player(Entity):
                       'market': manager.market_world,
                       'centaur': manager.centaur_world,
                       'basilisk': manager.basilisk_world,
-                      'gorgon': manager.basilisk_world}
+                      'gorgon': manager.gorgon_world}
 
         colliders = dictionary[self.game_state.location].colliders
         if self.game_state.debug_mode:
@@ -435,7 +461,7 @@ class TutorialWorld(Entity):
         self.text2 = Text(parent=self, text=self.desc2, position=(-8,4,19), scale=30, color=color.white)
 
         self.monster = Monster(game_state, parent=self, monster_stats=CENTAUR_STATS, position=Vec3(0,0,25), rotation=Vec3(0,180,0))
-        
+
         self.colliders = [self.gate.collision_box]
         self.map = ['        TTTTTTTT        ',
                     '       TTTT  TTTT       ',

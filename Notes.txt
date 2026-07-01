@@ -72,28 +72,71 @@ Instead, I shrunk the forest down to a minimum size with just having the trees a
 It took a bit of time to get the exact coordinates right and the tree spacing and map array. 
 
 COMBAT SYSTEM PROBLEMS
-FIXED: When creating the combat system, I added in the monster, gave it a hitbox, damage, and health, and gave it movement and distance checks, allowing it to move up to the player and attack them when close enough, taking away 1 health point per second. But when I tried to have the player attack the monster in retaliation, nothing happened. After a bit of debugging, I realised I was checking to see if the mouse.hovered_entity had health. I initially thought the entity was the monster itself, but it was actually the collision box that the player was hitting, as I discovered when I gave the collision box a name and printed it when attacking. I thought of adding the monster stats right into the collision box entities, but that felt wrong, so I attempted to create an on_click method for the monster, but that ended up not being called, or calling as soon as the player was in range. I thought about going back to the collision box idea, but thought of an idea to fix the monster not being instantly destroyed by only calling the on_click method when the player actually clicked on the monster. I still ran into a problem where the code was trying to find a monster that had been destroyed when checking for collisions. To fix this, I decided to allow the player to walk through monsters, meaning I didn't need to check their hitbox
+FIXED: When creating the combat system, I added in the monster, gave it a hitbox, damage, and
+health, and gave it movement and distance checks, allowing it to move up to the player and attack
+them when close enough, taking away 1 health point per second. But when I tried to have the player
+attack the monster in retaliation, nothing happened. After a bit of debugging, I realised I was
+checking to see if the mouse.hovered_entity had health. I initially thought the entity was the
+monster itself, but it was actually the collision box that the player was hitting, as I discovered
+when I gave the collision box a name and printed it when attacking. I thought of adding the monster
+stats right into the collision box entities, but that felt wrong, so I attempted to create an
+on_click method for the monster, but that ended up not being called, or calling as soon as the
+player was in range. I thought about going back to the collision box idea, but thought of an idea
+to fix the monster not being instantly destroyed by only calling the on_click method when the
+player actually clicked on the monster. I still ran into a problem where the code was trying to
+find a monster that had been destroyed when checking for collisions. To fix this, I decided to 
+allow the player to walk through monsters, meaning I didn't need to check their hitbox.
 -
-FIXED: When trying to use a gate, since the monster was destroyed, it couldn't be disabled, creating errors. To fix this, I tried changing the switch_scenes method from using an entities list given by TutorialWorld, to going through every child of TutorialWorld itself, and going through every child of those children to catch the collision boxes. This allowed me to go through the gate, but didn't disable anything. Instead, I parented everything in the world to the TutorialWorld entity, allowing me to disable everything with one line.
+FIXED: When trying to use a gate, since the monster was destroyed, it couldn't be disabled, 
+creating errors. To fix this, I tried changing the switch_scenes method from using an entities 
+list given by TutorialWorld, to going through every child of TutorialWorld itself, and going
+through every child of those children to catch the collision boxes. This allowed me to go through
+the gate, but didn't disable anything. Instead, I parented everything in the world to the 
+TutorialWorld entity, allowing me to disable everything with one line.
 -
-FIXED: When I started adding in more monsters, I added medusa, which worked fine, then I added the basilisk, which was tiny. I tried changing the scale, but that made the collision box grow massively. I eventually figured out that the collision box had hard-coded position and scale variables that were designed for the centaur.
-To fix this, I added in collider_scale and collider_position into the monster stats.
+FIXED: When I started adding in more monsters, I added medusa, which worked fine, then I added the
+basilisk, which was tiny. I tried changing the scale, but that made the collision box grow massively. 
+I eventually figured out that the collision box had hard-coded position and scale variables that 
+were designed for the centaur. To fix this, I added in collider_scale and collider_position into
+the monster stats.
 
 PLAYER SYSTEMS
-FIXED: When building the levelup system, I created a healthbar in the UI, and created a method to levelup. When leveling up, the player's health returns to max, and when printed out, it does. But on screen, and when fighting a monster, the UI healthbar doesn't change at all, neither the value or max_value. Through debugging, I discovered
-the problem came from the invoke() function from the monster class that deals damage to the player. I intially replaced it with a simple health -= damage * time.dt, but this resulted in many decimal places. So in the ui_state update method, I simply made it display a rounded number.
+FIXED: When building the levelup system, I created a healthbar in the UI, and created a method to
+levelup. When leveling up, the player's health returns to max, and when printed out, it does. But on
+screen, and when fighting a monster, the UI healthbar doesn't change at all, neither the value or 
+max_value. Through debugging, I discovered the problem came from the invoke() function from the
+monster class that deals damage to the player. I intially replaced it with a simple 
+health -= damage * time.dt, but this resulted in many decimal places. So in the ui_state update
+method, I simply made it display a rounded number.
+-
+NOT-FIXED: When building the teleport feature, I initially started out as having a button to
+activate it, but then realised the mouse was locked so the player couldn't press any buttons. I
+fixed this by replacing the button with a keybind. I will need to make the player aware of it
+though. When I got to teleporting, I tried teleporting to a world I was already in, and everything
+disappeared. I will need to disable the button that leads to the world the player is currently in.
 
 COMPUTER/DEVICE AND SOFTWARE PROBLEMS
-NOT-FIXED: While working on the game, I would sometimes change computers. I'd build a feature, save it, then pull it on another computer, and the feature would be slightly different(wall in different position, portals rotated 90 degrees in market), but when I returned to the computer I made the feature on, even after changing nothing, or 'fixing' it to make it return to normal, the feature returned to what it was, even after saving properly.
+NOT-FIXED: While working on the game, I would sometimes change computers. I'd build a feature,
+save it, then pull it on another computer, and the feature would be slightly different(wall in
+different position, portals rotated 90 degrees in market), but when I returned to the computer I
+made the feature on, even after changing nothing, or 'fixing' it to make it return to normal, the
+feature returned to what it was, even after saving properly.
 -
-NOT-CRITICAL: Although I often did work on VSC, I would sometimes get swap to thonny to debug. This would however sometimes cause problems. I would get crashes in thonny I never got in VSC. For example, when building the combat system, and the hit boxes were destroyed, thonny would raise an error in the player for loop where it checked every collider in the world, monster included which no longer existed. But VSC never raised such an error.
+NOT-FIXEDL: Although I often did work on VSC, I would sometimes get swap to thonny to debug. This
+would however sometimes cause problems. I would get crashes in thonny I never got in VSC. For 
+example, when building the combat system, and the hit boxes were destroyed, thonny would raise an
+error in the player for loop where it checked every collider in the world, monster included which 
+no longer existed. But VSC never raised such an error.
 -
-FIXED: I was working on the game one day at school, then went home and worked on it on my PC. As soon as I tried to go to the market, the game
-crashed, stating the stall_texture could not load texture. After much debugging and experimenting with paths, I realised the prop texture, which was
-located in the exact folder, was working fine. So I tried saving as the texture as something new. When I plugged the new texture back into the game,
-I got the exact same error. But then I saw the error: ':pnmimage:png(error): IDAT: CRC error'. This told me the image was corrupted. Going back, I noticed
-on some of the image thumbnails that the image was sometimes displayed as having a corrupted mess of green pixels. Since it was working fine on the previous
-devices, my theory is that this was anchorpoints doing. To fix it, I had to go and redownload the image from where I found it.
+FIXED: I was working on the game one day at school, then went home and worked on it on my PC. As 
+soon as I tried to go to the market, the game crashed, stating the stall_texture could not load
+texture. After much debugging and experimenting with paths, I realised the prop texture, which was
+located in the exact folder, was working fine. So I tried saving as the texture as something new.
+When I plugged the new texture back into the game, I got the exact same error. But then I saw the
+error: ':pnmimage:png(error): IDAT: CRC error'. This told me the image was corrupted. Going back, I
+noticed on some of the image thumbnails that the image was sometimes displayed as having a corrupted
+mess of green pixels. Since it was working fine on the previous devices, my theory is that this was
+anchorpoints doing. To fix it, I had to go and redownload the image from where I found it.
 
 USER INTERFACE PROBLEMS
 FIXED: When coding the UI, I wanted to display the health as a resourcebar on screen, so I used the built-in
