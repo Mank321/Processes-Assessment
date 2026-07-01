@@ -87,7 +87,7 @@ player actually clicked on the monster. I still ran into a problem where the cod
 find a monster that had been destroyed when checking for collisions. To fix this, I decided to 
 allow the player to walk through monsters, meaning I didn't need to check their hitbox.
 -
-FIXED: When trying to use a gate, since the monster was destroyed, it couldn't be disabled, 
+SPRINT-FIXED: When trying to use a gate, since the monster was destroyed, it couldn't be disabled, 
 creating errors. To fix this, I tried changing the switch_scenes method from using an entities 
 list given by TutorialWorld, to going through every child of TutorialWorld itself, and going
 through every child of those children to catch the collision boxes. This allowed me to go through
