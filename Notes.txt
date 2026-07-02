@@ -122,7 +122,7 @@ disappeared. I will need to disable the button that leads to the world the playe
 COMPUTER/DEVICE AND SOFTWARE PROBLEMS
 NOT-FIXED: While working on the game, I would sometimes change computers. I'd build a feature,
 save it, then pull it on another computer, and the feature would be slightly different(wall in
-different position, portals rotated 90 degrees in market), but when I returned to the computer I
+different position, portals and stalls rotated 90 degrees in market), but when I returned to the computer I
 made the feature on, even after changing nothing, or 'fixing' it to make it return to normal, the
 feature returned to what it was, even after saving properly.
 -

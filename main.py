@@ -434,6 +434,17 @@ class Gate(Entity):
                                     collider='box', visible=game_state.debug_mode,
                                     wireframe=True)
 
+class Gate2(Entity):
+    def __init__(self, game_state, position, name, parent):
+        super().__init__(parent=parent, model='Assets/Models/GateV2/vertex.fbx',
+                         texture='Assets/Models/GateV2/textures/vertex.png', double_sided=True,
+                         scale=(0.004,0.008,0.004), rotation_y=90, position=position)
+        self.name = name
+        self.frame = Entity(parent=parent, model='Assets/Models/GateV2/gate.fbx',
+                            texture='Assets/Models/GateV2/textures/Portal_p_3_albedo.png',
+                            double_sided=True, scale=(0.004,0.008,0.004), rotation_y=90, position=position)
+        self.collision_box = Entity()
+
 class Stall(Entity):
     def __init__(self, game_state, parent):
         super().__init__(parent=parent,model='Assets/Models/Stall/stall1.fbx', texture='Assets/Models/Stall/stall_texture.png',
@@ -457,7 +468,7 @@ class TutorialWorld(Entity):
         self.wall = Entity(parent=self,model='Assets/Models/Wall/wall.fbx', texture='Assets/Models/Wall/texture.png',
                     double_sided=True,scale=(0.005,0.01,0.005), collider='mesh', position=(0,5,10))
         
-        self.gate = Gate(game_state, parent=self, position=(0,0,30), name='gate.tutorial.market')
+        self.gate = Gate2(game_state, parent=self, position=(0,0,30), name='gate.tutorial.market')
 
         self.desc1 = '             Welcome to the dungeon!\n\nUse the mouse to move around\nPress "W" to move forward, "S" to move backward\nPress "A" to move right and "D" to move left\nPress the spacebar to jump'
         self.text1 = Text(parent=self, text=self.desc1, position=(-8,5,9), scale=30, color=color.white)
