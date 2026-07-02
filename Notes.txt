@@ -64,6 +64,10 @@ FIXED: When I added the two gates to the LevelCreator class, I had to figure out
 that returned the player to the previous world, and one that sent them to the next world. To fix this, I checked the player location, then got its index in the locations
 list and added/subtracted 1 to get the new worlds. But the next world would take me to the first world, and the previous gate took me to the tutorial. After debugging, I
 realised I was setting the player location after I'd created the class. To fix this, I simply updated the player location before I created the world.
+-
+When I walked up to the gate on a good computer with debug mode on, I'd inch close to the gate to test it. It went red when the orange cube tuched it, but I didn't teleport. I needed
+my tiny hitbox to tuch the gate for me to teleport. I fixed this by increasing the size of my hitbox to that of the orange cube. Upon further inspection, I realised that tiny hitbox
+wasn't a hitbox, but actually the raycasting. I set the distance from 0.1 to 0.5 and it worked perfectly.
 
 WORLD CREATION PROBLEMS
 FIXED: When creating the forest in the tutorial area, I started with a massive list containing the pre-chosen position of each tree. Then I looped through the list to plant each tree. This was incredibly inefficient, so I create a 2d map array which had the entire forest plotted out in a dozen lines. I initially filled the entire area in with

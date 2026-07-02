@@ -139,7 +139,7 @@ class GameManager(Entity):
 
 class GameState():
     def __init__(self):
-        self.debug_mode = False
+        self.debug_mode = True
 
 class UIState(Entity):
     def __init__(self, game_state, player):
@@ -197,7 +197,7 @@ class UIState(Entity):
 class Player(Entity):
     def __init__(self, ui_state, game_state):
         super().__init__(model='cube', scale=(1,2.5,1), position=(0,1,0),
-                         collider='box', visible_self=game_state.debug_mode,
+                         collider='box', visible_self=False,#game_state.debug_mode,
                          color=color.orange)
 
         self.ui_state = ui_state
@@ -209,7 +209,7 @@ class Player(Entity):
         self.gravity = 9.81**2
         self.velocity_y = 0
         self.armor = 0
-        self.health = 2
+        self.health = 20
         self.max_health = self.health
         self.damage = 1
         self.level = 1
@@ -254,7 +254,7 @@ class Player(Entity):
 
     def levelup(self):
         """."""
-        self.xp = 0
+        self.xp -= self.levelup_req
         self.level += 1
         self.levelup_req *= 2
         self.max_stamina += 2
@@ -320,7 +320,7 @@ class Player(Entity):
         
         # Check if nothing is infront of the player before moving
         ignore = [self, self.hand]
-        hit_info = raycast(self.world_position, movement, distance=0.1, debug=True, ignore=ignore)
+        hit_info = raycast(self.world_position, movement, distance=0.5, debug=self.game_state.debug_mode, ignore=ignore)
         if not hit_info.hit:
             move_amount = movement * self.speed * time.dt
             self.position += move_amount
@@ -390,8 +390,9 @@ class Monster(Entity):
             
             if self.health <= 0:
                 if self.is_boss:
-                    print_on_screen(f'{self.name.title()} boss Defeated!', color=color.red, position=(-0.4,0.4), scale=3, duration=2)
+                    print_on_screen(f'<red>{self.name.title()} boss Defeated!', position=(-0.4,0.4), scale=3, duration=2)
                     self.gate.animate_position((self.gate.x,0,self.gate.z), duration=1, curve=curve.in_out_sine)
+                    camera.shake(duration=1)
                 manager.player.gold += self.worth
                 manager.ui_state.player_gold_bar.value += self.worth
                 manager.player.xp += self.worth
@@ -552,6 +553,6 @@ def input(key):
     if key == 'x':
         manager.player.xp += 1
     if key == 'g':
-        manager.player.gold += 1
+        manager.player.gold += 1        
 
 app.run()
