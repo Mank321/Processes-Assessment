@@ -65,7 +65,7 @@ that returned the player to the previous world, and one that sent them to the ne
 list and added/subtracted 1 to get the new worlds. But the next world would take me to the first world, and the previous gate took me to the tutorial. After debugging, I
 realised I was setting the player location after I'd created the class. To fix this, I simply updated the player location before I created the world.
 -
-When I walked up to the gate on a good computer with debug mode on, I'd inch close to the gate to test it. It went red when the orange cube tuched it, but I didn't teleport. I needed
+FIXED: When I walked up to the gate on a good computer with debug mode on, I'd inch close to the gate to test it. It went red when the orange cube tuched it, but I didn't teleport. I needed
 my tiny hitbox to tuch the gate for me to teleport. I fixed this by increasing the size of my hitbox to that of the orange cube. Upon further inspection, I realised that tiny hitbox
 wasn't a hitbox, but actually the raycasting. I set the distance from 0.1 to 0.5 and it worked perfectly.
 
@@ -126,7 +126,7 @@ different position, portals rotated 90 degrees in market), but when I returned t
 made the feature on, even after changing nothing, or 'fixing' it to make it return to normal, the
 feature returned to what it was, even after saving properly.
 -
-NOT-FIXEDL: Although I often did work on VSC, I would sometimes get swap to thonny to debug. This
+NOT-CRITICAL: Although I often did work on VSC, I would sometimes get swap to thonny to debug. This
 would however sometimes cause problems. I would get crashes in thonny I never got in VSC. For 
 example, when building the combat system, and the hit boxes were destroyed, thonny would raise an
 error in the player for loop where it checked every collider in the world, monster included which 

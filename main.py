@@ -243,6 +243,10 @@ class Player(Entity):
         self.ui_state.death_menu.enabled = False
         self.ui_state.death_menu.background.enabled = False
         mouse.locked = True
+
+        if self.game_state.location != 'tutorial':
+            scenes = f'{self.game_state.location}.market'
+            manager.switch_scenes(scenes)
     
     def check_max_gold(self):
         if self.gold >= self.max_gold:
@@ -320,7 +324,7 @@ class Player(Entity):
         
         # Check if nothing is infront of the player before moving
         ignore = [self, self.hand]
-        hit_info = raycast(self.world_position, movement, distance=0.5, debug=self.game_state.debug_mode, ignore=ignore)
+        hit_info = raycast(self.world_position, movement, distance=1, debug=self.game_state.debug_mode, ignore=ignore)
         if not hit_info.hit:
             move_amount = movement * self.speed * time.dt
             self.position += move_amount
