@@ -68,6 +68,8 @@ realised I was setting the player location after I'd created the class. To fix t
 FIXED: When I walked up to the gate on a good computer with debug mode on, I'd inch close to the gate to test it. It went red when the orange cube tuched it, but I didn't teleport. I needed
 my tiny hitbox to tuch the gate for me to teleport. I fixed this by increasing the size of my hitbox to that of the orange cube. Upon further inspection, I realised that tiny hitbox
 wasn't a hitbox, but actually the raycasting. I set the distance from 0.1 to 0.5 and it worked perfectly.
+-
+NOT-FIXED: When I was replacing the portal with a more recognisable model, I had to spend a while figuring out how to put multiple parts of the portal into the game. finding the right textures, trying to get normal maps to work. Eventually I gave up on the normal maps and tried to get the scale and positioning right. 
 
 WORLD CREATION PROBLEMS
 FIXED: When creating the forest in the tutorial area, I started with a massive list containing the pre-chosen position of each tree. Then I looped through the list to plant each tree. This was incredibly inefficient, so I create a 2d map array which had the entire forest plotted out in a dozen lines. I initially filled the entire area in with

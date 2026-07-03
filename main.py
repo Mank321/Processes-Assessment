@@ -435,15 +435,27 @@ class Gate(Entity):
                                     wireframe=True)
 
 class Gate2(Entity):
-    def __init__(self, game_state, position, name, parent):
-        super().__init__(parent=parent, model='Assets/Models/GateV2/vertex.fbx',
-                         texture='Assets/Models/GateV2/textures/vertex.png', double_sided=True,
-                         scale=(0.004,0.008,0.004), rotation_y=90, position=position)
+    def __init__(self, game_state, position, name, parent, scale=(0.002,0.004,0.002)):
+        super().__init__(parent=parent, model='Assets/Models/GateV2/portal.fbx',
+                         texture='Assets/Models/GateV2/vertex.png', double_sided=True,
+                         scale=scale*2, rotation_y=-90, position=position, origin=(0,-10,30))
         self.name = name
-        self.frame = Entity(parent=parent, model='Assets/Models/GateV2/gate.fbx',
-                            texture='Assets/Models/GateV2/textures/Portal_p_3_albedo.png',
-                            double_sided=True, scale=(0.004,0.008,0.004), rotation_y=90, position=position)
+        self.frame = Entity(parent=parent, model='Assets/Models/GateV2/frame.fbx',
+                            texture='Assets/Models/GateV2/frame.png',
+                            double_sided=True, scale=scale, rotation_y=-90, position=position)
+        self.base = Entity(parent=parent, model='Assets/Models/GateV2/base.fbx',
+                           texture='Assets/Models/GateV2/stone.png', double_sided=True,
+                           scale=scale, rotation_y=-90, position=position)
+        self.crystals = Entity(parent=parent, model='Assets/Models/GateV2/crystals.fbx',
+                               texture='Assets/Models/GateV2/textures/Gem.png', double_sided=True,
+                               scale=scale, rotation_y=-90, position=position)
+        self.pattern = Entity(parent=parent, model='Assets/Models/GateV2/pattern.fbx',
+                              color=color.red, double_sided=True,scale=scale, rotation_y=90, position=(0,0,29.67))
         self.collision_box = Entity()
+
+    
+    def update(self):
+        self.rotation_z += 10 * time.dt
 
 class Stall(Entity):
     def __init__(self, game_state, parent):
