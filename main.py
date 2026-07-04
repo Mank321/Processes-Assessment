@@ -420,7 +420,7 @@ class Tree(Entity):
                                     wireframe=True)
 
 class Gate(Entity):
-    def __init__(self, game_state, position, name, parent, scale=(0.002,0.004,0.002)):
+    def __init__(self, game_state, position, name, parent, complete=False, scale=(0.002,0.004,0.002)):
         super().__init__(parent=parent, model='cube', name=name,
                                     position=position, scale=(4,11,1), origin=(0,-.5,0),
                                     collider='box', visible=game_state.debug_mode,
@@ -429,8 +429,9 @@ class Gate(Entity):
         # Vertex
         self.anchor = Entity(parent=parent, model='cube', scale=(0.5,1,0.5), position=position, y=position[1]-1)
         self.portal = Entity(parent=self.anchor, model='Assets/Models/GateV2/Sections/new.fbx', texture='Assets/Models/GateV2/Textures/vertex',
-                scale=0.045, rotation_y=90, double_sided=True, alpha=0)
+                scale=0.045, rotation_y=90, double_sided=True)
         self.portal.y += 6.5
+        self.portal.alpha = 1 if complete else 0
 
         # Other parts
         self.frame = Entity(parent=parent, model='Assets/Models/GateV2/Sections/frame.fbx',
@@ -443,7 +444,8 @@ class Gate(Entity):
                                texture='Assets/Models/GateV2/Textures/Gem.png', double_sided=True,
                                scale=scale, rotation_y=-90, position=position)
         self.pattern = Entity(parent=parent, model='Assets/Models/GateV2/Sections/pattern.fbx',
-                              color=color.red, double_sided=True,scale=scale, rotation_y=90, position=position, z=position[2]-0.33)
+                              double_sided=True,scale=scale, rotation_y=90, position=position, z=position[2]-0.33)
+        self.pattern.color = color.green if complete else color.red
         self.collision_box = Entity()
 
         self.name = name
@@ -515,8 +517,8 @@ class MarketWorld(Entity):
         self.wall = Entity(parent=self,model='Assets/Models/Wall/wall.fbx', texture='Assets/Models/Wall/texture.png',
                     double_sided=True,scale=(0.01,0.01,0.01), collider='mesh', position=(-30,5,-10))
 
-        self.tutorial_gate = Gate(game_state, parent=self,position=(0,0,-5), name='market.tutorial')
-        self.centaur_gate = Gate(game_state, parent=self,position=(0,0,20), name='market.centaur')
+        self.tutorial_gate = Gate(game_state, parent=self, position=(0,-0.7,-5), name='market.tutorial', complete=True)
+        self.centaur_gate = Gate(game_state, parent=self, position=(0,-0.7,20), name='market.centaur', complete=True)
 
         self.stall = Stall(game_state,parent=self)
 
@@ -543,8 +545,8 @@ class LevelCreator(Entity):
         self.previous_scene = manager.locations.index(self.location.title()) - 1
         self.previous_scene = manager.locations[self.previous_scene].lower()        
 
-        self.return_gate = Gate(game_state, parent=self, position=(0,0,-10), name=f'{self.location}.{self.previous_scene}')
-        self.next_gate = Gate(game_state, parent=self, position=(0,-15,60), name=f'{self.location}.{self.next_scene}')
+        self.return_gate = Gate(game_state, parent=self, position=(0,-0.7,-10), name=f'{self.location}.{self.previous_scene}', complete=True)
+        self.next_gate = Gate(game_state, parent=self, position=(0,-0.7,60), name=f'{self.location}.{self.next_scene}')
         
         self.boss = Monster(game_state, parent=self, monster_stats=monster_stats, is_boss=True, gate=self.next_gate, position=Vec3(0,0,50))
 
