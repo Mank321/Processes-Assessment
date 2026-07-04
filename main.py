@@ -99,12 +99,8 @@ class GameManager(Entity):
     
     def switch_scenes(self, gate):
         """."""
-        if hasattr(gate, 'name'):
-            new_scene_name = gate.name.split('.')[2]
-            old_scene_name = gate.name.split('.')[1]
-        else:
-            new_scene_name = gate.split('.')[1]
-            old_scene_name = gate.split('.')[0]
+        new_scene_name = gate.split('.')[1]
+        old_scene_name = gate.split('.')[0]
 
         self.game_state.location = new_scene_name
         
@@ -329,14 +325,10 @@ class Player(Entity):
         if not hit_info.hit:
             move_amount = movement * self.speed * time.dt
             self.position += move_amount
-        else:
-            name = hit_info.entity.name
-            if name.startswith('gate'):
-                manager.switch_scenes(hit_info.entity)
         
         
 class Monster(Entity):
-    def __init__(self, game_state, parent, monster_stats, is_boss=False, gate=None, position=Vec3(0,0,0), rotation=Vec3(0,0,0)):
+    def __init__(self, game_state, parent, monster_stats, is_boss=False, is_tutorial=False, gate=None, position=Vec3(0,0,0), rotation=Vec3(0,0,0)):
         super().__init__(model=f'Assets/Models/{monster_stats["name"].title()}/monster.fbx',
                        texture=f'Assets/Models/{monster_stats["name"].title()}/texture.png',
                        position=position, double_sided=True, scale=monster_stats['scale'],
@@ -360,6 +352,7 @@ class Monster(Entity):
         self.scale = monster_stats['scale']
         self.rotation = rotation
         self.is_boss = is_boss
+        self.is_tutorial = is_tutorial
         self.gate = gate
 
         if self.is_boss:
@@ -396,7 +389,9 @@ class Monster(Entity):
             if self.health <= 0:
                 if self.is_boss:
                     print_on_screen(f'<red>{self.name.title()} boss Defeated!', position=(-0.4,0.4), scale=3, duration=2)
-                    self.gate.animate_position((self.gate.x,0,self.gate.z), duration=1, curve=curve.in_out_sine)
+                if self.is_boss or self.is_tutorial:
+                    self.gate.portal.animate('alpha', 1, duration=1, curve=curve.in_out_sine)
+                    self.gate.pattern.animate_color(color.green,duration=1, curve=curve.in_out_sine)
                     camera.shake(duration=1)
                 manager.player.gold += self.worth
                 manager.ui_state.player_gold_bar.value += self.worth
@@ -424,17 +419,6 @@ class Tree(Entity):
                                     collider='box', visible=game_state.debug_mode,
                                     wireframe=True)
 
-class Gate1(Entity):
-    def __init__(self, game_state, position, name, parent):
-        super().__init__(parent=parent,model='Assets/Models/Gate/gate.fbx', texture='Assets/Models/Gate/texture.png',
-                         double_sided=True, scale=(0.02,0.03,0.015), rotation_y=180, position=position)
-        
-        self.name = name
-        self.collision_box = Entity(model='cube', parent=self, name=self.name,
-                                    position=(0,150,0), scale=(200,300,100),
-                                    collider='box', visible=game_state.debug_mode,
-                                    wireframe=True)
-
 class Gate(Entity):
     def __init__(self, game_state, position, name, parent, scale=(0.002,0.004,0.002)):
         super().__init__(parent=parent, model='cube', name=name,
@@ -444,29 +428,32 @@ class Gate(Entity):
 
         # Vertex
         self.anchor = Entity(parent=parent, model='cube', scale=(0.5,1,0.5), position=position, y=position[1]-1)
-        self.portal = Entity(parent=self.anchor, model='Assets/Models/GateV2/new.fbx', texture='Assets/Models/GateV2/vertex',
-                scale=0.045, rotation_y=90, double_sided=True)
+        self.portal = Entity(parent=self.anchor, model='Assets/Models/GateV2/Sections/new.fbx', texture='Assets/Models/GateV2/Textures/vertex',
+                scale=0.045, rotation_y=90, double_sided=True, alpha=0)
         self.portal.y += 6.5
 
         # Other parts
-        self.frame = Entity(parent=parent, model='Assets/Models/GateV2/frame.fbx',
-                            texture='Assets/Models/GateV2/frame.png',
+        self.frame = Entity(parent=parent, model='Assets/Models/GateV2/Sections/frame.fbx',
+                            texture='Assets/Models/GateV2/Textures/frame.png',
                             double_sided=True, scale=scale, rotation_y=-90, position=position)
-        self.base = Entity(parent=parent, model='Assets/Models/GateV2/base.fbx',
-                           texture='Assets/Models/GateV2/stone.png', double_sided=True,
+        self.base = Entity(parent=parent, model='Assets/Models/GateV2/Sections/base.fbx',
+                           texture='Assets/Models/GateV2/Textures/stone.png', double_sided=True,
                            scale=scale, rotation_y=-90, position=position)
-        self.crystals = Entity(parent=parent, model='Assets/Models/GateV2/crystals.fbx',
-                               texture='Assets/Models/GateV2/textures/Gem.png', double_sided=True,
+        self.crystals = Entity(parent=parent, model='Assets/Models/GateV2/Sections/crystals.fbx',
+                               texture='Assets/Models/GateV2/Textures/Gem.png', double_sided=True,
                                scale=scale, rotation_y=-90, position=position)
-        self.pattern = Entity(parent=parent, model='Assets/Models/GateV2/pattern.fbx',
+        self.pattern = Entity(parent=parent, model='Assets/Models/GateV2/Sections/pattern.fbx',
                               color=color.red, double_sided=True,scale=scale, rotation_y=90, position=position, z=position[2]-0.33)
         self.collision_box = Entity()
 
         self.name = name
 
-
     def update(self):
         self.portal.rotation_x += 50 * time.dt
+        if self.intersects(manager.player).hit:
+            manager.switch_scenes(self.name)
+
+
 class Stall(Entity):
     def __init__(self, game_state, parent):
         super().__init__(parent=parent,model='Assets/Models/Stall/stall1.fbx', texture='Assets/Models/Stall/stall_texture.png',
@@ -490,7 +477,7 @@ class TutorialWorld(Entity):
         self.wall = Entity(parent=self,model='Assets/Models/Wall/wall.fbx', texture='Assets/Models/Wall/texture.png',
                     double_sided=True,scale=(0.005,0.01,0.005), collider='mesh', position=(0,5,10))
         
-        self.gate = Gate(game_state, parent=self, position=(0,-0.7,30), name='gate.tutorial.market')
+        self.gate = Gate(game_state, parent=self, position=(0,-0.7,30), name='tutorial.market')
 
         self.desc1 = '             Welcome to the dungeon!\n\nUse the mouse to move around\nPress "W" to move forward, "S" to move backward\nPress "A" to move right and "D" to move left\nPress the spacebar to jump'
         self.text1 = Text(parent=self, text=self.desc1, position=(-8,5,9), scale=30, color=color.white)
@@ -498,7 +485,7 @@ class TutorialWorld(Entity):
         self.desc2 = 'Attack the monster up ahead by left clicking!\n                     Try not to get hit!'
         self.text2 = Text(parent=self, text=self.desc2, position=(-8,4,19), scale=30, color=color.white)
 
-        #self.monster = Monster(game_state, parent=self, monster_stats=CENTAUR_STATS, position=Vec3(0,0,25), rotation=Vec3(0,180,0))
+        self.monster = Monster(game_state, parent=self, monster_stats=CENTAUR_STATS, is_tutorial=True, gate=self.gate, position=Vec3(0,0,25), rotation=Vec3(0,180,0))
 
         self.colliders = [self.gate.collision_box]
         self.map = ['        TTTTTTTT        ',
@@ -528,8 +515,8 @@ class MarketWorld(Entity):
         self.wall = Entity(parent=self,model='Assets/Models/Wall/wall.fbx', texture='Assets/Models/Wall/texture.png',
                     double_sided=True,scale=(0.01,0.01,0.01), collider='mesh', position=(-30,5,-10))
 
-        self.tutorial_gate = Gate(game_state, parent=self,position=(0,0,-5), name='gate.market.tutorial')
-        self.centaur_gate = Gate(game_state, parent=self,position=(0,0,20), name='gate.market.centaur')
+        self.tutorial_gate = Gate(game_state, parent=self,position=(0,0,-5), name='market.tutorial')
+        self.centaur_gate = Gate(game_state, parent=self,position=(0,0,20), name='market.centaur')
 
         self.stall = Stall(game_state,parent=self)
 
@@ -556,8 +543,8 @@ class LevelCreator(Entity):
         self.previous_scene = manager.locations.index(self.location.title()) - 1
         self.previous_scene = manager.locations[self.previous_scene].lower()        
 
-        self.return_gate = Gate(game_state, parent=self, position=(0,0,-10), name=f'gate.{self.location}.{self.previous_scene}')
-        self.next_gate = Gate(game_state, parent=self, position=(0,-10,60), name=f'gate.{self.location}.{self.next_scene}')
+        self.return_gate = Gate(game_state, parent=self, position=(0,0,-10), name=f'{self.location}.{self.previous_scene}')
+        self.next_gate = Gate(game_state, parent=self, position=(0,-15,60), name=f'{self.location}.{self.next_scene}')
         
         self.boss = Monster(game_state, parent=self, monster_stats=monster_stats, is_boss=True, gate=self.next_gate, position=Vec3(0,0,50))
 
