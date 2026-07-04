@@ -14,10 +14,22 @@ CENTAUR_STATS = {'name': 'Centaur',
                  'collider_scale': Vec3(100,250,170),
                  'collider_position': Vec3(0,125,0)}
 
-GORGON_STATS = {'name': 'Gorgon',
+BASILISK_STATS = {'name': 'Basilisk',
                 'health': 100,
                 'damage': 10,
                 'worth':10,
+                'speed':35000,
+                'sight':13,
+                'closeness': 5.5,
+                'attack_speed': 1,
+                'scale': Vec3(0.0001,0.0002,0.0001),
+                'collider_scale': Vec3(10000,40000,100000),
+                'collider_position': Vec3(1,20000,1)}
+
+GORGON_STATS = {'name': 'Gorgon',
+                'health': 1000,
+                'damage': 100,
+                'worth':20,
                 'speed':100,
                 'sight':10,
                 'closeness':1.5,
@@ -26,17 +38,6 @@ GORGON_STATS = {'name': 'Gorgon',
                 'collider_scale': Vec3(100,200,100),
                 'collider_position': Vec3(0,100,0)}
 
-BASILISK_STATS = {'name': 'Basilisk',
-                'health': 1000,
-                'damage': 100,
-                'worth':20,
-                'speed':35000,
-                'sight':13,
-                'closeness': 5.5,
-                'attack_speed': 1,
-                'scale': Vec3(0.0001,0.0002,0.0001),
-                'collider_scale': Vec3(10000,40000,100000),
-                'collider_position': Vec3(1,20000,1)}
 
 class GameManager(Entity):
     """."""
@@ -209,7 +210,7 @@ class Player(Entity):
         self.gravity = 9.81**2
         self.velocity_y = 0
         self.armor = 0
-        self.health = 20
+        self.health = 2000
         self.max_health = self.health
         self.damage = 1
         self.level = 1
@@ -423,7 +424,7 @@ class Tree(Entity):
                                     collider='box', visible=game_state.debug_mode,
                                     wireframe=True)
 
-class Gate(Entity):
+class Gate1(Entity):
     def __init__(self, game_state, position, name, parent):
         super().__init__(parent=parent,model='Assets/Models/Gate/gate.fbx', texture='Assets/Models/Gate/texture.png',
                          double_sided=True, scale=(0.02,0.03,0.015), rotation_y=180, position=position)
@@ -434,12 +435,20 @@ class Gate(Entity):
                                     collider='box', visible=game_state.debug_mode,
                                     wireframe=True)
 
-class Gate2(Entity):
+class Gate(Entity):
     def __init__(self, game_state, position, name, parent, scale=(0.002,0.004,0.002)):
-        super().__init__(parent=parent, model='Assets/Models/GateV2/portal.fbx',
-                         texture='Assets/Models/GateV2/vertex.png', double_sided=True,
-                         scale=scale*2, rotation_y=-90, position=position, origin=(0,-10,30))
-        self.name = name
+        super().__init__(parent=parent, model='cube', name=name,
+                                    position=position, scale=(4,11,1), origin=(0,-.5,0),
+                                    collider='box', visible=game_state.debug_mode,
+                                    wireframe=True)
+
+        # Vertex
+        self.anchor = Entity(parent=parent, model='cube', scale=(0.5,1,0.5), position=position, y=position[1]-1)
+        self.portal = Entity(parent=self.anchor, model='Assets/Models/GateV2/new.fbx', texture='Assets/Models/GateV2/vertex',
+                scale=0.045, rotation_y=90, double_sided=True)
+        self.portal.y += 6.5
+
+        # Other parts
         self.frame = Entity(parent=parent, model='Assets/Models/GateV2/frame.fbx',
                             texture='Assets/Models/GateV2/frame.png',
                             double_sided=True, scale=scale, rotation_y=-90, position=position)
@@ -450,13 +459,14 @@ class Gate2(Entity):
                                texture='Assets/Models/GateV2/textures/Gem.png', double_sided=True,
                                scale=scale, rotation_y=-90, position=position)
         self.pattern = Entity(parent=parent, model='Assets/Models/GateV2/pattern.fbx',
-                              color=color.red, double_sided=True,scale=scale, rotation_y=90, position=(0,0,29.67))
+                              color=color.red, double_sided=True,scale=scale, rotation_y=90, position=position, z=position[2]-0.33)
         self.collision_box = Entity()
 
-    
-    def update(self):
-        self.rotation_z += 10 * time.dt
+        self.name = name
 
+
+    def update(self):
+        self.portal.rotation_x += 50 * time.dt
 class Stall(Entity):
     def __init__(self, game_state, parent):
         super().__init__(parent=parent,model='Assets/Models/Stall/stall1.fbx', texture='Assets/Models/Stall/stall_texture.png',
@@ -480,7 +490,7 @@ class TutorialWorld(Entity):
         self.wall = Entity(parent=self,model='Assets/Models/Wall/wall.fbx', texture='Assets/Models/Wall/texture.png',
                     double_sided=True,scale=(0.005,0.01,0.005), collider='mesh', position=(0,5,10))
         
-        self.gate = Gate2(game_state, parent=self, position=(0,0,30), name='gate.tutorial.market')
+        self.gate = Gate(game_state, parent=self, position=(0,-0.7,30), name='gate.tutorial.market')
 
         self.desc1 = '             Welcome to the dungeon!\n\nUse the mouse to move around\nPress "W" to move forward, "S" to move backward\nPress "A" to move right and "D" to move left\nPress the spacebar to jump'
         self.text1 = Text(parent=self, text=self.desc1, position=(-8,5,9), scale=30, color=color.white)
@@ -488,7 +498,7 @@ class TutorialWorld(Entity):
         self.desc2 = 'Attack the monster up ahead by left clicking!\n                     Try not to get hit!'
         self.text2 = Text(parent=self, text=self.desc2, position=(-8,4,19), scale=30, color=color.white)
 
-        self.monster = Monster(game_state, parent=self, monster_stats=CENTAUR_STATS, position=Vec3(0,0,25), rotation=Vec3(0,180,0))
+        #self.monster = Monster(game_state, parent=self, monster_stats=CENTAUR_STATS, position=Vec3(0,0,25), rotation=Vec3(0,180,0))
 
         self.colliders = [self.gate.collision_box]
         self.map = ['        TTTTTTTT        ',
@@ -552,6 +562,7 @@ class LevelCreator(Entity):
         self.boss = Monster(game_state, parent=self, monster_stats=monster_stats, is_boss=True, gate=self.next_gate, position=Vec3(0,0,50))
 
         self.colliders = [self.return_gate.collision_box, self.next_gate.collision_box]
+
 #---------------------------------------------------#
 def update():
     if held_keys['escape']:
