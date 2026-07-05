@@ -147,6 +147,7 @@ class UIState(Entity):
         self.player_health_bar = HealthBar(max_value=20,value=20,position=(-0.85, -0.39,0),colour=color.red,scale=(0.4,0.05))
         self.player_gold_bar = HealthBar(max_value=10,value=0,position=(-0.85, -0.33,0),colour=color.gold,scale=(0.4,0.05))
         self.player_experience_bar = HealthBar(max_value=10, value=0, position=(-0.89, -0.45,0), colour=color.green, scale=(1.8, 0.05))
+        self.level_display = Text(parent=camera.ui, text=1, position=(0, -0.35), size=0.12)
 
         self.death_screen_background = Entity(parent=camera.ui, model='quad', color=(255,0,0, 0.4), scale=(2,2), position=(0,0,-1), enabled=False)
         self.death_menu = MainMenu(None, None, bg=self.death_screen_background, header='You Died', text='Respawn', enabled=False)
@@ -179,6 +180,7 @@ class UIState(Entity):
             self.player_experience_bar.max_value = self.player.levelup_req
             self.player_experience_bar.value = self.player.xp
             self.damage_text.text = f'Damage: {self.player.damage}'
+            self.level_display.text = self.player.level
 
             if self.player.health <= 0 and not self.death_menu.enabled:
                 if self.death_menu.start_function is None:
@@ -194,7 +196,7 @@ class UIState(Entity):
 class Player(Entity):
     def __init__(self, ui_state, game_state):
         super().__init__(model='cube', scale=(1,2.5,1), position=(0,1,0),
-                         collider='box', visible_self=False,#game_state.debug_mode,
+                         collider='box', visible_self=game_state.debug_mode,
                          color=color.orange)
 
         self.ui_state = ui_state
@@ -206,7 +208,7 @@ class Player(Entity):
         self.gravity = 9.81**2
         self.velocity_y = 0
         self.armor = 0
-        self.health = 2000
+        self.health = 20
         self.max_health = self.health
         self.damage = 1
         self.level = 1
@@ -232,10 +234,14 @@ class Player(Entity):
     def death(self):
         application.paused = False
         self.position = Vec3(0,10,0)
+        self.max_health = self.max_health - self.level * 2 if self.max_health - self.level*2 >= 20 else self.max_health
         self.health = self.max_health
-        self.xp // 2
-        if self.level >= 1:
+        self.xp =self.xp // 2
+        if self.level > 1:
             self.level -= 1
+            self.levelup_req /= 2
+            self.levelup_red = round(self.levelup_req)
+            self.damage -= 1
 
         self.ui_state.death_menu.enabled = False
         self.ui_state.death_menu.background.enabled = False
@@ -255,14 +261,15 @@ class Player(Entity):
 
     def levelup(self):
         """."""
+        self.max_health += self.level * 2
+        self.health = self.max_health
         self.xp -= self.levelup_req
         self.level += 1
         self.levelup_req *= 2
         self.max_stamina += 2
         self.damage += 1
-        self.max_health += 2
-        self.health = self.max_health
-        self.ui_state.update()
+        self.armor += 0.5
+        #self.ui_state.update()
     
     def teleport(self, location):
         manager.switch_scenes(f'{self.game_state.location}.{location}')
@@ -321,10 +328,15 @@ class Player(Entity):
         
         # Check if nothing is infront of the player before moving
         ignore = [self, self.hand]
-        hit_info = raycast(self.world_position, movement, distance=1, debug=self.game_state.debug_mode, ignore=ignore)
+        hit_info = raycast(self.world_position, movement, distance=0.5, debug=self.game_state.debug_mode, ignore=ignore)
         if not hit_info.hit:
             move_amount = movement * self.speed * time.dt
             self.position += move_amount
+        else:
+            name = hit_info.entity.name
+            if name.startswith('gate') and name.split('.')[-1] == 'complete':
+                scenes = name[5:]
+                manager.switch_scenes(scenes)
         
         
 class Monster(Entity):
@@ -392,6 +404,9 @@ class Monster(Entity):
                 if self.is_boss or self.is_tutorial:
                     self.gate.portal.animate('alpha', 1, duration=1, curve=curve.in_out_sine)
                     self.gate.pattern.animate_color(color.green,duration=1, curve=curve.in_out_sine)
+                    self.gate.complete = True
+                    self.gate.name = f'{self.gate.name[:-10]}complete'
+                    self.gate.collision_box.name = self.gate.name
                     camera.shake(duration=1)
                 manager.player.gold += self.worth
                 manager.ui_state.player_gold_bar.value += self.worth
@@ -420,40 +435,42 @@ class Tree(Entity):
                                     wireframe=True)
 
 class Gate(Entity):
-    def __init__(self, game_state, position, name, parent, complete=False, scale=(0.002,0.004,0.002)):
-        super().__init__(parent=parent, model='cube', name=name,
-                                    position=position, scale=(4,11,1), origin=(0,-.5,0),
-                                    collider='box', visible=game_state.debug_mode,
-                                    wireframe=True)
+    def __init__(self, game_state, position, locations, parent, complete=False, scale=(0.002,0.004,0.002), rotation_y=0):
+        super().__init__(parent=parent, complete=complete)
+
+        self.complete = complete
+        self.name = f'gate.{locations}.incomplete' if not self.complete else f'gate.{locations}.complete'
+        
 
         # Vertex
         self.anchor = Entity(parent=parent, model='cube', scale=(0.5,1,0.5), position=position, y=position[1]-1)
         self.portal = Entity(parent=self.anchor, model='Assets/Models/GateV2/Sections/new.fbx', texture='Assets/Models/GateV2/Textures/vertex',
-                scale=0.045, rotation_y=90, double_sided=True)
+                scale=0.045, rotation_y=rotation_y+90, double_sided=True)
         self.portal.y += 6.5
-        self.portal.alpha = 1 if complete else 0
+        self.portal.alpha = 1 if self.complete else 0
 
         # Other parts
         self.frame = Entity(parent=parent, model='Assets/Models/GateV2/Sections/frame.fbx',
                             texture='Assets/Models/GateV2/Textures/frame.png',
-                            double_sided=True, scale=scale, rotation_y=-90, position=position)
+                            double_sided=True, scale=scale, rotation_y=rotation_y-90, position=position)
         self.base = Entity(parent=parent, model='Assets/Models/GateV2/Sections/base.fbx',
                            texture='Assets/Models/GateV2/Textures/stone.png', double_sided=True,
-                           scale=scale, rotation_y=-90, position=position)
+                           scale=scale, rotation_y=rotation_y-90, position=position)
         self.crystals = Entity(parent=parent, model='Assets/Models/GateV2/Sections/crystals.fbx',
                                texture='Assets/Models/GateV2/Textures/Gem.png', double_sided=True,
-                               scale=scale, rotation_y=-90, position=position)
+                               scale=scale, rotation_y=rotation_y-90, position=position)
         self.pattern = Entity(parent=parent, model='Assets/Models/GateV2/Sections/pattern.fbx',
-                              double_sided=True,scale=scale, rotation_y=90, position=position, z=position[2]-0.33)
-        self.pattern.color = color.green if complete else color.red
-        self.collision_box = Entity()
+                              double_sided=True,scale=scale, rotation_y=rotation_y+90, position=position, z=position[2]-0.33)
+        self.pattern.color = color.green if self.complete else color.red
+        self.pattern.z = position[2]-0.33 if rotation_y == 0 else position[2]+0.33
+        self.collision_box = Entity(parent=parent, model='cube', name=self.name, rotation_y=rotation_y, position=position, scale=(4,11,1),
+                                    origin=(0,-.5,0), collider='box', visible=game_state.debug_mode, wireframe=True)
 
-        self.name = name
 
     def update(self):
         self.portal.rotation_x += 50 * time.dt
-        if self.intersects(manager.player).hit:
-            manager.switch_scenes(self.name)
+        #if self.collision_box.intersects(manager.player).hit:
+        #    manager.switch_scenes(self.name)
 
 
 class Stall(Entity):
@@ -479,7 +496,7 @@ class TutorialWorld(Entity):
         self.wall = Entity(parent=self,model='Assets/Models/Wall/wall.fbx', texture='Assets/Models/Wall/texture.png',
                     double_sided=True,scale=(0.005,0.01,0.005), collider='mesh', position=(0,5,10))
         
-        self.gate = Gate(game_state, parent=self, position=(0,-0.7,30), name='tutorial.market')
+        self.gate = Gate(game_state, parent=self, position=(0,-0.7,30), locations='tutorial.market')
 
         self.desc1 = '             Welcome to the dungeon!\n\nUse the mouse to move around\nPress "W" to move forward, "S" to move backward\nPress "A" to move right and "D" to move left\nPress the spacebar to jump'
         self.text1 = Text(parent=self, text=self.desc1, position=(-8,5,9), scale=30, color=color.white)
@@ -517,8 +534,8 @@ class MarketWorld(Entity):
         self.wall = Entity(parent=self,model='Assets/Models/Wall/wall.fbx', texture='Assets/Models/Wall/texture.png',
                     double_sided=True,scale=(0.01,0.01,0.01), collider='mesh', position=(-30,5,-10))
 
-        self.tutorial_gate = Gate(game_state, parent=self, position=(0,-0.7,-5), name='market.tutorial', complete=True)
-        self.centaur_gate = Gate(game_state, parent=self, position=(0,-0.7,20), name='market.centaur', complete=True)
+        self.tutorial_gate = Gate(game_state, parent=self, position=(0,-0.7,-5), locations='market.tutorial', complete=True, rotation_y=180)
+        self.centaur_gate = Gate(game_state, parent=self, position=(0,-0.7,20), locations='market.centaur', complete=True)
 
         self.stall = Stall(game_state,parent=self)
 
@@ -545,19 +562,15 @@ class LevelCreator(Entity):
         self.previous_scene = manager.locations.index(self.location.title()) - 1
         self.previous_scene = manager.locations[self.previous_scene].lower()        
 
-        self.return_gate = Gate(game_state, parent=self, position=(0,-0.7,-10), name=f'{self.location}.{self.previous_scene}', complete=True)
-        self.next_gate = Gate(game_state, parent=self, position=(0,-0.7,60), name=f'{self.location}.{self.next_scene}')
+        self.return_gate = Gate(game_state, parent=self, position=(0,-0.7,-10), locations=f'{self.location}.{self.previous_scene}', complete=True, rotation_y=180)
+        self.next_gate = Gate(game_state, parent=self, position=(0,-0.7,60), locations=f'{self.location}.{self.next_scene}')
         
         self.boss = Monster(game_state, parent=self, monster_stats=monster_stats, is_boss=True, gate=self.next_gate, position=Vec3(0,0,50))
 
         self.colliders = [self.return_gate.collision_box, self.next_gate.collision_box]
 
 #---------------------------------------------------#
-def update():
-    if held_keys['escape']:
-        manager.pause_game()
-
-def pause_input(key):
+def spectator_input(key):
     if key == 'tab' and main_menu.started:
         spectator_mode.enabled = not spectator_mode.enabled
         spectator_mode.position = manager.player.position
@@ -570,16 +583,20 @@ app = Ursina()
 
 window.icon = 'Assets/ursina.ico'
 spectator_mode = EditorCamera(enabled = False, ignore_paused=True)
-pause_handler = Entity(ignore_paused=True, input=pause_input)
+pause_handler = Entity(ignore_paused=True, input=spectator_input)
 manager = GameManager()
 main_menu = MainMenu(manager.start_game, manager.resume_game)
 
 def input(key):
     if key == 'c' and hasattr(manager.game_state, 'debug_mode'):
         manager.game_state.debug_mode = not manager.game_state.debug_mode
-    if key == 'x':
+
+def update():
+    if held_keys['escape']:
+        manager.pause_game()
+    if held_keys['g']:
+        manager.player.gold += 1
+    if held_keys['x']:
         manager.player.xp += 1
-    if key == 'g':
-        manager.player.gold += 1        
 
 app.run()

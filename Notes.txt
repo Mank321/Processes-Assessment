@@ -86,6 +86,17 @@ creating a vertext entity outside the class. Eventually, the last one worked, bu
 integrate it into the gate class. To get its scale right I had to create an anchor object so it
 wouldn't look warped. After all this, I finally figured out that I was trying to change the
 position_y, position_x value, when I should've been trying to change the y, x value.
+-
+FIXED: When I was getting the gates to only teleport the player after they'd defeated the boss, I
+quickly got the animation sequence working, but then struggled to deny the player if the boss wasn't
+defeated. I tried adding a complete variable into the gate class, then using hit_info to extracted
+it to determine if the player should switch scenes. But it turns out hit_info can't see custom 
+variables, so I had to put it inside the name. While I was attempting this, I realised I could just
+disable and enable the gate's collision_box based on complete. This worked fine, except for the fact
+that when disbaled, the player could walk right through the gate, which made me scrap the idea and went
+back to the name approach. When I changed self.gate.name, I forgot to realise that the raycast was
+actually hiting the collision_box entity, so after a bit of debugging I changed the collision_box
+name to gate.location.complete, set the raycast to look for the complete, and it worked.
 
 WORLD CREATION PROBLEMS
 FIXED: When creating the forest in the tutorial area, I started with a massive list containing the
@@ -113,7 +124,7 @@ player actually clicked on the monster. I still ran into a problem where the cod
 find a monster that had been destroyed when checking for collisions. To fix this, I decided to 
 allow the player to walk through monsters, meaning I didn't need to check their hitbox.
 -
-SPRINT-FIXED: When trying to use a gate, since the monster was destroyed, it couldn't be disabled, 
+FIXED: When trying to use a gate, since the monster was destroyed, it couldn't be disabled, 
 creating errors. To fix this, I tried changing the switch_scenes method from using an entities 
 list given by TutorialWorld, to going through every child of TutorialWorld itself, and going
 through every child of those children to catch the collision boxes. This allowed me to go through
@@ -125,6 +136,9 @@ basilisk, which was tiny. I tried changing the scale, but that made the collisio
 I eventually figured out that the collision box had hard-coded position and scale variables that 
 were designed for the centaur. To fix this, I added in collider_scale and collider_position into
 the monster stats.
+-
+When I leveled up while being attacked by a monster, or when I leveled before ever being attacked,
+I would become permenantly invulnrable.
 
 PLAYER SYSTEMS
 FIXED: When building the levelup system, I created a healthbar in the UI, and created a method to
@@ -144,9 +158,9 @@ disappeared. I will need to disable the button that leads to the world the playe
 COMPUTER/DEVICE AND SOFTWARE PROBLEMS
 NOT-FIXED: While working on the game, I would sometimes change computers. I'd build a feature,
 save it, then pull it on another computer, and the feature would be slightly different(wall in
-different position, portals and stalls rotated 90 degrees in market), but when I returned to the computer I
-made the feature on, even after changing nothing, or 'fixing' it to make it return to normal, the
-feature returned to what it was, even after saving properly.
+different position, portals and stalls rotated 90 degrees in market), but when I returned to the 
+computer I made the feature on, even after changing nothing, or 'fixing' it to make it return to 
+normal, the feature returned to what it was, even after saving properly.
 -
 NOT-CRITICAL: Although I often did work on VSC, I would sometimes get swap to thonny to debug. This
 would however sometimes cause problems. I would get crashes in thonny I never got in VSC. For 
