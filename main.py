@@ -269,7 +269,6 @@ class Player(Entity):
         self.max_stamina += 2
         self.damage += 1
         self.armor += 0.5
-        #self.ui_state.update()
     
     def teleport(self, location):
         manager.switch_scenes(f'{self.game_state.location}.{location}')
@@ -469,8 +468,6 @@ class Gate(Entity):
 
     def update(self):
         self.portal.rotation_x += 50 * time.dt
-        #if self.collision_box.intersects(manager.player).hit:
-        #    manager.switch_scenes(self.name)
 
 
 class Stall(Entity):

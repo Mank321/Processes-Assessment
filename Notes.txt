@@ -136,9 +136,7 @@ basilisk, which was tiny. I tried changing the scale, but that made the collisio
 I eventually figured out that the collision box had hard-coded position and scale variables that 
 were designed for the centaur. To fix this, I added in collider_scale and collider_position into
 the monster stats.
--
-When I leveled up while being attacked by a monster, or when I leveled before ever being attacked,
-I would become permenantly invulnrable.
+
 
 PLAYER SYSTEMS
 FIXED: When building the levelup system, I created a healthbar in the UI, and created a method to
