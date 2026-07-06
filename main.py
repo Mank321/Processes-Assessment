@@ -12,7 +12,13 @@ CENTAUR_STATS = {'name': 'Centaur',
                  'attack_speed': 1,
                  'scale': Vec3(0.02,0.024,0.015),
                  'collider_scale': Vec3(100,250,170),
-                 'collider_position': Vec3(0,125,0)}
+                 'collider_position': Vec3(0,125,0),
+                 'boss_scale':Vec3(2,3,2),
+                 'boss_collider_scale':Vec3(0.7,3,1.5),
+                 'boss_collider_pos': Vec3(0,1,0),
+                 'boss_speed':1.5,
+                 'boss_sight':15,
+                 'boss_closeness':2}
 
 BASILISK_STATS = {'name': 'Basilisk',
                 'health': 100,
@@ -24,7 +30,13 @@ BASILISK_STATS = {'name': 'Basilisk',
                 'attack_speed': 1,
                 'scale': Vec3(0.0001,0.0002,0.0001),
                 'collider_scale': Vec3(10000,40000,100000),
-                'collider_position': Vec3(1,20000,1)}
+                'collider_position': Vec3(1,20000,1),
+                'boss_scale':5,
+                'boss_collider_scale':1,
+                'boss_collider_pos': Vec3(1,20000,1),
+                'boss_speed':2,
+                'boss_sight':15,
+                'boss_closeness':3}
 
 GORGON_STATS = {'name': 'Gorgon',
                 'health': 1000,
@@ -36,7 +48,13 @@ GORGON_STATS = {'name': 'Gorgon',
                 'attack_speed': 1,
                 'scale': Vec3(0.015,0.025,0.015),
                 'collider_scale': Vec3(100,200,100),
-                'collider_position': Vec3(0,100,0)}
+                'collider_position': Vec3(0,100,0),
+                'boss_scale':5,
+                'boss_collider_scale':1,
+                'boss_collider_pos': Vec3(0,100,0),
+                'boss_speed':2,
+                'boss_sight':15,
+                'boss_closeness':3}
 
 
 class GameManager(Entity):
@@ -147,8 +165,8 @@ class UIState(Entity):
         self.player_health_bar = HealthBar(max_value=20,value=20,position=(-0.85, -0.39,0),colour=color.red,scale=(0.4,0.05))
         self.player_gold_bar = HealthBar(max_value=10,value=0,position=(-0.85, -0.33,0),colour=color.gold,scale=(0.4,0.05))
         self.player_experience_bar = HealthBar(max_value=10, value=0, position=(-0.89, -0.45,0), colour=color.green, scale=(1.8, 0.05))
-        self.level_display = Text(parent=camera.ui, text=1, position=(0, -0.35), size=0.12)
-
+        self.level_display = Text(parent=camera.ui, text=1, position=(0, -0.35), size=0.12, font='Assets/Fonts/barber-chop/BarberChop.otf', color=color.lime)
+        self.level_display.scale = 0.5
         self.death_screen_background = Entity(parent=camera.ui, model='quad', color=(255,0,0, 0.4), scale=(2,2), position=(0,0,-1), enabled=False)
         self.death_menu = MainMenu(None, None, bg=self.death_screen_background, header='You Died', text='Respawn', enabled=False)
 
@@ -340,15 +358,14 @@ class Player(Entity):
         
 class Monster(Entity):
     def __init__(self, game_state, parent, monster_stats, is_boss=False, is_tutorial=False, gate=None, position=Vec3(0,0,0), rotation=Vec3(0,0,0)):
-        super().__init__(model=f'Assets/Models/{monster_stats["name"].title()}/monster.fbx',
-                       texture=f'Assets/Models/{monster_stats["name"].title()}/texture.png',
+        super().__init__(model=f'Assets/Models/{monster_stats["name"]}/monster.fbx',
+                       texture=f'Assets/Models/{monster_stats["name"]}/texture.png',
                        position=position, double_sided=True, scale=monster_stats['scale'],
                        rotation=rotation, name=monster_stats["name"], parent=parent)
 
         self.collision_box = Entity(model='cube', parent=self, position=monster_stats['collider_position'],
-                                    scale=monster_stats['collider_scale'], #collider='box',
-                                    visible=game_state.debug_mode,
-                                    wireframe=True, name=f'{monster_stats["name"].title()}.collider')
+                                    scale=monster_stats['collider_scale'], visible=game_state.debug_mode,
+                                    wireframe=True, name=f'{monster_stats["name"]}.collider')
 
         self.game_state = game_state
         self.name = monster_stats['name']
@@ -367,13 +384,16 @@ class Monster(Entity):
         self.gate = gate
 
         if self.is_boss:
+            self.model = f'Assets/Models/{self.name}/Boss/boss.fbx'
+            self.texture = f'Assets/Models/{self.name}/Boss/texture.png'
+            self.scale = monster_stats['boss_scale']
+            self.collision_box.scale = monster_stats['boss_collider_scale']
+            self.collision_box.position = monster_stats['boss_collider_pos']
+            self.speed = monster_stats['boss_speed']
+            self.closeness = monster_stats['boss_closeness']
+            self.sight = monster_stats['boss_sight']
             self.damage *= 2
             self.health *= 5
-            self.sight *= 1.5
-            self.scale *= 1.5
-            self.collision_box.scale *= 1.5
-            self.speed *= 2
-            self.closeness *= 1.5
             self.worth *= 10
 
     def distance_check(self):
@@ -443,22 +463,22 @@ class Gate(Entity):
 
         # Vertex
         self.anchor = Entity(parent=parent, model='cube', scale=(0.5,1,0.5), position=position, y=position[1]-1)
-        self.portal = Entity(parent=self.anchor, model='Assets/Models/GateV2/Sections/new.fbx', texture='Assets/Models/GateV2/Textures/vertex',
+        self.portal = Entity(parent=self.anchor, model='Assets/Models/Gate/Sections/new.fbx', texture='Assets/Models/Gate/Textures/vertex',
                 scale=0.045, rotation_y=rotation_y+90, double_sided=True)
         self.portal.y += 6.5
         self.portal.alpha = 1 if self.complete else 0
 
         # Other parts
-        self.frame = Entity(parent=parent, model='Assets/Models/GateV2/Sections/frame.fbx',
-                            texture='Assets/Models/GateV2/Textures/frame.png',
+        self.frame = Entity(parent=parent, model='Assets/Models/Gate/Sections/frame.fbx',
+                            texture='Assets/Models/Gate/Textures/frame.png',
                             double_sided=True, scale=scale, rotation_y=rotation_y-90, position=position)
-        self.base = Entity(parent=parent, model='Assets/Models/GateV2/Sections/base.fbx',
-                           texture='Assets/Models/GateV2/Textures/stone.png', double_sided=True,
+        self.base = Entity(parent=parent, model='Assets/Models/Gate/Sections/base.fbx',
+                           texture='Assets/Models/Gate/Textures/stone.png', double_sided=True,
                            scale=scale, rotation_y=rotation_y-90, position=position)
-        self.crystals = Entity(parent=parent, model='Assets/Models/GateV2/Sections/crystals.fbx',
-                               texture='Assets/Models/GateV2/Textures/Gem.png', double_sided=True,
+        self.crystals = Entity(parent=parent, model='Assets/Models/Gate/Sections/crystals.fbx',
+                               texture='Assets/Models/Gate/Textures/Gem.png', double_sided=True,
                                scale=scale, rotation_y=rotation_y-90, position=position)
-        self.pattern = Entity(parent=parent, model='Assets/Models/GateV2/Sections/pattern.fbx',
+        self.pattern = Entity(parent=parent, model='Assets/Models/Gate/Sections/pattern.fbx',
                               double_sided=True,scale=scale, rotation_y=rotation_y+90, position=position, z=position[2]-0.33)
         self.pattern.color = color.green if self.complete else color.red
         self.pattern.z = position[2]-0.33 if rotation_y == 0 else position[2]+0.33
@@ -472,17 +492,18 @@ class Gate(Entity):
 
 class Stall(Entity):
     def __init__(self, game_state, parent):
-        super().__init__(parent=parent,model='Assets/Models/Stall/stall1.fbx', texture='Assets/Models/Stall/stall_texture.png',
+        super().__init__(parent=parent,model='Assets/Models/Stall/Stall/stall1.fbx', texture='Assets/Models/Stall/Stall/stall_texture.png',
                          double_sided=True, scale=(0.1,0.22,0.1), position=(10,0,0))
 
-        self.props = Entity(model='Assets/Models/Stall/props.fbx', texture='Assets/Models/Stall/props_texture.png',
+        self.props = Entity(model='Assets/Models/Stall/Props/props.fbx', texture='Assets/Models/Stall/Props/props_texture.png',
                             parent=self, double_sided=True,scale=(1,1,1), position=(0,0,0))
 
         self.collision_box = Entity(model='cube', parent=self, name=self.name,
                                     position=(0,0,0), scale=(40,50,40),
                                     collider='box', visible=game_state.debug_mode,
                                     wireframe=True)
-        self.merchant = Entity()
+        self.merchant = Entity(model='Assets/Models/Stall/Merchant/merchant.fbx', texture='Assets/Models/Stall/Merchant/texture.jpg',
+                               double_sided=True, parent=self, scale=(.11,.11,.11), position=(0,0,0))
         
 
 class TutorialWorld(Entity):
@@ -594,6 +615,6 @@ def update():
     if held_keys['g']:
         manager.player.gold += 1
     if held_keys['x']:
-        manager.player.xp += 1
+        manager.player.xp += 100
 
 app.run()
