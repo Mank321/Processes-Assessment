@@ -106,7 +106,22 @@ a dozen lines. I initially filled the entire area in with over a thousand trees,
 the framerate down to 20fps, so I knew I couldn't do it that way without breaking a requirement.
 Instead, I shrunk the forest down to a minimum size with just having the trees as border walls,
 and shrunk the main perimeter wall to fit the new forest size. It took a bit of time to get the
-exact coordinates right and the tree spacing and map array. 
+exact coordinates right and the tree spacing and map array.
+-
+NOT-FIXED: When I began adding in custom monster world, specifically the first(centaur) world, I
+would fall through the floor either directly after loading into the world, or after I took a step,
+even though the collider was set to mesh. I did some debugging by disabling the player falling
+mechanics, which stopped the player from falling through the world, but still meant I could walk
+through the world walls. I noticed there was no ground being detected beneath my when I entered
+the centaur world, which is why turning off the player falling system worked. I added a keybind
+to control the player y-level to check if it was just a problem with the distance between the
+player and the world, but the detector still returned false. I came up with a theory that the
+raycast wasn't detecting anything since it had been teleported right into the center of the world.
+I placed the world way below where I spawned and lowered my gravity so I would hit the world, but
+as soon as I took a step, I fell right through. After much debugging, I gave up on the mesh
+collider and resorted to creating multiple custom hitboxes. But the first one I tried making
+wouldn't appear in the world. After much debugging and stripping it of everything non-essential,
+I realised I said mode='cube' instead of model='cube'.
 
 COMBAT SYSTEM PROBLEMS
 FIXED: When creating the combat system, I added in the monster, gave it a hitbox, damage, and

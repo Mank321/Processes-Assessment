@@ -117,6 +117,7 @@ class GameManager(Entity):
     
     def switch_scenes(self, gate):
         """."""
+        self.player.position = (0,0,0)
         new_scene_name = gate.split('.')[1]
         old_scene_name = gate.split('.')[0]
 
@@ -147,9 +148,6 @@ class GameManager(Entity):
         old_scene.disable()
 
         print_on_screen(f'--{new_scene_name.title()}--', position=(-0.1,0.45), scale=3, duration=2)
-        
-        self.player.position = (0,0,0)
-        self.player.rotation = (0,0,0)
 
 
 class GameState():
@@ -299,12 +297,14 @@ class Player(Entity):
         self.check_max_gold()
         self.check_max_health()
 
-        # Allowing jumping only when the player is on the ground
-        ground_ray = raycast(self.world_position + Vec3(0,0.1,0), self.down, distance=1.1, ignore=[self])
+        # Allow jumping only when the player is on the ground
+        ground_ray = raycast(self.position + Vec3(0,0.5,0), direction=Vec3(0,-1,0), distance=2, ignore=[self], debug=self.game_state.debug_mode)
         self.grounded = ground_ray.hit
         
         if self.grounded:
-            self.velocity_y = max(0, self.velocity_y)
+            if self.velocity_y <= 0:
+                self.y = ground_ray.point.y
+                self.velocity_y = 0
             if held_keys['space']:
                 self.velocity_y = self.jump_height
         else:
@@ -357,10 +357,10 @@ class Player(Entity):
         
         
 class Monster(Entity):
-    def __init__(self, game_state, parent, monster_stats, is_boss=False, is_tutorial=False, gate=None, position=Vec3(0,0,0), rotation=Vec3(0,0,0)):
+    def __init__(self, game_state, parent, monster_stats, is_boss=False, is_tutorial=False, gate=None, position=Vec3(0,0,0), rotation=Vec3(0,0,0), scale=1):
         super().__init__(model=f'Assets/Models/{monster_stats["name"]}/monster.fbx',
                        texture=f'Assets/Models/{monster_stats["name"]}/texture.png',
-                       position=position, double_sided=True, scale=monster_stats['scale'],
+                       position=position, double_sided=True, scale=monster_stats['scale']*scale,
                        rotation=rotation, name=monster_stats["name"], parent=parent)
 
         self.collision_box = Entity(model='cube', parent=self, position=monster_stats['collider_position'],
@@ -442,10 +442,10 @@ class Monster(Entity):
 
 
 class Tree(Entity):
-    def __init__(self, game_state, position, parent):
+    def __init__(self, game_state, position, parent, scale=1):
         super().__init__(model='Assets/Models/Tree/treev2.fbx',
                          texture='Assets/Models/Tree/texture.png',
-                         scale=(0.05,0.04,0.05), position=position,
+                         scale=(0.05,0.04,0.05)*scale, position=position,
                          double_sided=True, name='tree', parent=parent)
 
         self.collision_box = Entity(model='cube', parent=self,
@@ -455,7 +455,7 @@ class Tree(Entity):
 
 class Gate(Entity):
     def __init__(self, game_state, position, locations, parent, complete=False, scale=(0.002,0.004,0.002), rotation_y=0):
-        super().__init__(parent=parent, complete=complete)
+        super().__init__(parent=parent, complete=complete, position=(0,-1,0))
 
         self.complete = complete
         self.name = f'gate.{locations}.incomplete' if not self.complete else f'gate.{locations}.complete'
@@ -504,7 +504,58 @@ class Stall(Entity):
                                     wireframe=True)
         self.merchant = Entity(model='Assets/Models/Stall/Merchant/merchant.fbx', texture='Assets/Models/Stall/Merchant/texture.jpg',
                                double_sided=True, parent=self, scale=(.11,.11,.11), position=(0,0,0))
+
+class CentaurMap(Entity):
+    def __init__(self, game_state, parent):
+        super().__init__(parent=parent, model='Assets/Models/Centaur/World/ground.fbx', texture='Assets/Models/Centaur/World/ground.png',
+                         double_sided=True, scale=(.05,.05,.05), position=(0,0,0), rotation_y=90)
         
+        self.ground_collider = Entity(model='cube', parent=self, collider='box', position=(0,0,0), scale=(5000,1,5000),
+                                      visible=game_state.debug_mode, wireframe=True)
+        self.left_collider = Entity(model='cube', parent=self, collider='box', position=(0,0,-1500), scale=(5,500,5000), rotation=(0,85,0),
+                                      visible=game_state.debug_mode, wireframe=True)
+        self.right_collider = Entity(model='cube', parent=self, collider='box', position=(0,0,1600), scale=(5,500,5000), rotation=(0,85,0),
+                                      visible=game_state.debug_mode, wireframe=True)
+        self.front_collider = Entity(model='cube', parent=self, collider='box', position=(-1700,0,0), scale=(5,500,5000), rotation=(0,5,0),
+                                      visible=game_state.debug_mode, wireframe=True)
+        self.back_collider = Entity(model='cube', parent=self, collider='box', position=(1800,0,0), scale=(5,500,5000), rotation=(0,-5,0),
+                                      visible=game_state.debug_mode, wireframe=True)
+        self.front_left_collider = Entity(model='cube', parent=self, collider='box', position=(-1500,0,450), scale=(400,500,2000), rotation=(0,-80,0),
+                                      visible=game_state.debug_mode, wireframe=True)
+        self.front_left_collider2 = Entity(model='cube', parent=self, collider='box', position=(-1500,0,700), scale=(300,500,800), rotation=(0,-40,0),
+                                      visible=game_state.debug_mode, wireframe=True)
+        self.front_right_collider = Entity(model='cube', parent=self, collider='box', position=(-1350,0,-750), scale=(350,500,2000), rotation=(0,70,0),
+                                      visible=game_state.debug_mode, wireframe=True)
+        self.map = ['TTTWWTTTTTTWWWWW',
+                    '  TWWWTO TWWWWT ',
+                    ' M TWW B WWWTT  T',
+                    'TM TWWW  WWTT     ',
+                    '   TWWWM WWT  MM  T',
+                    'T   TWW MWWT       ',
+                    '    TWW  WWT  T   T',
+                    '  M  TTMMTT        ',
+                    'T     M  M        T',
+                    '    T   M    T MM  T',
+                    'T         MM        ',
+                    'T   MM T      T  M  ',
+                    '    M     M       T',
+                    'T           T  M  T',
+                    'MM  T   MM         ',
+                    'WT  MM        T   T',
+                    'W   M    T  M    T ',
+                    'WW   T      M    ',
+                    'WWWT    S     TT',
+                    'WWWWMM  I  T T',
+                    'WWWWW TT T']
+        for x, row in enumerate(self.map):
+            for z, col in enumerate(row):
+                if col == 'T':
+                    Tree(game_state, ((x*200)-1700, 0, (z*200)-1600), parent=self, scale=20)
+
+
+        self.grass = Entity(parent=self, model='Assets/Models/Centaur/World/grass.fbx', texture='Assets/Models/Centaur/World/Grass_gradient.png',
+                            double_sided=True)
+
 
 class TutorialWorld(Entity):
     def __init__(self, game_state):
@@ -562,15 +613,8 @@ class MarketWorld(Entity):
 class LevelCreator(Entity):
     def __init__(self, game_state, monster_stats):
         super().__init__()
-            
-        self.ground = Entity(parent=self, model='plane', texture='grass', collider='box', scale=200, texture_scale=(4,4))
-        
+
         self.name = monster_stats['name']
-        
-        for i in range(20):
-            x = random.randint(-100,100)
-            z = random.randint(-100,100)
-            Monster(game_state, parent=self, monster_stats=monster_stats, position=(x,0,z), rotation=(0,random.randint(-360,360),0))
 
         self.location = game_state.location
 
@@ -578,12 +622,24 @@ class LevelCreator(Entity):
         self.next_scene = manager.locations[self.next_scene].lower()
         
         self.previous_scene = manager.locations.index(self.location.title()) - 1
-        self.previous_scene = manager.locations[self.previous_scene].lower()        
-
-        self.return_gate = Gate(game_state, parent=self, position=(0,-0.7,-10), locations=f'{self.location}.{self.previous_scene}', complete=True, rotation_y=180)
-        self.next_gate = Gate(game_state, parent=self, position=(0,-0.7,60), locations=f'{self.location}.{self.next_scene}')
-        
-        self.boss = Monster(game_state, parent=self, monster_stats=monster_stats, is_boss=True, gate=self.next_gate, position=Vec3(0,0,50))
+        self.previous_scene = manager.locations[self.previous_scene].lower()
+            
+        self.world = CentaurMap(game_state, self)
+        self.world.map.reverse()
+        for z, row in enumerate(self.world.map):
+            for x, col in enumerate(row):
+                position = ((x*8)-65,0,(z*8)-90)
+                if col == 'M':
+                    Monster(game_state, parent=self, monster_stats=monster_stats, position=position, rotation=(0,random.randint(-360,360),0), scale=20)
+                elif col == 'O':
+                    self.next_gate = Gate(game_state, parent=self, position=position, locations=f'{self.location}.{self.next_scene}')
+                elif col == 'I':
+                    self.return_gate = Gate(game_state, parent=self, position=position, locations=f'{self.location}.{self.previous_scene}', complete=True, rotation_y=180)
+                elif col == 'B':
+                    self.boss = Monster(game_state, parent=self, monster_stats=monster_stats, is_boss=True, gate=None, position=position)
+                elif col == 'S':
+                    manager.player.position = position
+        self.boss.gate = self.next_gate
 
         self.colliders = [self.return_gate.collision_box, self.next_gate.collision_box]
 
