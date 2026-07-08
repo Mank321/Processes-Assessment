@@ -108,7 +108,7 @@ Instead, I shrunk the forest down to a minimum size with just having the trees a
 and shrunk the main perimeter wall to fit the new forest size. It took a bit of time to get the
 exact coordinates right and the tree spacing and map array.
 -
-NOT-FIXED: When I began adding in custom monster world, specifically the first(centaur) world, I
+FIXED: When I began adding in custom monster world, specifically the first(centaur) world, I
 would fall through the floor either directly after loading into the world, or after I took a step,
 even though the collider was set to mesh. I did some debugging by disabling the player falling
 mechanics, which stopped the player from falling through the world, but still meant I could walk
@@ -121,7 +121,17 @@ I placed the world way below where I spawned and lowered my gravity so I would h
 as soon as I took a step, I fell right through. After much debugging, I gave up on the mesh
 collider and resorted to creating multiple custom hitboxes. But the first one I tried making
 wouldn't appear in the world. After much debugging and stripping it of everything non-essential,
-I realised I said mode='cube' instead of model='cube'.
+I realised I said mode='cube' instead of model='cube'. I would eventually figure out when
+building the basilisk world that for the mesh collider to work, the model needs to be a .obj
+instead of a .fbx.
+-
+NOT-FIXED: When making the basilisk world, I noticed that when I used a gate to go from the centuar world to
+the basilisk world, I would immediantly teleport to the center of the centaur world. I quickly
+noted that the location message was showing basilisk and centaur at the same time, so I deduced
+that I was being teleported to the basilisk world, then immediantly teleported back to the centaur
+world. I was being positioned at 0,0,0 because since the centaur world had already been created, it
+wouldn't use the custom world spawn and was defaulting to 0,0,0. The solution came to me while writing
+this, and that was to position every world map so that its spawn point would be at 0,0,0.
 
 COMBAT SYSTEM PROBLEMS
 FIXED: When creating the combat system, I added in the monster, gave it a hitbox, damage, and

@@ -108,12 +108,14 @@ class GameManager(Entity):
         main_menu.background.enabled = True
         main_menu.enabled = True
         main_menu.background.z = -1
+        application.paused = True
 
     def resume_game(self):
         main_menu.enabled = False
         main_menu.background.enabled = False
         mouse.locked = True
         main_menu.background.z = 1
+        application.paused = False
     
     def switch_scenes(self, gate):
         """."""
@@ -302,9 +304,10 @@ class Player(Entity):
         self.grounded = ground_ray.hit
         
         if self.grounded:
-            if self.velocity_y <= 0:
-                self.y = ground_ray.point.y
-                self.velocity_y = 0
+            #if self.velocity_y <= 0:
+            #    self.y = ground_ray.point.y
+            #    self.velocity_y = 0
+            self.velocity_y = max(0, self.velocity_y)
             if held_keys['space']:
                 self.velocity_y = self.jump_height
         else:
@@ -508,7 +511,7 @@ class Stall(Entity):
 class CentaurMap(Entity):
     def __init__(self, game_state, parent):
         super().__init__(parent=parent, model='Assets/Models/Centaur/World/ground.fbx', texture='Assets/Models/Centaur/World/ground.png',
-                         double_sided=True, scale=(.05,.05,.05), position=(0,0,0), rotation_y=90)
+                         double_sided=True, scale=(.05,.05,.05), position=(5,0,80), rotation_y=90)
         
         self.ground_collider = Entity(model='cube', parent=self, collider='box', position=(0,0,0), scale=(5000,1,5000),
                                       visible=game_state.debug_mode, wireframe=True)
@@ -551,11 +554,115 @@ class CentaurMap(Entity):
             for z, col in enumerate(row):
                 if col == 'T':
                     Tree(game_state, ((x*200)-1700, 0, (z*200)-1600), parent=self, scale=20)
-
+        
+        self.out_position = 0
 
         self.grass = Entity(parent=self, model='Assets/Models/Centaur/World/grass.fbx', texture='Assets/Models/Centaur/World/Grass_gradient.png',
                             double_sided=True)
 
+class BasiliskMap(Entity):
+    def __init__(self, game_state, parent):
+        super().__init__(parent=parent, rotation_y=90, position=(-2,7,-5), scale=(0.5,1,0.5))
+        self.hallway = Entity(parent=self, model='Assets/Models/Basilisk/World/hall.obj', texture='Assets/Models/Basilisk/World/Hall.png',
+                               double_sided=True, collider='mesh')
+        self.head = Entity(parent=self, model='Assets/Models/Basilisk/World/head.obj', texture='Assets/Models/Basilisk/World/Head.png',
+                            double_sided=True, collider='mesh')
+        self.main_room = Entity(parent=self, model='Assets/Models/Basilisk/World/main.obj', texture='Assets/Models/Basilisk/World/Main_Room.png',
+                                 double_sided=True, collider='mesh')
+        self.floor = Entity(parent=self, model='Assets/Models/Basilisk/World/floor.obj', texture='Assets/Models/Basilisk/World/Floor.png',
+                             double_sided=True, collider='mesh')
+        self.water = Entity(parent=self, model='Assets/Models/Basilisk/World/water.fbx', texture='Assets/Models/Basilisk/World/Water.png',
+                             double_sided=True, scale=0.01, rotation_y=180, z=6)
+        self.snakes = Entity(parent=self, model='Assets/Models/Basilisk/World/snakes.fbx', texture='Assets/Models/Basilisk/World/Snake.png',
+                              double_sided=True, scale=0.01, rotation_y=180, z=6)
+        self.snake_collider1 = Entity(parent=self, model='cube', collider='box', position=(-77.5,-3,-10), scale=(75,10,10),
+                                      visible=game_state.debug_mode, wireframe=True)
+        self.snake_collider2 = Entity(parent=self, model='cube', collider='box', position=(-77.5,-3,17), scale=(75,10,10),
+                                      visible=game_state.debug_mode, wireframe=True)
+        self.map = ['                 O                     ',
+                    '                                       ',
+                    '                                       ',
+                    '                                       ',
+                    '  TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT  ',
+                    ' T                                   T ',
+                    ' T                 B                 T ',
+                    'T        M                      M     T',
+                    'T                                     T',
+                    'T                                     T',
+                    'T                     M               T',
+                    'T    M                                T',
+                    'T                                M    T',
+                    'T           M                         T',
+                    'T                                     T',
+                    'T                   M                 T',
+                    'T                             M       T',
+                    'T                                     T',
+                    'T        M                            T',
+                    'T                                     T',
+                    ' T                 M                  T',
+                    ' T                              M     T',
+                    '  T    M                              T',
+                    '  T                     M            T ',
+                    '   T                                T  ',
+                    '    T       M                      T   ',
+                    '     T                      M     T    ',
+                    '      T                          T     ',
+                    '        T                      T       ',
+                    '         T       M            T        ',
+                    '           T            M   T          ',
+                    '             T            T            ',
+                    '              T          T             ',
+                    '              T          T             ',
+                    '              T  M       T             ',
+                    '              T          T             ',
+                    '              T          T             ',
+                    '              T         MT             ',
+                    '              T          T             ',
+                    '              TTTTT  TTTTT             ',
+                    '                  T  T                 ',
+                    '                  T  T                 ',
+                    '                  T MT                 ',
+                    '                  T  T                 ',
+                    '                  T  T                 ',
+                    '                  T  T                 ',
+                    '                  T  T                 ',
+                    '                  T  T                 ',
+                    '                  TM T                 ',
+                    '                  T  T                 ',
+                    '                  T  T                 ',
+                    '                  T  T                 ',
+                    '                  T  T                 ',
+                    '                  T  T                 ',
+                    '                  T MT                 ',
+                    '                  T  T                 ',
+                    '                  T  T                 ',
+                    '                  T  T                 ',
+                    '                  T  T                 ',
+                    '                  T  T                 ',
+                    '                  TM T                 ',
+                    '                  T  T                 ',
+                    '                  T  T                 ',
+                    '                  T  T                 ',
+                    '             TTTTTT  TTTTTT            ',
+                    '                                       ',
+                    '                                       ',
+                    '                                       ',
+                    '                  S                    ',
+                    '                  I                    ',]
+        for x, row in enumerate(self.map):
+            for z, col in enumerate(row):
+                if col == 'T':
+                    Entity(parent=self, model='cube', position=((x*4)-290, 0, (z*4)-75))
+        
+        self.out_position = 3
+        
+
+class GorgonMap(Entity):
+    def __init__(self, game_state, parent):
+        super().__init__(parent=parent)
+        self.ground = Entity(parent=self, model='plane', texture='grass', collider='box', scale=200, texture_scale=(4,4))
+        self.map = []
+        self.out_position = 0
 
 class TutorialWorld(Entity):
     def __init__(self, game_state):
@@ -623,22 +730,46 @@ class LevelCreator(Entity):
         
         self.previous_scene = manager.locations.index(self.location.title()) - 1
         self.previous_scene = manager.locations[self.previous_scene].lower()
-            
-        self.world = CentaurMap(game_state, self)
-        self.world.map.reverse()
-        for z, row in enumerate(self.world.map):
-            for x, col in enumerate(row):
-                position = ((x*8)-65,0,(z*8)-90)
-                if col == 'M':
-                    Monster(game_state, parent=self, monster_stats=monster_stats, position=position, rotation=(0,random.randint(-360,360),0), scale=20)
-                elif col == 'O':
-                    self.next_gate = Gate(game_state, parent=self, position=position, locations=f'{self.location}.{self.next_scene}')
-                elif col == 'I':
-                    self.return_gate = Gate(game_state, parent=self, position=position, locations=f'{self.location}.{self.previous_scene}', complete=True, rotation_y=180)
-                elif col == 'B':
-                    self.boss = Monster(game_state, parent=self, monster_stats=monster_stats, is_boss=True, gate=None, position=position)
-                elif col == 'S':
-                    manager.player.position = position
+        
+        if self.name == 'Centaur':
+            self.world = CentaurMap(game_state, self)
+            self.x_multi = 8
+            self.x_add = -60
+            self.z_multi = 8
+            self.z_add = -10
+        elif self.name == 'Basilisk':
+            self.world = BasiliskMap(game_state, self)
+            self.x_multi = 2
+            self.x_add = -36.5
+            self.z_multi = 2
+            self.z_add = 0
+        elif self.name == 'Gorgon':
+            self.world = GorgonMap(game_state, self)
+            self.x_multi = 1
+            self.x_add = 0
+            self.z_multi = 1
+            self.z_add = 0
+
+        if hasattr(self.world, 'map') and self.world.map:
+            self.world.map.reverse()
+            for z, row in enumerate(self.world.map):
+                for x, col in enumerate(row):
+                    position = ((x*self.x_multi)+self.x_add,0,(z*self.z_multi)+self.z_add)
+                    if col == 'M':
+                        Monster(game_state, parent=self, monster_stats=monster_stats, position=position, rotation=(0,random.randint(-360,360),0), scale=20)
+                    elif col == 'O':
+                        self.next_gate = Gate(game_state, parent=self, position=(position[0], self.world.out_position, position[2]), locations=f'{self.location}.{self.next_scene}')
+                    elif col == 'I':
+                        self.return_gate = Gate(game_state, parent=self, position=position, locations=f'{self.location}.{self.previous_scene}', complete=True, rotation_y=180)
+                    elif col == 'B':
+                        self.boss = Monster(game_state, parent=self, monster_stats=monster_stats, is_boss=True, gate=None, position=position)
+                    elif col == 'S':
+                        manager.player.position = (position[0], 1, position[2])
+        else:
+            self.next_gate = Gate(game_state, parent=self, position=(0,0,10), locations=f'{self.location}.{self.next_scene}')
+            self.return_gate = Gate(game_state, parent=self, position=(0,0,-2), locations=f'{self.location}.{self.previous_scene}', complete=True, rotation_y=180)
+            self.boss = Monster(game_state, parent=self, monster_stats=monster_stats, is_boss=True, gate=None, position=(0,0,8))
+
         self.boss.gate = self.next_gate
 
         self.colliders = [self.return_gate.collision_box, self.next_gate.collision_box]
@@ -668,9 +799,10 @@ def input(key):
 def update():
     if held_keys['escape']:
         manager.pause_game()
-    if held_keys['g']:
-        manager.player.gold += 1
-    if held_keys['x']:
-        manager.player.xp += 100
+    if manager.player is not None:
+        if held_keys['g']:
+            manager.player.gold += 1
+        if held_keys['x']:
+            manager.player.xp += 100
 
 app.run()
