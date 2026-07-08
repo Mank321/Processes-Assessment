@@ -154,7 +154,7 @@ class GameManager(Entity):
 
 class GameState():
     def __init__(self):
-        self.debug_mode = True
+        self.debug_mode = False
 
 class UIState(Entity):
     def __init__(self, game_state, player):
@@ -360,7 +360,7 @@ class Player(Entity):
         
         
 class Monster(Entity):
-    def __init__(self, game_state, parent, monster_stats, is_boss=False, is_tutorial=False, gate=None, position=Vec3(0,0,0), rotation=Vec3(0,0,0), scale=1):
+    def __init__(self, game_state, parent, monster_stats, is_boss=False, is_tutorial=False, gate=None, position=Vec3(0,0,0), rotation=Vec3(0,0,0), boss_type='fbx', scale=1):
         super().__init__(model=f'Assets/Models/{monster_stats["name"]}/monster.fbx',
                        texture=f'Assets/Models/{monster_stats["name"]}/texture.png',
                        position=position, double_sided=True, scale=monster_stats['scale']*scale,
@@ -387,7 +387,7 @@ class Monster(Entity):
         self.gate = gate
 
         if self.is_boss:
-            self.model = f'Assets/Models/{self.name}/Boss/boss.fbx'
+            self.model = f'Assets/Models/{self.name}/Boss/boss.{boss_type}'
             self.texture = f'Assets/Models/{self.name}/Boss/texture.png'
             self.scale = monster_stats['boss_scale']
             self.collision_box.scale = monster_stats['boss_collider_scale']
@@ -649,10 +649,6 @@ class BasiliskMap(Entity):
                     '                                       ',
                     '                  S                    ',
                     '                  I                    ',]
-        for x, row in enumerate(self.map):
-            for z, col in enumerate(row):
-                if col == 'T':
-                    Entity(parent=self, model='cube', position=((x*4)-290, 0, (z*4)-75))
         
         self.out_position = 3
         
@@ -762,7 +758,7 @@ class LevelCreator(Entity):
                     elif col == 'I':
                         self.return_gate = Gate(game_state, parent=self, position=position, locations=f'{self.location}.{self.previous_scene}', complete=True, rotation_y=180)
                     elif col == 'B':
-                        self.boss = Monster(game_state, parent=self, monster_stats=monster_stats, is_boss=True, gate=None, position=position)
+                        self.boss = Monster(game_state, parent=self, monster_stats=monster_stats, is_boss=True, gate=None, position=position, boss_type='obj', scale=0.1)
                     elif col == 'S':
                         manager.player.position = (position[0], 1, position[2])
         else:
