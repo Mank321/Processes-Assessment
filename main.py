@@ -51,7 +51,7 @@ GORGON_STATS = {'name': 'Gorgon',
                 'scale': Vec3(0.015,0.025,0.015),
                 'collider_scale': Vec3(100,200,100),
                 'collider_position': Vec3(0,100,0),
-                'boss_scale':5,
+                'boss_scale':0.04,
                 'boss_collider_scale':1,
                 'boss_collider_pos': Vec3(0,100,0),
                 'boss_rotation': 0,
@@ -208,6 +208,8 @@ class UIState(Entity):
             self.player_experience_bar.value = self.player.xp
             self.damage_text.text = f'Damage: {self.player.damage}'
             self.level_display.text = self.player.level
+            self.teleport_buttons['Gorgon'].on_click = lambda: self.player.teleport('gorgon')
+            self.teleport_buttons['Gorgon'].disabled = False
 
             if self.player.health <= 0 and not self.death_menu.enabled:
                 if self.death_menu.start_function is None:
@@ -237,7 +239,7 @@ class Player(Entity):
         self.armor = 0
         self.health = 20
         self.max_health = self.health
-        self.damage = 1
+        self.damage = 100
         self.level = 1
         self.old_req = 3
         self.levelup_req = 5
@@ -369,7 +371,7 @@ class Player(Entity):
             if name.startswith('gate') and name.split('.')[-1] == 'complete':
                 scenes = name[5:]
                 manager.switch_scenes(scenes)
-        
+
         
 class Monster(Entity):
     def __init__(self, game_state, parent, monster_stats, is_boss=False, is_tutorial=False, gate=None, position=Vec3(0,0,0), rotation=Vec3(0,0,0), boss_type='fbx', scale=1, enabled=True):
@@ -699,10 +701,13 @@ class BasiliskMap(Entity):
 
 class GorgonMap(Entity):
     def __init__(self, game_state, parent):
-        super().__init__(parent=parent)
-        self.ground = Entity(parent=self, model='plane', texture='grass', collider='box', scale=200, texture_scale=(4,4))
+        super().__init__(parent=parent, model='Assets/Models/Gorgon/World/world.obj', texture='Assets/Models/Gorgon/World/texture.png', double_sided=True,
+                         position=(0,2,0), scale=(1,1.2,1), rotation_y=180, collider='mesh')
+        self.statues = Entity(parent=self, model='Assets/Models/Gorgon/World/gorgon_statues.fbx', texture='Assets/Models/Gorgon/World/Statues/texture.png', double_sided=True,
+                              scale=(0.01,0.01,0.01))
         self.map = []
         self.out_position = 0
+
 
 class TutorialWorld(Entity):
     def __init__(self, game_state):
@@ -848,6 +853,6 @@ def update():
         if held_keys['g']:
             manager.player.gold += 1
         if held_keys['x']:
-            manager.player.xp += 1
+            manager.player.xp += 100
 
 app.run()

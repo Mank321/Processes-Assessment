@@ -1,0 +1,28 @@
+# 
+# Wavefront material file
+# Created in RealityCapture
+# Engine version v1.0.3.6310
+# 
+
+newmtl socha_100k_Material
+Ka 1 1 1
+Kd 1 1 1
+d 1
+Ns 0
+illum 1
+
+newmtl socha_100k_Material_u1_v1
+Ka 1 1 1
+Kd 1 1 1
+d 1
+Ns 0
+illum 1
+map_Kd socha_100k_u1_v1.png
+
+newmtl socha_100k_Material_u2_v1
+Ka 1 1 1
+Kd 1 1 1
+d 1
+Ns 0
+illum 1
+map_Kd socha_100k_u2_v1.png
