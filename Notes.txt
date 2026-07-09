@@ -135,6 +135,30 @@ this, and that was to position every world map so that its spawn point would be 
 worked, but it definitely didn't later. No matter how I moved the map, I would still spawn directly into
 the basilisk centaur gate and be teleported right back to the centaur map. To fix it, I removed the
 player teleporting to the map spawn, and tweaked some world positioning coordinates.
+-
+FIXED: When making the gorgon world, I started off with a model that worked pretty well. It didn't take
+long before I got it into the right position and scale. But then I realized since there was only a single
+texture material, it was hard to percieve depth. So I added a material slot in blender and did some texturing.
+I also got some statues from the internet for decoration. But I had multiple problems when trying to 
+bake the material slots together. I couldn't figure out why I couldn't add thickness to the model using
+the solidify modifier to make its collisions better. Eventually I figured out I needed to apply all 
+transformation to the model, which solved that problem. Next I needed to bake the materials together, but
+when I unwrapped, the textures got stretched, but If I increased the size of the uv map it would fail to
+bake. I tried increasing the resolution of the texture image which didn't do much. After several hours of
+trialling and debugging and researching, I learned that I needed to use a UV mapping node combined with
+multiple uv maps selected in a certain order. This finally allowed me to combine the materials into a
+single image, but when I loaded it into the game, it was extremely pixalated, even though that had been
+one of my main goals during the baking and problems I had. I tried doubling the resolution of the texture
+again, but that didn't result in much, so I was forced to return to the original model and texture.
+
+FIXED: When the first time I tried to get the statues in, I accidentally exported the whole blender file,
+so I re-exported it only to find the entire file in the map still. I realised that ursina must be saving
+the file internally and saving it based on name, so I had to change the file name each time I exported it.
+But for some reason when I exported the fbx(statues) file, it loaded into the world as mirrored, unlike the
+obj(terrain). To fix this, I used a mirror modifier on the statues in blender and exported the mirrored
+statues, which came out fine. I did find their texture extremely pixalated, so I increased its resolution
+too.
+
 
 COMBAT SYSTEM PROBLEMS
 FIXED: When creating the combat system, I added in the monster, gave it a hitbox, damage, and
