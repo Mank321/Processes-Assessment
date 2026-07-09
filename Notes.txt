@@ -125,13 +125,16 @@ I realised I said mode='cube' instead of model='cube'. I would eventually figure
 building the basilisk world that for the mesh collider to work, the model needs to be a .obj
 instead of a .fbx.
 -
-NOT-FIXED: When making the basilisk world, I noticed that when I used a gate to go from the centuar world to
+FIXED: When making the basilisk world, I noticed that when I used a gate to go from the centuar world to
 the basilisk world, I would immediantly teleport to the center of the centaur world. I quickly
 noted that the location message was showing basilisk and centaur at the same time, so I deduced
 that I was being teleported to the basilisk world, then immediantly teleported back to the centaur
 world. I was being positioned at 0,0,0 because since the centaur world had already been created, it
 wouldn't use the custom world spawn and was defaulting to 0,0,0. The solution came to me while writing
-this, and that was to position every world map so that its spawn point would be at 0,0,0.
+this, and that was to position every world map so that its spawn point would be at 0,0,0. This might've
+worked, but it definitely didn't later. No matter how I moved the map, I would still spawn directly into
+the basilisk centaur gate and be teleported right back to the centaur map. To fix it, I removed the
+player teleporting to the map spawn, and tweaked some world positioning coordinates.
 
 COMBAT SYSTEM PROBLEMS
 FIXED: When creating the combat system, I added in the monster, gave it a hitbox, damage, and
@@ -161,6 +164,13 @@ basilisk, which was tiny. I tried changing the scale, but that made the collisio
 I eventually figured out that the collision box had hard-coded position and scale variables that 
 were designed for the centaur. To fix this, I added in collider_scale and collider_position into
 the monster stats.
+-
+FIXED: When implementing the basilisk boss, It would always face away from me when moving towards
+me, no matter what I changed its forward axis to when exporting the model, or changing its rotation
+value. I eventually got it working by adding in a new boss_rotation value to the monster stats, and
+setting the basilisk boss to be 90 degrees on the y-axis. My first attempt at this set the value 
+to Vec3(0,90,0), but I got a TypeError as soon as I got close to a boss since I was trying to do
+rotation_y(single value) += boss_rotation(class). So I just changed the Vec3() to 90.
 
 
 PLAYER SYSTEMS

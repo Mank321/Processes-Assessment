@@ -16,6 +16,7 @@ CENTAUR_STATS = {'name': 'Centaur',
                  'boss_scale':Vec3(2,3,2),
                  'boss_collider_scale':Vec3(0.7,3,1.5),
                  'boss_collider_pos': Vec3(0,1,0),
+                 'boss_rotation': 0,
                  'boss_speed':1.5,
                  'boss_sight':15,
                  'boss_closeness':2}
@@ -25,18 +26,19 @@ BASILISK_STATS = {'name': 'Basilisk',
                 'damage': 10,
                 'worth':10,
                 'speed':35000,
-                'sight':13,
+                'sight':15,
                 'closeness': 5.5,
                 'attack_speed': 1,
                 'scale': Vec3(0.0001,0.0002,0.0001),
                 'collider_scale': Vec3(10000,40000,100000),
                 'collider_position': Vec3(1,20000,1),
-                'boss_scale':5,
-                'boss_collider_scale':1,
-                'boss_collider_pos': Vec3(1,20000,1),
-                'boss_speed':2,
-                'boss_sight':15,
-                'boss_closeness':3}
+                'boss_scale':Vec3(2,2,2),
+                'boss_collider_scale': Vec3(6,3,3),
+                'boss_collider_pos': Vec3(-1,0,0),
+                'boss_rotation': 90,
+                'boss_speed':3,
+                'boss_sight':20,
+                'boss_closeness':10}
 
 GORGON_STATS = {'name': 'Gorgon',
                 'health': 1000,
@@ -52,6 +54,7 @@ GORGON_STATS = {'name': 'Gorgon',
                 'boss_scale':5,
                 'boss_collider_scale':1,
                 'boss_collider_pos': Vec3(0,100,0),
+                'boss_rotation': 0,
                 'boss_speed':2,
                 'boss_sight':15,
                 'boss_closeness':3}
@@ -119,7 +122,7 @@ class GameManager(Entity):
     
     def switch_scenes(self, gate):
         """."""
-        self.player.position = (0,0,0)
+        self.player.position = (0,1,0)
         new_scene_name = gate.split('.')[1]
         old_scene_name = gate.split('.')[0]
 
@@ -154,7 +157,7 @@ class GameManager(Entity):
 
 class GameState():
     def __init__(self):
-        self.debug_mode = False
+        self.debug_mode = True
 
 class UIState(Entity):
     def __init__(self, game_state, player):
@@ -230,14 +233,15 @@ class Player(Entity):
         self.max_health = self.health
         self.damage = 1
         self.level = 1
-        self.levelup_req = 10 * self.level
+        self.old_req = 3
+        self.levelup_req = 5
         self.xp = 0
         self.stamina = 5
         self.max_stamina = self.stamina
         self.gold = 0
         self.max_gold = 10
         self.inventory = None
-        self.reach = 5
+        self.reach = 2
         self.distance = float('inf')
         
         camera.position = (0,1,0)
@@ -283,10 +287,11 @@ class Player(Entity):
         self.health = self.max_health
         self.xp -= self.levelup_req
         self.level += 1
-        self.levelup_req *= 2
+        self.old_req, self.levelup_req = self.levelup_req, self.old_req + self.levelup_req
         self.max_stamina += 2
         self.damage += 1
         self.armor += 0.5
+        self.basereach += 0.1
     
     def teleport(self, location):
         manager.switch_scenes(f'{self.game_state.location}.{location}')
@@ -395,6 +400,7 @@ class Monster(Entity):
             self.speed = monster_stats['boss_speed']
             self.closeness = monster_stats['boss_closeness']
             self.sight = monster_stats['boss_sight']
+            self.boss_rotation = monster_stats['boss_rotation']
             self.damage *= 2
             self.health *= 5
             self.worth *= 10
@@ -405,6 +411,8 @@ class Monster(Entity):
         if self.closeness < self.distance <= self.sight:
             self.look_at_2d(manager.player, 'y')
             self.position += self.forward * time.dt * self.speed
+            if self.is_boss:
+                self.rotation_y += self.boss_rotation
 
         if self.distance <= self.closeness:
             damage_delt = self.damage - manager.player.armor
@@ -562,7 +570,7 @@ class CentaurMap(Entity):
 
 class BasiliskMap(Entity):
     def __init__(self, game_state, parent):
-        super().__init__(parent=parent, rotation_y=90, position=(-2,7,-5), scale=(0.5,1,0.5))
+        super().__init__(parent=parent, rotation_y=90, position=(-2,7,-7), scale=(0.5,1,0.5))
         self.hallway = Entity(parent=self, model='Assets/Models/Basilisk/World/hall.obj', texture='Assets/Models/Basilisk/World/Hall.png',
                                double_sided=True, collider='mesh')
         self.head = Entity(parent=self, model='Assets/Models/Basilisk/World/head.obj', texture='Assets/Models/Basilisk/World/Head.png',
@@ -645,9 +653,9 @@ class BasiliskMap(Entity):
                     '                  T  T                 ',
                     '             TTTTTT  TTTTTT            ',
                     '                                       ',
-                    '                                       ',
-                    '                                       ',
                     '                  S                    ',
+                    '                                       ',
+                    '                                       ',
                     '                  I                    ',]
         
         self.out_position = 3
@@ -733,18 +741,21 @@ class LevelCreator(Entity):
             self.x_add = -60
             self.z_multi = 8
             self.z_add = -10
+            self.boss_type = 'fbx'
         elif self.name == 'Basilisk':
             self.world = BasiliskMap(game_state, self)
             self.x_multi = 2
             self.x_add = -36.5
             self.z_multi = 2
-            self.z_add = 0
+            self.z_add = -3
+            self.boss_type = 'obj'
         elif self.name == 'Gorgon':
             self.world = GorgonMap(game_state, self)
             self.x_multi = 1
             self.x_add = 0
             self.z_multi = 1
             self.z_add = 0
+            self.boss_type = 'fbx'
 
         if hasattr(self.world, 'map') and self.world.map:
             self.world.map.reverse()
@@ -752,15 +763,17 @@ class LevelCreator(Entity):
                 for x, col in enumerate(row):
                     position = ((x*self.x_multi)+self.x_add,0,(z*self.z_multi)+self.z_add)
                     if col == 'M':
-                        Monster(game_state, parent=self, monster_stats=monster_stats, position=position, rotation=(0,random.randint(-360,360),0), scale=20)
+                        
+                        Monster(game_state, parent=self, monster_stats=monster_stats, position=position, rotation=(0,random.randint(-360,360),0))
                     elif col == 'O':
                         self.next_gate = Gate(game_state, parent=self, position=(position[0], self.world.out_position, position[2]), locations=f'{self.location}.{self.next_scene}')
                     elif col == 'I':
                         self.return_gate = Gate(game_state, parent=self, position=position, locations=f'{self.location}.{self.previous_scene}', complete=True, rotation_y=180)
                     elif col == 'B':
-                        self.boss = Monster(game_state, parent=self, monster_stats=monster_stats, is_boss=True, gate=None, position=position, boss_type='obj', scale=0.1)
-                    elif col == 'S':
-                        manager.player.position = (position[0], 1, position[2])
+                        self.boss = Monster(game_state, parent=self, monster_stats=monster_stats, is_boss=True, gate=None, position=position, boss_type=self.boss_type, rotation=(0,0,0))#, scale=0.1)
+                    #elif col == 'S':
+                    #    continue
+                    #    manager.player.position = (position[0], 1, position[2])
         else:
             self.next_gate = Gate(game_state, parent=self, position=(0,0,10), locations=f'{self.location}.{self.next_scene}')
             self.return_gate = Gate(game_state, parent=self, position=(0,0,-2), locations=f'{self.location}.{self.previous_scene}', complete=True, rotation_y=180)
@@ -799,6 +812,6 @@ def update():
         if held_keys['g']:
             manager.player.gold += 1
         if held_keys['x']:
-            manager.player.xp += 100
+            manager.player.xp += 1
 
 app.run()
