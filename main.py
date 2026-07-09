@@ -32,7 +32,7 @@ BASILISK_STATS = {'name': 'Basilisk',
                 'scale': Vec3(0.0001,0.0002,0.0001),
                 'collider_scale': Vec3(10000,40000,100000),
                 'collider_position': Vec3(1,20000,1),
-                'boss_scale':Vec3(2,2,2),
+                'boss_scale':Vec3(2,6,2),
                 'boss_collider_scale': Vec3(6,3,3),
                 'boss_collider_pos': Vec3(-1,0,0),
                 'boss_rotation': 90,
@@ -81,8 +81,8 @@ class GameManager(Entity):
             'Centaur',
             'Basilisk',
             'Gorgon',
-            'Cyclops',
-            'Giant',
+            'Chimera',
+            'Hydra',
         ]
 
     def start_game(self):
@@ -139,18 +139,27 @@ class GameManager(Entity):
             if new_scene_name == 'market':
                 self.market_world = MarketWorld(self.game_state)
                 new_scene = self.market_world
+                self.ui_state.teleport_buttons['Market'].on_click = lambda: self.player.teleport('market')
+                self.ui_state.teleport_buttons['Market'].disabled = False
             elif new_scene_name == 'centaur':
                 self.centaur_world = LevelCreator(self.game_state, monster_stats=CENTAUR_STATS)
                 new_scene = self.centaur_world
+                self.ui_state.teleport_buttons['Centaur'].on_click = lambda: self.player.teleport('centaur')
+                self.ui_state.teleport_buttons['Centaur'].disabled = False
             elif new_scene_name == 'basilisk':
                 self.basilisk_world = LevelCreator(self.game_state, monster_stats=BASILISK_STATS)
                 new_scene = self.basilisk_world
+                self.ui_state.teleport_buttons['Basilisk'].on_click = lambda: self.player.teleport('basilisk')
+                self.ui_state.teleport_buttons['Basilisk'].disabled = False
             elif new_scene_name == 'gorgon':
                 self.gorgon_world = LevelCreator(self.game_state, monster_stats=GORGON_STATS)
                 new_scene = self.gorgon_world
+                self.ui_state.teleport_buttons['Gorgon'].on_click = lambda: self.player.teleport('gorgon')
+                self.ui_state.teleport_buttons['Gorgon'].disabled = False
 
-        new_scene.enable()
-        old_scene.disable()
+        if new_scene_name != old_scene_name:
+            new_scene.enable()
+            old_scene.disable()
 
         print_on_screen(f'--{new_scene_name.title()}--', position=(-0.1,0.45), scale=3, duration=2)
 
@@ -175,11 +184,12 @@ class UIState(Entity):
 
         self.teleport_hud = Panel(parent=camera.ui, color=color.black, enabled=False, scale=(0.7,0.6), position=(0,0,1))
         self.teleport_hud_text = Text(parent=self.teleport_hud, text='Teleport to the following', color=color.red, text_scale=10, origin=(0,0,0), position=(0,0.4,-5))
-        self.teleport_tutorial_button = Button(parent=self.teleport_hud, text='Tutorial', text_size=2, color=color.lime, scale=(0.6,0.15), position=(0,0.3,-1))
-        self.teleport_market_button = Button(parent=self.teleport_hud, text='Market', text_size=2, color=color.lime, scale=(0.6,0.15), position=(0,0.1,-1))
-        self.teleport_centaur_button = Button(parent=self.teleport_hud, text='Centaur', text_size=2, color=color.lime, scale=(0.6,0.15), position=(0,-0.1,-1))
-        self.teleport_gorgon_button = Button(parent=self.teleport_hud, text='Gorgon', text_size=2, color=color.lime, scale=(0.6,0.15), position=(0,-0.3,-3), disabled=True)
-        self.teleport_basilisk_button = Button(parent=self.teleport_hud, text='Basilisk', text_size=2, color=color.lime, scale=(0.6,0.15), position=(0,-0.5,-1))
+        self.teleport_buttons = {
+            'Tutorial': Button(parent=self.teleport_hud, text='Tutorial', text_size=2, color=color.lime, scale=(0.6,0.15), position=(0,0.3,-1)),
+            'Market': Button(parent=self.teleport_hud, text='Market', text_size=2, color=color.lime, scale=(0.6,0.15), position=(0,0.1,-1), disabled=True),
+            'Centaur': Button(parent=self.teleport_hud, text='Centaur', text_size=2, color=color.lime, scale=(0.6,0.15), position=(0,-0.1,-1), disabled=True),
+            'Basilisk': Button(parent=self.teleport_hud, text='Basilisk', text_size=2, color=color.lime, scale=(0.6,0.15), position=(0,-0.3,-1), disabled=True),
+            'Gorgon': Button(parent=self.teleport_hud, text='Gorgon', text_size=2, color=color.lime, scale=(0.6,0.15), position=(0,-0.5,-3), disabled=True)}
 
     def death_screen(self):
         mouse.locked = False
@@ -189,11 +199,7 @@ class UIState(Entity):
 
     def update(self):
         if self.player != None:
-            self.teleport_tutorial_button.on_click = lambda: self.player.teleport('tutorial')
-            self.teleport_market_button.on_click = lambda: self.player.teleport('market')
-            self.teleport_centaur_button.on_click = lambda: self.player.teleport('centaur')
-            self.teleport_gorgon_button.on_click = lambda: self.player.teleport('gorgon')
-            self.teleport_basilisk_button.on_click = lambda: self.player.teleport('basilisk')
+            self.teleport_buttons['Tutorial'].on_click = lambda: self.player.teleport('tutorial')
             self.player_gold_bar.max_value = self.player.max_gold
             self.player_gold_bar.value = self.player.gold
             self.player_health_bar.max_value = self.player.max_health
@@ -241,7 +247,7 @@ class Player(Entity):
         self.gold = 0
         self.max_gold = 10
         self.inventory = None
-        self.reach = 2
+        self.basereach = 2
         self.distance = float('inf')
         
         camera.position = (0,1,0)
@@ -294,6 +300,7 @@ class Player(Entity):
         self.basereach += 0.1
     
     def teleport(self, location):
+        self.ui_state
         manager.switch_scenes(f'{self.game_state.location}.{location}')
 
     def update(self):
@@ -365,19 +372,22 @@ class Player(Entity):
         
         
 class Monster(Entity):
-    def __init__(self, game_state, parent, monster_stats, is_boss=False, is_tutorial=False, gate=None, position=Vec3(0,0,0), rotation=Vec3(0,0,0), boss_type='fbx', scale=1):
+    def __init__(self, game_state, parent, monster_stats, is_boss=False, is_tutorial=False, gate=None, position=Vec3(0,0,0), rotation=Vec3(0,0,0), boss_type='fbx', scale=1, enabled=True):
         super().__init__(model=f'Assets/Models/{monster_stats["name"]}/monster.fbx',
                        texture=f'Assets/Models/{monster_stats["name"]}/texture.png',
                        position=position, double_sided=True, scale=monster_stats['scale']*scale,
-                       rotation=rotation, name=monster_stats["name"], parent=parent)
+                       rotation=rotation, name=monster_stats["name"], parent=parent, enabled=enabled)
 
         self.collision_box = Entity(model='cube', parent=self, position=monster_stats['collider_position'],
                                     scale=monster_stats['collider_scale'], visible=game_state.debug_mode,
                                     wireframe=True, name=f'{monster_stats["name"]}.collider')
 
         self.game_state = game_state
+        self.parent = parent
+        self.monster_stats = monster_stats
         self.name = monster_stats['name']
         self.health = monster_stats['health']
+        self.max_health = monster_stats['health']
         self.damage = monster_stats['damage']
         self.sight = monster_stats['sight']
         self.worth = monster_stats['worth']
@@ -385,9 +395,12 @@ class Monster(Entity):
         self.attack_speed = monster_stats['attack_speed']
         self.closeness = monster_stats['closeness']
         self.position = position
+        self.origin_position = position
         self.scale = monster_stats['scale']
         self.rotation = rotation
+        self.origin_rotation = rotation
         self.is_boss = is_boss
+        self.is_boss_true = is_boss
         self.is_tutorial = is_tutorial
         self.gate = gate
 
@@ -401,11 +414,62 @@ class Monster(Entity):
             self.closeness = monster_stats['boss_closeness']
             self.sight = monster_stats['boss_sight']
             self.boss_rotation = monster_stats['boss_rotation']
+            self.origin_rotation = self.boss_rotation
             self.damage *= 2
             self.health *= 5
+            self.max_health = self.health
             self.worth *= 10
 
-    def distance_check(self):
+    def death(self):
+        self.visible = False
+        self.collision_box.visible = False
+        self.enabled = False
+        self.collision_box.enabled = False
+        self.ignore = True
+        self.collision_box.ignore = True
+        self.is_boss = False
+        self.is_tutorial = False
+        invoke(self.respawn, delay=self.monster_delay)
+    
+    def respawn(self):
+        self.position = self.origin_position
+        self.rotation = self.origin_rotation
+        self.visible = True
+        self.collision_box.visible = True
+        self.enabled = True
+        self.collision_box.enabled = True
+        self.ignore = False
+        self.collision_box.ignore = False
+        self.health = self.max_health
+
+    def on_click(self):
+        """This triggers when the mouse clicks the monster."""
+        self.distance = distance(self, manager.player)
+        if self.distance <= manager.player.basereach + self.closeness:
+            self.health -= manager.player.damage
+
+            # Flash Red Effect
+            self.blink(color.red)
+            
+            if self.health <= 0:
+                self.monster_delay = 10
+                if self.is_boss_true:
+                    print_on_screen(f'<red>{self.name.title()} boss Defeated!', position=(-0.4,0.4), scale=3, duration=2)
+                    self.monster_delay=60
+                if self.is_boss or self.is_tutorial:
+                    self.gate.portal.animate('alpha', 1, duration=1, curve=curve.in_out_sine)
+                    self.gate.pattern.animate_color(color.green,duration=1, curve=curve.in_out_sine)
+                    self.gate.complete = True
+                    self.gate.name = f'{self.gate.name[:-10]}complete'
+                    self.gate.collision_box.name = self.gate.name
+                    camera.shake(duration=1)
+                manager.player.gold += self.worth
+                manager.ui_state.player_gold_bar.value += self.worth
+                manager.player.xp += self.worth
+                manager.ui_state.player_experience_bar.value += self.worth
+                self.death()
+
+    def update(self):
         """."""
         self.distance = distance(self, manager.player)
         if self.closeness < self.distance <= self.sight:
@@ -418,34 +482,6 @@ class Monster(Entity):
             damage_delt = self.damage - manager.player.armor
             if damage_delt >= 1:
                 manager.player.health -= damage_delt * time.dt * self.attack_speed
-
-    def on_click(self):
-        """This triggers when the mouse clicks the monster."""
-        self.distance = distance(self, manager.player)
-        if self.distance <= manager.player.reach + self.closeness:
-            self.health -= manager.player.damage
-
-            # Flash Red Effect
-            self.blink(color.red)
-            
-            if self.health <= 0:
-                if self.is_boss:
-                    print_on_screen(f'<red>{self.name.title()} boss Defeated!', position=(-0.4,0.4), scale=3, duration=2)
-                if self.is_boss or self.is_tutorial:
-                    self.gate.portal.animate('alpha', 1, duration=1, curve=curve.in_out_sine)
-                    self.gate.pattern.animate_color(color.green,duration=1, curve=curve.in_out_sine)
-                    self.gate.complete = True
-                    self.gate.name = f'{self.gate.name[:-10]}complete'
-                    self.gate.collision_box.name = self.gate.name
-                    camera.shake(duration=1)
-                manager.player.gold += self.worth
-                manager.ui_state.player_gold_bar.value += self.worth
-                manager.player.xp += self.worth
-                manager.ui_state.player_experience_bar.value += self.worth
-                destroy(self)
-
-    def update(self):
-        self.distance_check()
 
     def input(self, key):
         if key == 'left mouse up':
@@ -770,7 +806,7 @@ class LevelCreator(Entity):
                     elif col == 'I':
                         self.return_gate = Gate(game_state, parent=self, position=position, locations=f'{self.location}.{self.previous_scene}', complete=True, rotation_y=180)
                     elif col == 'B':
-                        self.boss = Monster(game_state, parent=self, monster_stats=monster_stats, is_boss=True, gate=None, position=position, boss_type=self.boss_type, rotation=(0,0,0))#, scale=0.1)
+                        self.boss = Monster(game_state, parent=self, monster_stats=monster_stats, is_boss=True, gate=None, position=position, boss_type=self.boss_type)
                     #elif col == 'S':
                     #    continue
                     #    manager.player.position = (position[0], 1, position[2])

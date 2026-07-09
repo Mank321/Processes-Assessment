@@ -171,6 +171,18 @@ value. I eventually got it working by adding in a new boss_rotation value to the
 setting the basilisk boss to be 90 degrees on the y-axis. My first attempt at this set the value 
 to Vec3(0,90,0), but I got a TypeError as soon as I got close to a boss since I was trying to do
 rotation_y(single value) += boss_rotation(class). So I just changed the Vec3() to 90.
+-
+FIXED: When I was implementing monster respawns, I duplicated the monster as it died, set It
+to be disabled, then had an invoke function wait for a bit and enable it while the original was
+destroyed. The problem with this was that upon creation, the original monster was replaced by the
+duplicate which came in the form of a white cube covering most of the new monster's model, and
+when the invoke function finally ran, the game crashed. I soon realised that the white cube was
+actually the hitbox without wireform. I scrapped this idea, and decided to make a death method
+that's called when the monster dies instead of being destroyed. The method completely disabled the 
+monster, and invokes a respawn method that will reenable the monster after some time with its
+original position, rotation, and health. But for some reason, this disabled the gates after a
+few monster kills. I fixed this by disabling the fact that it was considered a boss/tutorial
+monster, which was messing with the portals.
 
 
 PLAYER SYSTEMS
@@ -182,11 +194,18 @@ monster class that deals damage to the player. I intially replaced it with a sim
 health -= damage * time.dt, but this resulted in many decimal places. So in the ui_state update
 method, I simply made it display a rounded number.
 -
-NOT-FIXED: When building the teleport feature, I initially started out as having a button to
+FIXED: When building the teleport feature, I initially started out as having a button to
 activate it, but then realised the mouse was locked so the player couldn't press any buttons. I
 fixed this by replacing the button with a keybind. I will need to make the player aware of it
 though. When I got to teleporting, I tried teleporting to a world I was already in, and everything
 disappeared. I will need to disable the button that leads to the world the player is currently in.
+I fixed it by adding in a check to see if the new scene equals the old scene before enabling or 
+disabling anything.
+-
+FIXED: When building the teleport feature, I tried disabling all the buttons at the start, then assign 
+their on_click functions when the player had been created. But this still let the player use the
+button. I moved the addition of an on_click function inside the switch_scenes method so that the
+button would do nothing until the world had actually been visited.
 
 COMPUTER/DEVICE AND SOFTWARE PROBLEMS
 NOT-FIXED: While working on the game, I would sometimes change computers. I'd build a feature,
