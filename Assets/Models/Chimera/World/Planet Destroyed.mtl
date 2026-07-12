@@ -1,0 +1,450 @@
+newmtl ModelGround_Material001
+Ks 1 1 1
+map_Kd DATA009.png
+cm none
+opaque yes
+
+newmtl ModelMagma A_Material002
+Ks 1 1 1
+map_Kd DATA003.png
+cm none
+opaque yes
+
+newmtl ModelMagma B_Material003
+Ks 1 1 1
+map_Kd DATA004.png
+cm none
+opaque yes
+
+newmtl ModelMain A_Material004
+Ks 1 1 1
+map_Kd DATA009.png
+cm none
+opaque yes
+
+newmtl ModelMain B_Material005
+Ks 1 1 1
+map_Kd DATA009.png
+cm none
+opaque yes
+
+newmtl ModelMesh A_Material006
+Ks 1 1 1
+map_Kd DATA003.png
+cm none
+opaque yes
+
+newmtl ModelMesh B_Material007
+Ks 1 1 1
+map_Kd DATA003.png
+cm none
+opaque yes
+
+newmtl ModelObject A_Material008
+Ks 1 1 1
+map_Kd DATA003.png
+cm none
+opaque yes
+
+newmtl ModelObject B_Material009
+Ks 1 1 1
+map_Kd DATA003.png
+cm none
+opaque yes
+
+newmtl ModelObject C_Material010
+Ks 1 1 1
+map_Kd DATA003.png
+cm none
+opaque yes
+
+newmtl ModelObject D_Material011
+Ks 1 1 1
+map_Kd DATA003.png
+cm none
+opaque yes
+
+newmtl ModelObject E_Material012
+Ks 1 1 1
+map_Kd DATA003.png
+cm none
+opaque yes
+
+newmtl ModelObject F_Material013
+Ks 1 1 1
+map_Kd DATA003.png
+cm none
+opaque yes
+
+newmtl ModelObject G_Material014
+Ks 1 1 1
+map_Kd DATA003.png
+cm none
+opaque yes
+
+newmtl ModelObject H_Material015
+Ks 1 1 1
+map_Kd DATA003.png
+cm none
+opaque yes
+
+newmtl ModelObject I_Material016
+Ks 1 1 1
+map_Kd DATA003.png
+cm none
+opaque yes
+
+newmtl ModelObject J_Material017
+Ks 1 1 1
+map_Kd DATA003.png
+cm none
+opaque yes
+
+newmtl ModelObject K_Material018
+Ks 1 1 1
+map_Kd DATA003.png
+cm none
+opaque yes
+
+newmtl ModelObject L_Material019
+Ks 1 1 1
+map_Kd DATA003.png
+cm none
+opaque yes
+
+newmtl ModelObject M_Material020
+Ks 1 1 1
+map_Kd DATA003.png
+cm none
+opaque yes
+
+newmtl ModelObject N_Material021
+Ks 1 1 1
+map_Kd DATA003.png
+cm none
+opaque yes
+
+newmtl ModelObject O_Material022
+Ks 1 1 1
+map_Kd DATA003.png
+cm none
+opaque yes
+
+newmtl ModelObject P_Material023
+Ks 1 1 1
+map_Kd DATA003.png
+cm none
+opaque yes
+
+newmtl ModelObject Q_Material024
+Ks 1 1 1
+map_Kd DATA003.png
+cm none
+opaque yes
+
+newmtl ModelObject R_Material025
+Ks 1 1 1
+map_Kd DATA003.png
+cm none
+opaque yes
+
+newmtl ModelObject S_Material026
+Ks 1 1 1
+map_Kd DATA003.png
+cm none
+opaque yes
+
+newmtl ModelObject T_Material027
+Ks 1 1 1
+map_Kd DATA003.png
+cm none
+opaque yes
+
+newmtl ModelObject U_Material028
+Ks 1 1 1
+map_Kd DATA003.png
+cm none
+opaque yes
+
+newmtl ModelObject V_Material029
+Ks 1 1 1
+map_Kd DATA003.png
+cm none
+opaque yes
+
+newmtl ModelObject W_Material030
+Ks 1 1 1
+map_Kd DATA003.png
+cm none
+opaque yes
+
+newmtl ModelObject X_Material031
+Ks 1 1 1
+map_Kd DATA003.png
+cm none
+opaque yes
+
+newmtl ModelObject Y_Material032
+Ks 1 1 1
+map_Kd DATA003.png
+cm none
+opaque yes
+
+newmtl ModelObject Z_Material033
+Ks 1 1 1
+map_Kd DATA003.png
+cm none
+opaque yes
+
+newmtl ModelPolygon C_Material034
+Ks 1 1 1
+map_Kd DATA003.png
+cm none
+opaque yes
+
+newmtl ModelPolygon G_Material035
+Ks 1 1 1
+map_Kd DATA003.png
+cm none
+opaque yes
+
+newmtl ModelPolygon K_Material036
+Ks 1 1 1
+map_Kd DATA003.png
+cm none
+opaque yes
+
+newmtl ModelPolygon N_Material037
+Ks 1 1 1
+map_Kd DATA003.png
+cm none
+opaque yes
+
+newmtl ModelPolygon Q_Material038
+Ks 1 1 1
+map_Kd DATA003.png
+cm none
+opaque yes
+
+newmtl ModelPolygon R_Material039
+Ks 1 1 1
+map_Kd DATA003.png
+cm none
+opaque yes
+
+newmtl ModelPolygon S_Material040
+Ks 1 1 1
+map_Kd DATA003.png
+cm none
+opaque yes
+
+newmtl ModelPolygon T_Material041
+Ks 1 1 1
+map_Kd DATA003.png
+cm none
+opaque yes
+
+newmtl ModelPolygon U_Material042
+Ks 1 1 1
+map_Kd DATA003.png
+cm none
+opaque yes
+
+newmtl ModelPolygon V_Material043
+Ks 1 1 1
+map_Kd DATA003.png
+cm none
+opaque yes
+
+newmtl ModelPolygon W_Material044
+Ks 1 1 1
+map_Kd DATA003.png
+cm none
+opaque yes
+
+newmtl ModelPolygon X_Material045
+Ks 1 1 1
+map_Kd DATA003.png
+cm none
+opaque yes
+
+newmtl ModelPolygon Y_Material046
+Ks 1 1 1
+map_Kd DATA003.png
+cm none
+opaque yes
+
+newmtl ModelPolygon Z_Material047
+Ks 1 1 1
+map_Kd DATA003.png
+cm none
+opaque yes
+
+newmtl ModelSky_Material048
+Ks 1 1 1
+map_Kd DATA012.png
+cm none
+opaque yes
+
+newmtl ModelSmog B_Material049
+Ks 1 1 1
+map_Kd DATA002.png
+cm none
+opaque no
+
+newmtl Modelpolymsh A_Material050
+Ks 1 1 1
+map_Kd DATA007.png
+cm none
+opaque yes
+
+newmtl Modelpolymsh B_Material051
+Ks 1 1 1
+map_Kd DATA007.png
+cm none
+opaque yes
+
+newmtl Modelpolymsh C_Material052
+Ks 1 1 1
+map_Kd DATA005.png
+cm none
+opaque yes
+
+newmtl Modelpolymsh D_Material053
+Ks 1 1 1
+map_Kd DATA005.png
+cm none
+opaque yes
+
+newmtl Modelpolymsh E_Material054
+Ks 1 1 1
+map_Kd DATA009.png
+cm none
+opaque yes
+
+newmtl Modelpolymsh F_Material055
+Ks 1 1 1
+map_Kd DATA009.png
+cm none
+opaque yes
+
+newmtl Modelpolymsh G_Material056
+Ks 1 1 1
+map_Kd DATA009.png
+cm none
+opaque yes
+
+newmtl Modelpolymsh H_Material057
+Ks 1 1 1
+map_Kd DATA009.png
+cm none
+opaque yes
+
+newmtl Modelpolymsh I_Material058
+Ks 1 1 1
+map_Kd DATA009.png
+cm none
+opaque yes
+
+newmtl Modelpolymsh J_Material059
+Ks 1 1 1
+map_Kd DATA009.png
+cm none
+opaque yes
+
+newmtl Modelpolymsh K_Material060
+Ks 1 1 1
+map_Kd DATA009.png
+cm none
+opaque yes
+
+newmtl Modelpolymsh L_Material061
+Ks 1 1 1
+map_Kd DATA009.png
+cm none
+opaque yes
+
+newmtl Modelpolymsh M_Material062
+Ks 1 1 1
+map_Kd DATA009.png
+cm none
+opaque yes
+
+newmtl Modelpolymsh N_Material063
+Ks 1 1 1
+map_Kd DATA009.png
+cm none
+opaque yes
+
+newmtl Modelpolymsh O_Material064
+Ks 1 1 1
+map_Kd DATA009.png
+cm none
+opaque yes
+
+newmtl Modelpolymsh P_Material065
+Ks 1 1 1
+map_Kd DATA009.png
+cm none
+opaque yes
+
+newmtl Modelpolymsh Q_Material066
+Ks 1 1 1
+map_Kd DATA009.png
+cm none
+opaque yes
+
+newmtl Modelpolymsh R_Material067
+Ks 1 1 1
+map_Kd DATA008.png
+cm none
+opaque yes
+
+newmtl Modelpolymsh S_Material068
+Ks 1 1 1
+map_Kd DATA008.png
+cm none
+opaque yes
+
+newmtl Modelpolymsh T_Material069
+Ks 1 1 1
+map_Kd DATA005.png
+cm none
+opaque yes
+
+newmtl ModelEnkei_Material070
+Ks 1 1 1
+map_Kd DATA000.png
+cm none
+opaque no
+
+newmtl ModelPolygon D_Material071
+Ks 1 1 1
+map_Kd DATA013.png
+cm none
+opaque no
+
+newmtl ModelPolygon H_Material072
+Ks 1 1 1
+map_Kd DATA013.png
+cm none
+opaque no
+
+newmtl ModelPolygon L_Material073
+Ks 1 1 1
+map_Kd DATA013.png
+cm none
+opaque no
+
+newmtl ModelPolygon O_Material074
+Ks 1 1 1
+map_Kd DATA013.png
+cm none
+opaque no
+
+newmtl ModelSmog A_Material075
+Ks 1 1 1
+map_Kd DATA013.png
+cm none
+opaque no
+
