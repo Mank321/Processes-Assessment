@@ -1,6 +1,8 @@
 from ursina import *
 from Scripts.HealthBar import HealthBar
 from Scripts.MainMenu import MainMenu
+from ursina.shaders import unlit_shader
+
 
 CENTAUR_STATS = {'name': 'Centaur',
                  'health': 10,
@@ -51,12 +53,12 @@ GORGON_STATS = {'name': 'Gorgon',
                 'scale': Vec3(0.015,0.025,0.015),
                 'collider_scale': Vec3(100,200,100),
                 'collider_position': Vec3(0,100,0),
-                'boss_scale':0.04,
-                'boss_collider_scale':1,
+                'boss_scale':0.05,
+                'boss_collider_scale':Vec3(100,200,100),
                 'boss_collider_pos': Vec3(0,100,0),
                 'boss_rotation': 0,
-                'boss_speed':2,
-                'boss_sight':15,
+                'boss_speed':50,
+                'boss_sight':20,
                 'boss_closeness':3}
 
 
@@ -378,7 +380,8 @@ class Monster(Entity):
         super().__init__(model=f'Assets/Models/{monster_stats["name"]}/monster.fbx',
                        texture=f'Assets/Models/{monster_stats["name"]}/texture.png',
                        position=position, double_sided=True, scale=monster_stats['scale']*scale,
-                       rotation=rotation, name=monster_stats["name"], parent=parent, enabled=enabled)
+                       rotation=rotation, name=monster_stats["name"], parent=parent, enabled=enabled,
+                       shader=unlit_shader, cache_compiled_model=False)
 
         self.collision_box = Entity(model='cube', parent=self, position=monster_stats['collider_position'],
                                     scale=monster_stats['collider_scale'], visible=game_state.debug_mode,
@@ -705,8 +708,9 @@ class GorgonMap(Entity):
                          position=(0,2,0), scale=(1,1.2,1), rotation_y=180, collider='mesh')
         self.statues = Entity(parent=self, model='Assets/Models/Gorgon/World/gorgon_statues.fbx', texture='Assets/Models/Gorgon/World/Statues/texture.png', double_sided=True,
                               scale=(0.01,0.01,0.01))
-        self.map = []
-        self.out_position = 0
+        self.positions = [(0,1,10)]
+        self.next_gate_position = (-87,4,514)
+        self.boss_position = (-87,5,510)
 
 
 class TutorialWorld(Entity):
@@ -815,6 +819,12 @@ class LevelCreator(Entity):
                     #elif col == 'S':
                     #    continue
                     #    manager.player.position = (position[0], 1, position[2])
+        elif hasattr(self.world, 'positions'):
+            for position in self.world.positions:
+                Monster(game_state, parent=self, monster_stats=monster_stats, position=position, rotation=(0,random.randint(-360,360),0))
+            self.next_gate = Gate(game_state, parent=self, position=self.world.next_gate_position, locations=f'{self.location}.{self.next_scene}')
+            self.return_gate = Gate(game_state, parent=self, position=(0,0,-5), locations=f'{self.location}.{self.previous_scene}', complete=True, rotation_y=180)
+            self.boss = Monster(game_state, parent=self, monster_stats=monster_stats, is_boss=True, gate=None, position=self.world.boss_position, boss_type=self.boss_type)
         else:
             self.next_gate = Gate(game_state, parent=self, position=(0,0,10), locations=f'{self.location}.{self.next_scene}')
             self.return_gate = Gate(game_state, parent=self, position=(0,0,-2), locations=f'{self.location}.{self.previous_scene}', complete=True, rotation_y=180)
