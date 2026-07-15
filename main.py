@@ -180,7 +180,7 @@ class GameManager(Entity):
                 self.ui_state.teleport_buttons['Gorgon'].on_click = lambda: self.player.teleport('gorgon')
                 self.ui_state.teleport_buttons['Gorgon'].disabled = False
             elif new_scene_name == 'chimera':
-                self.gorgon_world = LevelCreator(self, monster_stats=CHIMERA_STATS)
+                self.chimera_world = LevelCreator(self, monster_stats=CHIMERA_STATS)
                 new_scene = self.chimera_world
                 self.ui_state.teleport_buttons['Chimera'].on_click = lambda: self.player.teleport('chimera')
                 self.ui_state.teleport_buttons['Chimera'].disabled = False
@@ -378,7 +378,8 @@ class Player(Entity):
                       'market': manager.market_world,
                       'centaur': manager.centaur_world,
                       'basilisk': manager.basilisk_world,
-                      'gorgon': manager.gorgon_world}
+                      'gorgon': manager.gorgon_world,
+                      'chimera': manager.chimera_world}
 
         colliders = dictionary[self.manager.location].colliders
         if self.manager.debug_mode:
@@ -633,6 +634,10 @@ class CentaurMap(Entity):
 
         self.grass = Entity(parent=self, model='Assets/Models/Centaur/World/grass.fbx', texture='Assets/Models/Centaur/World/Grass_gradient.png',
                             double_sided=True)
+        
+    def update(self):
+        if manager.player.y <= -21:
+            manager.player.position=(0,0,0)
 
 class BasiliskMap(Entity):
     def __init__(self, manager, parent):
@@ -725,7 +730,11 @@ class BasiliskMap(Entity):
                     '                  I                    ',]
         
         self.out_position = 3
-        
+
+    def update(self):
+        if manager.player.y <= -21:
+            manager.player.position=(0,0,0)
+
 
 class GorgonMap(Entity):
     def __init__(self, parent):
@@ -751,11 +760,19 @@ class GorgonMap(Entity):
                           (-85.2, -0.5, 413),(-65.4, -0.5, 422.8),(-41.5, -0.5, 442.8),(-68.2, -0.5, 439.8),(-90.1, -0.5, 433.6), (-123.8, -0.5, 435.1),(-104, -0.5, 436.4)]
         self.next_gate_position = (-87,4,514)
         self.boss_position = (-87,5,510)
-        self.cubes() 
+
+    def update(self):
+        if manager.player.y <= -21:
+            manager.player.position=(0,0,0)
     
 class ChimeraMap(Entity):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, parent):
+        super().__init__(parent=parent, model='Assets/Models/Chimera/World/world_V3.obj', texture='Assets/Models/Chimera/World/texture.png',
+                         double_sided=True, collider='mesh', position=(0,0,0), scale=(1,2,1))
+    
+    def update(self):
+        if manager.player.y <= -21:
+            print('death')
 
 class GridCube(Draggable):
     def __init__(self, pos):
@@ -865,6 +882,9 @@ class LevelCreator(Entity):
             self.boss_type = 'obj'
         elif self.name == 'Gorgon':
             self.world = GorgonMap(parent=self)
+            self.boss_type = 'fbx'
+        elif self.name == 'Chimera':
+            self.world = ChimeraMap(parent=self)
             self.x_multi = 1
             self.x_add = 0
             self.z_multi = 1
