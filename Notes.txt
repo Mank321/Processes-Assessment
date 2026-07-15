@@ -150,7 +150,7 @@ multiple uv maps selected in a certain order. This finally allowed me to combine
 single image, but when I loaded it into the game, it was extremely pixalated, even though that had been
 one of my main goals during the baking and problems I had. I tried doubling the resolution of the texture
 again, but that didn't result in much, so I was forced to return to the original model and texture.
-
+-
 FIXED: When the first time I tried to get the statues in, I accidentally exported the whole blender file,
 so I re-exported it only to find the entire file in the map still. I realised that ursina must be saving
 the file internally and saving it based on name, so I had to change the file name each time I exported it.
@@ -158,7 +158,21 @@ But for some reason when I exported the fbx(statues) file, it loaded into the wo
 obj(terrain). To fix this, I used a mirror modifier on the statues in blender and exported the mirrored
 statues, which came out fine. I did find their texture extremely pixalated, so I increased its resolution
 too.
-
+-
+EFFICIENCY: When I was centaur world, the world was nice and flat. To get the monsters placed into the world
+where I liked them, I didn't type in random numbers and hoped for the best. Instead, I created a map array
+the size of the world, and populated it with trees and centaurs, then when the world was first created, I
+went through the map array to place each tree/centaur. This method worked fine for the basilisk world too.
+When I built the gorgon world, the terrain was complex, with underground tunnels, so I needed a more efficient
+approach. I created a simple class that created dozens of cubes at spawn, which I could drag around the entire
+map. I would place these where I wanted the monsters to be, and each time I did the exact coordinates of the
+cube would be printed, allowing me to add the coordinates to an ever-increasing list of monster locations.
+This approach allowed me to place the monsters efficiently in the gorgon world. When it came time to do the
+chimera world, which was even more complex than the gorgon world, I first started off with the cube method,
+but a problem with it was that it didn't work with the y-axis, meaning cubes would hide inside the ground
+and I'd have to guess the y-level. I came up with my most efficient and easiest strategy to get around this,
+but creating a text at the top of my screen and displaying the player coordinates live. This allowed me to
+simply walked to were ever I wanted the monster, record the player coordinates, and list them in an array.
 
 COMBAT SYSTEM PROBLEMS
 FIXED: When creating the combat system, I added in the monster, gave it a hitbox, damage, and

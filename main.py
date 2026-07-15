@@ -62,23 +62,23 @@ GORGON_STATS = {'name': 'Gorgon',
                 'boss_closeness':3}
 
 CHIMERA_STATS = {'name': 'Chimera',
-                'health': 1000,
-                'damage': 100,
-                'worth':20,
-                'speed':300,
-                'sight':12,
+                'health': 10000,
+                'damage': 1000,
+                'worth':50,
+                'speed':400,
+                'sight':15,
                 'closeness':2.5,
                 'attack_speed': 1,
                 'scale': Vec3(0.005,0.01,0.005),
                 'collider_scale': Vec3(200,800,150),
                 'collider_position': Vec3(100,400,0),
-                'boss_scale':0.05,
-                'boss_collider_scale':Vec3(100,200,100),
-                'boss_collider_pos': Vec3(0,100,0),
+                'boss_scale':0.003,
+                'boss_collider_scale':Vec3(0.05,0.05,0.05),
+                'boss_collider_pos': Vec3(0,0,0),
                 'boss_rotation': 0,
-                'boss_speed':50,
+                'boss_speed':300,
                 'boss_sight':20,
-                'boss_closeness':3}
+                'boss_closeness':5}
 
 
 class GameManager(Entity):
@@ -208,6 +208,7 @@ class UIState(Entity):
         self.level_display.scale = 0.5
         self.death_screen_background = Entity(parent=camera.ui, model='quad', color=(255,0,0, 0.4), scale=(2,2), position=(0,0,-1), enabled=False)
         self.death_menu = MainMenu(None, None, bg=self.death_screen_background, header='You Died', text='Respawn', enabled=False)
+        self.position_text = Text(parent=camera.ui, text=f'Position: Null', position=(-0.5, 0.5), size=0.04)
 
         self.teleport_hud = Panel(parent=camera.ui, color=color.black, enabled=False, scale=(0.7,0.6), position=(0,0,1))
         self.teleport_hud_text = Text(parent=self.teleport_hud, text='Teleport to the following', color=color.red, text_scale=10, origin=(0,0,0), position=(0,0.4,-1))
@@ -236,6 +237,7 @@ class UIState(Entity):
             self.player_experience_bar.value = self.player.xp
             self.damage_text.text = f'Damage: {self.player.damage}'
             self.level_display.text = self.player.level
+            self.position_text.text = f'Position: {self.player.position}'
             self.teleport_buttons['Chimera'].on_click = lambda: self.player.teleport('chimera')
             self.teleport_buttons['Chimera'].disabled = False
 
@@ -496,7 +498,7 @@ class Monster(Entity):
                     camera.shake(duration=1)
                 manager.player.gold += self.worth
                 manager.ui_state.player_gold_bar.value += self.worth
-                manager.player.xp += self.worth
+                manager.player.xp += self.worth * 2
                 manager.ui_state.player_experience_bar.value += self.worth
                 self.death()
 
@@ -512,7 +514,8 @@ class Monster(Entity):
         if self.distance <= self.closeness:
             damage_delt = self.damage - manager.player.armor
             if damage_delt >= 1:
-                manager.player.health -= damage_delt * time.dt * self.attack_speed
+                pass
+                #manager.player.health -= damage_delt * time.dt * self.attack_speed
 
     def input(self, key):
         if key == 'left mouse up':
@@ -769,6 +772,18 @@ class ChimeraMap(Entity):
     def __init__(self, parent):
         super().__init__(parent=parent, model='Assets/Models/Chimera/World/world_V3.obj', texture='Assets/Models/Chimera/World/texture.png',
                          double_sided=True, collider='mesh', position=(0,0,0), scale=(1,2,1))
+        
+        self.positions = [(5.2,-1,-18.4),(-23.9,-1.5,14.7),(13.7,-5,18.8),(-52.1,5,9.7),(-54,6,-6.1),(-78.5,0.5,25.2),(-59.4,2,-34.3),(-107.3,-0.5,20.7),
+                          (-24.1,3,-74.6),(10.6,2,-90.8),(25.1,2,-121.8),(26,2,-111.1),(-133.2,-6.7,-3),(-172.7,-7.9,-6.8),(-190,-8.2,-34.6),(-128.5,-9.3,-54.2),
+                          (-112.3,-7.8,-118.5),(-138,-7.5,-146.4)]
+
+        self.next_gate_position = (10,10,10)
+        self.boss_position = (-10,0,0)
+        self.cubes()
+    def cubes(self):
+        for x in range(10):
+            for z in range(10):
+                GridCube(pos=(x,0,z))
     
     def update(self):
         if manager.player.y <= -21:
