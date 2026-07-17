@@ -10,7 +10,7 @@ CENTAUR_STATS = {'name': 'Centaur',
                  'worth':1,
                  'speed':100,
                  'sight':10,
-                 'closeness':2,
+                 'closeness':2.2,
                  'attack_speed': 1,
                  'scale': Vec3(0.02,0.024,0.015),
                  'collider_scale': Vec3(100,250,170),
@@ -201,6 +201,7 @@ class UIState(Entity):
         super().__init__()
         self.player = player
         self.damage_text = Text(parent=camera.ui, text='', position=(-0.85,-.22,0), size=0.06)
+        self.armor_text = Text(parent=camera.ui, text='', position=(-0.85,-0.16), size=0.06)
         self.player_health_bar = HealthBar(max_value=20,value=20,position=(-0.85, -0.39,0),colour=color.red,scale=(0.4,0.05))
         self.player_gold_bar = HealthBar(max_value=10,value=0,position=(-0.85, -0.33,0),colour=color.gold,scale=(0.4,0.05))
         self.player_experience_bar = HealthBar(max_value=10, value=0, position=(-0.89, -0.45,0), colour=color.green, scale=(1.8, 0.05))
@@ -236,6 +237,7 @@ class UIState(Entity):
             self.player_experience_bar.max_value = self.player.levelup_req
             self.player_experience_bar.value = self.player.xp
             self.damage_text.text = f'Damage: {self.player.damage}'
+            self.armor_text.text = f'Armor: {self.player.armor}'
             self.level_display.text = self.player.level
             self.position_text.text = f'Position: {self.player.position}'
             self.teleport_buttons['Chimera'].on_click = lambda: self.player.teleport('chimera')
@@ -269,7 +271,7 @@ class Player(Entity):
         self.armor = 0
         self.health = 20
         self.max_health = self.health
-        self.damage = 100
+        self.damage = 1
         self.level = 1
         self.old_req = 3
         self.levelup_req = 5
@@ -328,12 +330,17 @@ class Player(Entity):
         self.old_req, self.levelup_req = self.levelup_req, self.old_req + self.levelup_req
         self.max_stamina += 2
         self.damage += 1
-        self.armor += 0.5
+        self.armor += 0.25
         self.basereach += 0.1
     
     def teleport(self, location):
-        self.ui_state
         manager.switch_scenes(f'{self.manager.location}.{location}')
+    
+    def punch(self):
+        self.hand.animate_position((1,1,1), duration=0.1, curve=curve.in_out_sine)
+        invoke(self.unpunch, delay=0.1)
+    def unpunch(self):
+        self.hand.animate_position((1,0.5,-1), duration=0.1, curve=curve.in_out_sine)
 
     def update(self):
         """."""
@@ -416,6 +423,7 @@ class Monster(Entity):
                                     scale=monster_stats['collider_scale'], visible=manager.debug_mode,
                                     wireframe=True, name=f'{monster_stats["name"]}.collider')
 
+        self.manager = manager
         self.parent = parent
         self.monster_stats = monster_stats
         self.name = monster_stats['name']
@@ -427,9 +435,9 @@ class Monster(Entity):
         self.speed = monster_stats['speed']
         self.attack_speed = monster_stats['attack_speed']
         self.closeness = monster_stats['closeness']
+        self.scale = monster_stats['scale']
         self.position = position
         self.origin_position = position
-        self.scale = monster_stats['scale']
         self.rotation = rotation
         self.origin_rotation = rotation
         self.is_boss = is_boss
@@ -466,11 +474,11 @@ class Monster(Entity):
     
     def respawn(self):
         self.position = self.origin_position
-        self.rotation = self.origin_rotation
+        #self.rotation = self.origin_rotation
         self.visible = True
-        self.collision_box.visible = True
+        self.collision_box.visible = self.manager.debug_mode
         self.enabled = True
-        self.collision_box.enabled = True
+        self.collision_box.enabled = self.manager.debug_mode
         self.ignore = False
         self.collision_box.ignore = False
         self.health = self.max_health
@@ -480,6 +488,7 @@ class Monster(Entity):
         self.distance = distance(self, manager.player)
         if self.distance <= manager.player.basereach + self.closeness:
             self.health -= manager.player.damage
+            self.manager.player.punch()
 
             # Flash Red Effect
             self.blink(color.red)
@@ -507,15 +516,14 @@ class Monster(Entity):
         self.distance = distance(self, manager.player)
         if self.closeness < self.distance <= self.sight:
             self.look_at_2d(manager.player, 'y')
-            #self.position += self.forward * time.dt * self.speed
+            self.position += self.forward * time.dt * self.speed
             if self.is_boss:
                 self.rotation_y += self.boss_rotation
 
         if self.distance <= self.closeness:
             damage_delt = self.damage - manager.player.armor
-            if damage_delt >= 1:
-                pass
-                #manager.player.health -= damage_delt * time.dt * self.attack_speed
+            if damage_delt >= 0:
+                manager.player.health -= damage_delt * time.dt * self.attack_speed
 
     def input(self, key):
         if key == 'left mouse up':
@@ -774,45 +782,17 @@ class ChimeraMap(Entity):
                          double_sided=True, collider='mesh', position=(0,0,0), scale=(1,2,1))
         
         self.positions = [(5.2,-1,-18.4),(-23.9,-1.5,14.7),(13.7,-5,18.8),(-52.1,5,9.7),(-54,6,-6.1),(-78.5,0.5,25.2),(-59.4,2,-34.3),(-107.3,-0.5,20.7),
-                          (-24.1,3,-74.6),(10.6,2,-90.8),(25.1,2,-121.8),(26,2,-111.1),(-133.2,-6.7,-3),(-172.7,-7.9,-6.8),(-190,-8.2,-34.6),(-128.5,-9.3,-54.2),
-                          (-112.3,-7.8,-118.5),(-138,-7.5,-146.4)]
+                          (-24.1,17.2,-74.6),(10.6,11.6,-90.8),(25.1,2,-121.8),(26,10.2,-111.1),(-133.2,-6.7,-3),(-172.7,-7.9,-6.8),(-190,-8.2,-34.6),(-128.5,-9.3,-54.2),
+                          (-112.3,-7.8,-118.5),(-138,-7.5,-146.4),(-34.6,6.3,94.9),(-86.4,2.6,126),(-82.9,51,192.2),(-49.4,17.4,169.5),(42.4,-7.8,98.4),(80.1,2.3,83.4),
+                          (175.2,-4.1,189.5),(124.6,-0.8,24.1),(27.9,-0.2,136.3),(67.7,-0.8,165.1),(143.6,-3.7,170.4),(209,-0.1,115.1)]
 
-        self.next_gate_position = (10,10,10)
-        self.boss_position = (-10,0,0)
-        self.cubes()
-    def cubes(self):
-        for x in range(10):
-            for z in range(10):
-                GridCube(pos=(x,0,z))
+        self.next_gate_position = (213.3,-3,113,175.3)
+        self.boss_position = (205,-2.6,162.4)
     
     def update(self):
         if manager.player.y <= -21:
             print('death')
 
-class GridCube(Draggable):
-    def __init__(self, pos):
-        super().__init__(
-            parent=scene, 
-            model='cube', 
-            color=color.white, 
-            scale=1, 
-            plane_direction=(0,1,0), 
-            position=pos
-        )
-
-    def drag(self):
-        self.color = color.red
-        print(f"Picked up at: {self.position}")
-
-    def drop(self):
-        self.color = color.azure
-        print(f"Dropped at: {self.position}")
-
-    def cubes(self):
-        for x in range(10):
-            for z in range(10):
-                GridCube(pos=(x, 1, z))
-  
 
 class TutorialWorld(Entity):
     def __init__(self, manager):
