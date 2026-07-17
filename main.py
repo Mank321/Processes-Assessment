@@ -1,4 +1,5 @@
-from ursina import *
+from random import random
+from ursina import Entity, Sky, application, Text, color, Button, Panel, Ursina, EditorCamera, held_keys,print_on_screen, mouse, camera, window
 from Scripts.HealthBar import HealthBar
 from Scripts.MainMenu import MainMenu
 from Scripts.Maps import CentaurMap, BasiliskMap, GorgonMap, ChimeraMap
