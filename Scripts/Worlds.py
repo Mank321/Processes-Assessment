@@ -47,11 +47,11 @@ class MarketWorld(Entity):
         self.ground = Entity(parent=self,model='plane', collider='box', scale=200, texture='grass', texture_scale=(4,4))
         
         self.wall = Entity(parent=self,model='Assets/Models/Wall/Wall.obj', texture='Assets/Models/Wall/texture.png',
-                    double_sided=True,scale=(0.01,0.01,0.01), collider='mesh', position=(-30,5,-10))
+                    double_sided=True,scale=(0.2,1,0.5), collider='mesh', position=(0,5,0))
 
         self.tutorial_gate = Gate(manager, parent=self, position=(0,-0.7,-5), locations='market.tutorial', complete=True, rotation_y=180)
         self.centaur_gate = Gate(manager, parent=self, position=(0,-0.7,20), locations='market.centaur', complete=True)
 
-        self.stall = Stall(manager,parent=self)
+        self.stall = Stall(manager,parent=self, position=(5,0,5), rotation_y=-90)
 
-        self.colliders = [self.tutorial_gate.collision_box, self.stall.collision_box, self.centaur_gate.collision_box]
+        self.colliders = [self.tutorial_gate.collision_box, self.stall.collision_box, self.centaur_gate.collision_box, self.stall.collision_box]

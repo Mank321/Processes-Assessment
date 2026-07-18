@@ -1,5 +1,5 @@
-from random import random
-from ursina import Entity, Sky, application, Text, color, Button, Panel, Ursina, EditorCamera, held_keys,print_on_screen, mouse, camera, window
+import random
+from ursina import Entity, Sky, application, Text, color, Button, Panel, Ursina, EditorCamera, held_keys, print_on_screen, mouse, camera, window
 from Scripts.HealthBar import HealthBar
 from Scripts.MainMenu import MainMenu
 from Scripts.Maps import CentaurMap, BasiliskMap, GorgonMap, ChimeraMap
@@ -7,6 +7,7 @@ from Scripts.Objects import Gate
 from Scripts.Worlds import TutorialWorld, MarketWorld
 from Scripts.Monster import Monster
 from Scripts.Player import Player
+from Scripts.Store import Store
 from Scripts.MonsterStats import CENTAUR_STATS, BASILISK_STATS, GORGON_STATS, CHIMERA_STATS
 
 class GameManager(Entity):
@@ -43,6 +44,7 @@ class GameManager(Entity):
         main_menu.background.enabled = False
         
         # Initialize the main classes
+        self.store = Store(self)
         self.ui_state = UIState(None)
         self.player = Player(self.ui_state, self)
         self.ui_state.player = self.player         
@@ -223,7 +225,6 @@ class LevelCreator(Entity):
                 for x, col in enumerate(row):
                     position = ((x*self.x_multi)+self.x_add,0,(z*self.z_multi)+self.z_add)
                     if col == 'M':
-                        
                         Monster(manager, parent=self, monster_stats=monster_stats, position=position, rotation=(0,random.randint(-360,360),0))
                     elif col == 'O':
                         self.next_gate = Gate(manager, parent=self, position=(position[0], self.world.out_position, position[2]), locations=f'{self.location}.{self.next_scene}')

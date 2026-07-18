@@ -14,9 +14,9 @@ class Tree(Entity):
 
 
 class Stall(Entity):
-    def __init__(self, manager, parent):
+    def __init__(self, manager, parent, position, rotation_y):
         super().__init__(parent=parent,model='Assets/Models/Stall/Stall/stall1.fbx', texture='Assets/Models/Stall/Stall/stall_texture.png',
-                         double_sided=True, scale=(0.1,0.22,0.1), position=(10,0,0))
+                         double_sided=True, scale=(0.1,0.25,0.1), position=position, rotation_y=rotation_y)
 
         self.props = Entity(model='Assets/Models/Stall/Props/props.fbx', texture='Assets/Models/Stall/Props/props_texture.png',
                             parent=self, double_sided=True,scale=(1,1,1), position=(0,0,0))
@@ -27,6 +27,7 @@ class Stall(Entity):
                                     wireframe=True)
         self.merchant = Entity(model='Assets/Models/Stall/Merchant/merchant.fbx', texture='Assets/Models/Stall/Merchant/texture.jpg',
                                double_sided=True, parent=self, scale=(.11,.11,.11), position=(0,0,0))
+
 
 class Gate(Entity):
     def __init__(self, manager, position, locations, parent, complete=False, scale=(0.002,0.004,0.002), rotation_y=0):

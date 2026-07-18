@@ -1,4 +1,4 @@
-from ursina import Entity, Text, camera, Sprite, color, ButtonList, Func, application, Button, Ursina
+from ursina import Entity, Text, ButtonList, Func, application, Ursina, camera
 
 app = Ursina()
 ORIGIN_BACKGROUND = Entity(model='quad', texture='Assets/menu background.jpg', z=1, scale=(1.8,1))
@@ -27,10 +27,6 @@ class MainMenu(Entity):
             "Resume": Func(resume_func),
             "Exit": Func(lambda: application.quit())
         },y=0, z=-10, parent=self.main_menu, enabled=False, ignore_paused=True)
-    
-    def switch(self, new_menu, old_menu):
-        new_menu.enable()
-        old_menu.disable()
     
     def execute_start(self):
         if self.start_function:

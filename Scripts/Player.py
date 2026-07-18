@@ -1,4 +1,5 @@
 from ursina import Entity, color, application, Vec3, time, held_keys, curve, invoke, raycast, camera, mouse
+
 class Player(Entity):
     def __init__(self, ui_state, manager):
         super().__init__(model='cube', scale=(1,2.5,1), position=(0,1,0),
@@ -21,13 +22,16 @@ class Player(Entity):
         self.old_req = 3
         self.levelup_req = 5
         self.xp = 0
+        self.xp_multi = 1
         self.stamina = 5
         self.max_stamina = self.stamina
         self.gold = 0
         self.max_gold = 10
         self.inventory = None
+        self.weapon_level = 0
         self.basereach = 2
         self.distance = float('inf')
+        self.movement_locked = False
         
         camera.position = (0,1,0)
         camera.rotation = (0,0,0)
@@ -37,6 +41,7 @@ class Player(Entity):
 
         self.hand = Entity(model='Assets/Models/Hands/handv5.fbx',texture='Assets/Models/Hands/skin.jpg',
                             parent=self, scale=0.05, collider='box',position=(1,0.5, -1), rotation=(1,1,-25), double_sided = True)
+        self.store_icon = Entity(parent=camera.ui, model='quad', texture='Assets/Store Icon.png', position=(0,0,10), scale=(0.4,0.1), alpha=0)
 
     def death(self):
         application.paused = False
@@ -100,9 +105,6 @@ class Player(Entity):
         self.grounded = ground_ray.hit
         
         if self.grounded:
-            #if self.velocity_y <= 0:
-            #    self.y = ground_ray.point.y
-            #    self.velocity_y = 0
             self.velocity_y = max(0, self.velocity_y)
             if held_keys['space']:
                 self.velocity_y = self.jump_height
@@ -136,21 +138,33 @@ class Player(Entity):
                       'chimera': self.manager.chimera_world}
 
         colliders = dictionary[self.manager.location].colliders
-        if self.manager.debug_mode:
-            for collider in colliders:
-                if self.intersects(collider).hit:
-                    collider.color = color.red
-                else:
-                    collider.color = color.white
+        for collider in colliders:
+            if self.intersects(collider).hit:
+                collider.color = color.red
+                if collider.name == 'stall':
+                    self.store_icon.alpha = 1
+                    self.at_stall = True
+                        
+            else:
+                collider.color = color.white
+                if collider.name == 'stall':
+                    self.store_icon.alpha = 0
+                    self.at_stall = False
         
         # Check if nothing is infront of the player before moving
         ignore = [self, self.hand]
         hit_info = raycast(self.world_position, movement, distance=0.5, debug=self.manager.debug_mode, ignore=ignore)
         if not hit_info.hit:
-            move_amount = movement * self.speed * time.dt
-            self.position += move_amount
+            if not self.movement_locked:
+                move_amount = movement * self.speed * time.dt
+                self.position += move_amount
         else:
             name = hit_info.entity.name
             if name.startswith('gate') and name.split('.')[-1] == 'complete':
                 scenes = name[5:]
                 self.manager.switch_scenes(scenes)
+    def input(self, key):
+        if key == 'e' and self.at_stall:
+            self.manager.store.enabled = not self.manager.store.enabled
+            self.movement_locked = not self.movement_locked
+            mouse.locked = not mouse.locked

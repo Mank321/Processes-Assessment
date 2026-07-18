@@ -46,8 +46,8 @@ class Monster(Entity):
             self.sight = monster_stats['boss_sight']
             self.boss_rotation = monster_stats['boss_rotation']
             self.origin_rotation = self.boss_rotation
-            self.damage *= 2
-            self.health *= 5
+            self.damage *= 5
+            self.health *= 10
             self.max_health = self.health
             self.worth *= 10
 
@@ -97,7 +97,7 @@ class Monster(Entity):
                     camera.shake(duration=1)
                 self.manager.player.gold += self.worth
                 self.manager.ui_state.player_gold_bar.value += self.worth
-                self.manager.player.xp += self.worth * 2
+                self.manager.player.xp += self.worth * 2 * self.manager.player.xp_multi
                 self.manager.ui_state.player_experience_bar.value += self.worth
                 self.death()
 
