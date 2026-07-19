@@ -1,5 +1,6 @@
 from ursina import Entity, color, Text, Button, Tooltip, Ursina, camera
 
+#Make an upgrades class and create an object for each upgrade
 class Store(Entity):
     def __init__(self, manager, enabled=False):
         super().__init__(parent=camera.ui, model='quad', color=color.black, position=(0,0,0), scale=(0.9, 0.7, 1), enabled=enabled)
@@ -7,14 +8,17 @@ class Store(Entity):
         self.manager = manager
         self.player_hud = Entity(parent=self, enabled=True)
         self.shop_hud = Entity(parent=self, enabled=False)
+        self.skill_hud = Entity(parent=self, enabled=False)
 
-        self.player_button = Button(parent=self, color=color.gray, scale=(0.17, 0.20), position=(-0.5, 0.37), icon='Profile Icon.png', tooltip=Tooltip(f'<green>Player Stats'),
-                                    on_click=lambda: setattr(self.player_hud, 'enabled', not self.player_hud.enabled))
-        self.shop_button = Button(parent=self, color=color.gray, scale=(0.17,0.20), position=(-0.5, 0), icon='store.png', tooltip=Tooltip(f'<green>Shop'),
-                                  on_click=lambda: setattr(self.shop_hud, 'enabled', not self.shop_hud.enabled))
+        self.player_button = Button(parent=self, color=color.gray, scale=(0.17, 0.20), position=(-0.5, 0.37,-1), icon='Profile Icon.png', tooltip=Tooltip(f'<green>Player Stats'),
+                                    on_click=lambda: self.switch(self.player_hud, self.shop_hud, self.skill_hud))
+        self.shop_button = Button(parent=self, color=color.gray, scale=(0.17,0.20), position=(-0.5, 0,-1), icon='store.png', tooltip=Tooltip(f'<green>Shop'),
+                                  on_click=lambda: self.switch(self.shop_hud, self.player_hud, self.skill_hud))
+        self.skill_button = Button(parent=self, color=color.gray, scale=(0.17,0.2), position=(-0.5, -0.37,-1), icon='fireball skill icon.jpg', tooltip=Tooltip(f'<green.Skills'),
+                                   on_click=lambda: self.switch(self.skill_hud, self.player_hud, self.shop_hud))
 
         self.health_upgrade_cost = 5
-        self.health_upgrade_markup = 1.5
+        self.health_upgrade_markup = 1.2
         self.damage_upgrade_cost = 5
         self.damage_upgrade_markup = 2
         self.speed_upgrade_cost = 5
@@ -23,6 +27,7 @@ class Store(Entity):
         self.experience_upgrade_markup = 1.5
         self.reach_upgrade_cost = 5
         self.reach_upgrade_markup = 1.5
+
         self.bag_upgrade_cost = 10
         self.bag_upgrade_markup = 2
         self.armor_upgrade_cost = 15
@@ -30,42 +35,112 @@ class Store(Entity):
         self.weapon_upgrade_cost = 15
         self.weapon_upgrade_markup = 5
 
-        self.health_text = Text(parent=self.player_hud, text=f'Health Increase Cost: {self.health_upgrade_cost}', position=(-0.4,0.4))
-        self.health_button = Button(parent=self.player_hud, color=color.lime, text='Buy', position=(0,0.4), scale=(0.1,0.1), on_click=lambda: self.buy('Health'))
-        self.damage_text = Text(parent=self.player_hud, text=f'Damage Increase Cost: {self.damage_upgrade_cost}', position=(-0.4,0.28))
-        self.damage_button = Button(parent=self.player_hud, color=color.lime, text='Buy', position=(0,0.28), scale=(0.1,0.1), on_click=lambda: self.buy('Damage'))
-        self.speed_text = Text(parent=self.player_hud, text=f'Speed Increase Cost: {self.speed_upgrade_cost}', position=(-0.4,0.16))
-        self.speed_button = Button(parent=self.player_hud, color=color.lime, text='Buy', position=(0,0.16), scale=(0.1,0.1), on_click=lambda: self.buy('Speed'))
-        self.experience_text = Text(parent=self.player_hud, text=f'Experience Multiplier Cost: {self.experience_upgrade_cost}', position=(-0.4,0.04))
-        self.experience_button = Button(parent=self.player_hud, color=color.lime, text='Buy', position=(0,0.04), scale=(0.1,0.1), on_click=lambda: self.buy('Experience'))
-        self.reach_text = Text(parent=self.player_hud, text=f'Reach Increase Cost: {self.reach_upgrade_cost}', position=(-0.4,-0.08))
-        self.reach_button = Button(parent=self.player_hud, color=color.lime, text='Buy', position=(0,-0.08), scale=(0.1,0.1), on_click=lambda: self.buy('Reach'))
-        self.bag_text = Text(parent=self.shop_hud, text=f'Bag Multiplier Cost: {self.bag_upgrade_cost}', position=(-0.4,-0.2))
-        self.bag_button = Button(parent=self.shop_hud, color=color.lime, text='Buy', position=(0,-0.2), scale=(0.1,0.1), on_click=lambda: self.buy('Bag'))
-        self.armor_text = Text(parent=self.shop_hud, text=f'Armor Increase Cost: {self.armor_upgrade_cost}', position=(-0.4,-0.32))
-        self.armor_button = Button(parent=self.shop_hud, color=color.lime, text='Buy', position=(0,-0.32), scale=(0.1,0.1), on_click=lambda: self.buy('Armor'))
-        self.weapon_text = Text(parent=self.shop_hud, text=f'Weapon Level Cost: {self.weapon_upgrade_cost}', position=(-0.4,-0.44))
-        self.weapon_button = Button(parent=self.shop_hud, color=color.lime, text='Buy', position=(0,-0.44), scale=(0.1,0.1), on_click=lambda: self.buy('Weapon'))
+        self.regeneration_upgrade_cost = 10
+        self.regeneration_upgrade_markup = 2
+        self.gorgon_gaze_cost = 50
+        self.lava_protection_cost = 500
 
+        self.health_text = Text(parent=self.player_hud, text=f'Health Increase Cost: {self.health_upgrade_cost}', position=(-0.4,0.4,-1))
+        self.health_button = Button(parent=self.player_hud, color=color.lime, text='Buy', position=(0,0.4,-1), scale=(0.1,0.1), on_click=lambda: self.buy('Health'))
+        self.damage_text = Text(parent=self.player_hud, text=f'Damage Increase Cost: {self.damage_upgrade_cost}', position=(-0.4,0.28,-1))
+        self.damage_button = Button(parent=self.player_hud, color=color.lime, text='Buy', position=(0,0.28,-1), scale=(0.1,0.1), on_click=lambda: self.buy('Damage'))
+        self.speed_text = Text(parent=self.player_hud, text=f'Speed Increase Cost: {self.speed_upgrade_cost}', position=(-0.4,0.16,-1))
+        self.speed_button = Button(parent=self.player_hud, color=color.lime, text='Buy', position=(0,0.16,-1), scale=(0.1,0.1), on_click=lambda: self.buy('Speed'))
+        self.experience_text = Text(parent=self.player_hud, text=f'Experience Multiplier Cost: {self.experience_upgrade_cost}', position=(-0.4,0.04,-1))
+        self.experience_button = Button(parent=self.player_hud, color=color.lime, text='Buy', position=(0,0.04,-1), scale=(0.1,0.1), on_click=lambda: self.buy('Experience'))
+        self.reach_text = Text(parent=self.player_hud, text=f'Reach Increase Cost: {self.reach_upgrade_cost}', position=(-0.4,-0.08,-1))
+        self.reach_button = Button(parent=self.player_hud, color=color.lime, text='Buy', position=(0,-0.08,-1), scale=(0.1,0.1), on_click=lambda: self.buy('Reach'))
+
+        self.bag_text = Text(parent=self.shop_hud, text=f'Bag Multiplier Cost: {self.bag_upgrade_cost}', position=(-0.4,0.4,-1))
+        self.bag_button = Button(parent=self.shop_hud, color=color.lime, text='Buy', position=(0,0.4,-1), scale=(0.1,0.1), on_click=lambda: self.buy('Bag'))
+        self.armor_text = Text(parent=self.shop_hud, text=f'Armor Increase Cost: {self.armor_upgrade_cost}', position=(-0.4,0.28,-1))
+        self.armor_button = Button(parent=self.shop_hud, color=color.lime, text='Buy', position=(0,0.28,-1), scale=(0.1,0.1), on_click=lambda: self.buy('Armor'))
+        self.weapon_text = Text(parent=self.shop_hud, text=f'Weapon Level Cost: {self.weapon_upgrade_cost}', position=(-0.4,0.16,-1))
+        self.weapon_button = Button(parent=self.shop_hud, color=color.lime, text='Buy', position=(0,0.16,-1), scale=(0.1,0.1), on_click=lambda: self.buy('Weapon'))
+
+        self.regeneration_text = Text(parent=self.skill_hud, text=f'Regeneration Increase Cost: {self.regeneration_upgrade_cost}', position=(-0.4,0.4,-1))
+        self.regeneration_button = Button(parent=self.skill_hud, color=color.lime, text='Buy', position=(0,0.4,-1), scale=(0.1,0.1), on_click=lambda: self.buy('Regeneration'))
+        self.gorgon_gaze_text = Text(parent=self.skill_hud, text=f'Gorgon Protection Skill Cost: {self.gorgon_gaze_cost}', position=(-0.4,0.28,-1))
+        self.gorgon_gaze_button = Button(parent=self.skill_hud, color=color.lime, text='Buy', position=(0,0.28,-1), scale=(0.1,0.1), on_click=lambda: self.buy('Gorgon Gaze'))
+        self.lava_protection_text = Text(parent=self.skill_hud, text=f'Lava Protection Skill Cost: {self.lava_protection_cost}', position=(-0.4,0.16,-1))
+        self.lava_protection_button = Button(parent=self.skill_hud, color=color.lime, text='Buy', position=(0,0.16,-1), scale=(0.1,0.1), on_click=lambda: self.buy('Lava Protection'))
+
+
+        self.exit_text = Text(parent=self, text='Press E to exit', color=color.white, position=(-0.2, -0.2,-1))
+
+    def switch(self, new, old1, old2):
+        new.enable()
+        old1.disable()
+        old2.disable()
 
     def buy(self, stat):
-        stats = {'Health': [self.health_upgrade_cost, 'add', 5, self.health_upgrade_markup, self.manager.player.health, self.health_text],
-                 'Damage': [self.damage_upgrade_cost, 'add', 1, self.damage_upgrade_markup, self.manager.player.damage, self.damage_text],
-                 'Speed': [self.speed_upgrade_cost, 'add', 2, self.speed_upgrade_markup, self.manager.player.speed, self.speed_text],
-                 'Experience': [self.experience_upgrade_cost, 'multi', 1.2, self.experience_upgrade_markup, self.manager.player.xp_multi, self.experience_text],
-                 'Reach': [self.reach_upgrade_cost, 'add', 0.5, self.reach_upgrade_markup, self.manager.player.basereach, self.reach_text],
-                 'Bag': [self.bag_upgrade_cost, 'multi', 2, self.bag_upgrade_markup, self.manager.player.max_gold, self.bag_text],
-                 'Armor': [self.armor_upgrade_cost, 'add', 0.25, self.armor_upgrade_markup, self.manager.player.armor, self.armor_text],
-                 'Weapon': [self.weapon_upgrade_cost, 'add', 1, self.weapon_upgrade_markup, self.manager.player.weapon_level, self.weapon_text]}
-        if self.manager.player.gold >= stats[stat][0]:
-            if stats[stat][1] == 'add':
-                stats[stat][4] += stats[stat][2]
-            else:
-                stats[stat][4] *= stats[stat][2]
-            self.manager.player.gold -= stats[stat][0]
-            stats[stat][0] *= stats[stat][3]
-            stats[stat][5].text = f'{stat} Cost: {stats[stat][0]}'
-            print(self.manager.player.damage)
+        costs = {'Health': self.health_upgrade_cost,
+                 'Damage': self.damage_upgrade_cost,
+                 'Speed': self.speed_upgrade_cost,
+                 'Experience': self.experience_upgrade_cost,
+                 'Reach': self.reach_upgrade_cost,
+                 'Bag': self.bag_upgrade_cost,
+                 'Armor': self.armor_upgrade_cost,
+                 'Weapon': self.weapon_upgrade_cost,
+                 'Regeneration': self.regeneration_upgrade_cost,
+                 'Gorgon Gaze': self.gorgon_gaze_cost,
+                 'Lava Protection': self.lava_protection_cost}
+
+        if self.manager.player.gold >= costs[stat][0]:
+            if stat == 'Health':
+                self.manager.player.health += 5
+                self.health_upgrade_cost *= 1.2
+                self.health_upgrade_cost = round(self.health_upgrade_cost)
+                self.health_text.text = f'{stat} Increase Cost: {self.health_upgrade_cost}'
+            elif stat == 'Damage':
+                self.manager.player.damage += 1
+                self.damage_upgrade_cost *= 1.7
+                self.damage_upgrade_cost = round(self.damage_upgrade_cost)
+                self.damage_text.text = f'{stat} Increase Cost: {self.damage_upgrade_cost}'
+            elif stat == 'Speed':
+                self.manager.player.speed += 2
+                self.speed_upgrade_cost *= 2
+                self.speed_upgrade_cost = round(self.speed_upgrade_cost)
+                self.speed_text.text = f'{stat} Increase Cost: {self.speed_upgrade_cost}'
+            elif stat == 'Experience':
+                self.manager.player.xp_multi *= 1.2
+                self.experience_upgrade_cost *= 2
+                self.experience_upgrade_cost = round(self.experience_upgrade_cost)
+                self.experience_text.text = f'{stat} Multiplier Cost: {self.experience_upgrade_cost}'
+            elif stat == 'Reach':
+                self.manager.player.basereach += 0.5
+                self.reach_upgrade_cost *= 1.2
+                self.reach_upgrade_cost = round(self.reach_upgrade_cost)
+                self.reach_text.text = f'{stat} Increase Cost: {self.reach_upgrade_cost}'
+            elif stat == 'Bag':
+                self.manager.player.max_gold *= 2
+                self.bag_upgrade_cost *= 2
+                self.bag_upgrade_cost = round(self.bag_upgrade_cost)
+                self.bag_text.text = f'{stat} Multiplier Cost: {self.bag_upgrade_cost}'
+            elif stat == 'Armor':
+                self.manager.player.armor += 0.25
+                self.armor_upgrade_cost *= 3
+                self.armor_upgrade_cost = round(self.armor_upgrade_cost)
+                self.armor_text.text = f'{stat} Increase Cost: {self.armor_upgrade_cost}'
+            elif stat == 'Weapon':
+                self.manager.player.weapon_level += 1
+                self.weapon_upgrade_cost *= 5
+                self.weapon_upgrade_cost = round(self.weapon_upgrade_cost)
+                self.weapon_text.text = f'{stat} Level Cost: {self.weapon_upgrade_cost}'
+            elif stat == 'Regeneration':
+                self.manager.player.regeneration += 0.1
+                self.regeneration_upgrade_cost *= 5
+                self.regeneration_upgrade_cost = round(self.regeneration_upgrade_cost)
+                self.regeneration_text.text = f'{stat} Increase Cost: {self.regeneration_upgrade_cost}'
+            elif stat == 'Gorgon Gaze':
+                self.manager.player.gorgon_protection = True
+                self.gorgon_gaze_text.text = f'{stat} Skill Cost: Bought'
+            elif stat == 'Lava Protection':
+                self.manager.player.lava_protection = True
+                self.weapon_text.text = f'{stat} Skill Cost: Bought'
+
+
+            self.manager.player.gold -= costs[stat][0]
 
 if __name__ == '__main__':
     app=Ursina()
@@ -79,7 +154,7 @@ if __name__ == '__main__':
             self.speed = 50
             self.xp_multi = 1
             self.basereach = 2
-            self.bag = 10
+            self.max_gold = 10
             self.armor = 0
             self.weapon_level = 0
     class Manager():
@@ -96,5 +171,16 @@ if __name__ == '__main__':
             store.enabled = not store.enabled
         if key == 'm':
             manager.player.gold += 10
+        if key =='s':
+            print(f'Gold {manager.player.gold}')
+            print(f'Health {manager.player.health}')
+            print(f'Damage {manager.player.damage}')
+            print(store.damage_upgrade_cost)
+            print(f'Speed {manager.player.speed}')
+            print(f'Experience {manager.player.xp_multi}')
+            print(f'Reach {manager.player.basereach}')
+            print(f'Bag {manager.player.max_gold}')
+            print(f'Armor {manager.player.armor}')
+            print(f'Weapon {manager.player.weapon_level}')
 
     app.run()

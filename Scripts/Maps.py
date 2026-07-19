@@ -203,5 +203,7 @@ class ChimeraMap(Entity):
         self.manager = manager
 
     def update(self):
-        if self.manager.player.y <= -21:
+        if self.manager.player.y <= -21 and not self.manager.player.lava_protection:
             self.manager.player.health -= 10
+        if self.manager.player.y <= -50:
+            self.manager.player.position=(0,0,0)

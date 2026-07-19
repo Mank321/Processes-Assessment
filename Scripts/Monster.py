@@ -109,6 +109,8 @@ class Monster(Entity):
             self.position += self.forward * time.dt * self.speed
             if self.is_boss:
                 self.rotation_y += self.boss_rotation
+            if self.name == 'Gorgon' and not self.manager.player.gorgon_protection:
+                self.manager.player.health -= 100
 
         if self.distance <= self.closeness:
             damage_delt = self.damage - self.manager.player.armor

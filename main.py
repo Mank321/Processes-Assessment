@@ -172,9 +172,9 @@ class UIState(Entity):
                     self.death_menu.start_function = self.player.death
                 self.death_screen()
                 self.teleport_hud.enabled=False
-            
+
     def input(self, key):
-        if key == 't':
+        if key == 't' and not self.store.enabled:
             self.teleport_hud.enabled = not self.teleport_hud.enabled
             mouse.locked = not self.teleport_hud.enabled
 

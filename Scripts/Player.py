@@ -32,6 +32,8 @@ class Player(Entity):
         self.basereach = 2
         self.distance = float('inf')
         self.movement_locked = False
+        self.gorgon_protection = False
+        self.lava_protection
         
         camera.position = (0,1,0)
         camera.rotation = (0,0,0)
