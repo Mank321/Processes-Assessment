@@ -269,6 +269,16 @@ mess of green pixels. Since it was working fine on the previous devices, my theo
 anchorpoints doing. To fix it, I had to go and redownload the image from where I found it.
 -
 NOT_CRITICAL: Sometimes I would spawn in facing a slightly different direction, sometimes not.
+-
+NOT-FIXED: When I worked on the game at home during the holidays, I could see the centaur boss.
+But when I loaded up the game at school, the boss became invisible. I confirmed that all the other
+bosses remained visible. I tried recreating the file and naming it differently so ursina didn't try
+to use old models, but it was still invisible. I tried changing the boss file location code line,
+model='Assets/...', to be a straight string directly to the centaur boss, but it didn't work. I changed
+the model to be of the base monster, and it appeared correctly(with boss scalling and texturing). To
+confirm that it was the centaur boss model, I changed the model to the basilisk boss model and it worked
+fine too. I went back into version history and got an old version of the boss monster, and that fixed the
+issue.
 
 USER INTERFACE PROBLEMS
 FIXED: When coding the UI, I wanted to display the health as a resourcebar on screen, so I used the built-in

@@ -45,7 +45,7 @@ class GameManager(Entity):
         
         # Initialize the main classes
         self.store = Store(self)
-        self.ui_state = UIState(None)
+        self.ui_state = UIState(self, None)
         self.player = Player(self.ui_state, self)
         self.ui_state.player = self.player         
 
@@ -84,7 +84,7 @@ class GameManager(Entity):
         self.scenes = {'tutorial': self.tutorial_world, 'market': self.market_world,
                        'centaur': self.centaur_world, 'basilisk': self.basilisk_world,
                        'gorgon': self.gorgon_world, 'chimera': self.chimera_world}
-        
+
         new_scene = self.scenes[new_scene_name]
         old_scene = self.scenes[old_scene_name]
 
@@ -123,8 +123,9 @@ class GameManager(Entity):
 
 
 class UIState(Entity):
-    def __init__(self, player):
+    def __init__(self, manager, player):
         super().__init__()
+        self.manager = manager
         self.player = player
         self.damage_text = Text(parent=camera.ui, text='', position=(-0.85,-.22,0), size=0.06)
         self.armor_text = Text(parent=camera.ui, text='', position=(-0.85,-0.16), size=0.06)
@@ -174,10 +175,9 @@ class UIState(Entity):
                 self.teleport_hud.enabled=False
 
     def input(self, key):
-        if key == 't' and not self.store.enabled:
+        if key == 't' and not self.manager.store.enabled:
             self.teleport_hud.enabled = not self.teleport_hud.enabled
             mouse.locked = not self.teleport_hud.enabled
-
 
 
 class LevelCreator(Entity):
@@ -193,7 +193,7 @@ class LevelCreator(Entity):
         
         self.previous_scene = manager.locations.index(self.location.title()) - 1
         self.previous_scene = manager.locations[self.previous_scene].lower()
-        
+
         if self.name == 'Centaur':
             self.world = CentaurMap(manager, self)
             self.x_multi = 8

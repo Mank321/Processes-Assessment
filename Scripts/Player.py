@@ -32,8 +32,9 @@ class Player(Entity):
         self.basereach = 2
         self.distance = float('inf')
         self.movement_locked = False
+        self.regeneration_value = 0
         self.gorgon_protection = False
-        self.lava_protection
+        self.lava_protection = False
         
         camera.position = (0,1,0)
         camera.rotation = (0,0,0)
@@ -101,6 +102,8 @@ class Player(Entity):
         
         self.check_max_gold()
         self.check_max_health()
+        
+        self.health += self.regeneration_value
 
         # Allow jumping only when the player is on the ground
         ground_ray = raycast(self.position + Vec3(0,0.5,0), direction=Vec3(0,-1,0), distance=2, ignore=[self], debug=self.manager.debug_mode)

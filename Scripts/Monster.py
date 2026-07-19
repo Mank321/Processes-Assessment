@@ -36,7 +36,7 @@ class Monster(Entity):
         self.gate = gate
 
         if self.is_boss:
-            self.model = f'Assets/Models/{self.name}/Boss/boss.{boss_type}'
+            self.model = f'Assets/Models/{self.name}/Boss/boss3.{boss_type}'
             self.texture = f'Assets/Models/{self.name}/Boss/texture.png'
             self.scale = monster_stats['boss_scale']
             self.collision_box.scale = monster_stats['boss_collider_scale']

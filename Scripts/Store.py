@@ -14,7 +14,7 @@ class Store(Entity):
                                     on_click=lambda: self.switch(self.player_hud, self.shop_hud, self.skill_hud))
         self.shop_button = Button(parent=self, color=color.gray, scale=(0.17,0.20), position=(-0.5, 0,-1), icon='store.png', tooltip=Tooltip(f'<green>Shop'),
                                   on_click=lambda: self.switch(self.shop_hud, self.player_hud, self.skill_hud))
-        self.skill_button = Button(parent=self, color=color.gray, scale=(0.17,0.2), position=(-0.5, -0.37,-1), icon='fireball skill icon.jpg', tooltip=Tooltip(f'<green.Skills'),
+        self.skill_button = Button(parent=self, color=color.gray, scale=(0.17,0.2), position=(-0.5, -0.37,-1), icon='fireball skill icon.jpg', tooltip=Tooltip(f'<green>Skills'),
                                    on_click=lambda: self.switch(self.skill_hud, self.player_hud, self.shop_hud))
 
         self.health_upgrade_cost = 5
@@ -59,11 +59,11 @@ class Store(Entity):
         self.weapon_button = Button(parent=self.shop_hud, color=color.lime, text='Buy', position=(0,0.16,-1), scale=(0.1,0.1), on_click=lambda: self.buy('Weapon'))
 
         self.regeneration_text = Text(parent=self.skill_hud, text=f'Regeneration Increase Cost: {self.regeneration_upgrade_cost}', position=(-0.4,0.4,-1))
-        self.regeneration_button = Button(parent=self.skill_hud, color=color.lime, text='Buy', position=(0,0.4,-1), scale=(0.1,0.1), on_click=lambda: self.buy('Regeneration'))
+        self.regeneration_button = Button(parent=self.skill_hud, color=color.lime, text='Buy', position=(-0.1,0.4,-1), scale=(0.1,0.1), on_click=lambda: self.buy('Regeneration'))
         self.gorgon_gaze_text = Text(parent=self.skill_hud, text=f'Gorgon Protection Skill Cost: {self.gorgon_gaze_cost}', position=(-0.4,0.28,-1))
-        self.gorgon_gaze_button = Button(parent=self.skill_hud, color=color.lime, text='Buy', position=(0,0.28,-1), scale=(0.1,0.1), on_click=lambda: self.buy('Gorgon Gaze'))
+        self.gorgon_gaze_button = Button(parent=self.skill_hud, color=color.lime, text='Buy', position=(-0.1,0.28,-1), scale=(0.1,0.1), on_click=lambda: self.buy('Gorgon Gaze'))
         self.lava_protection_text = Text(parent=self.skill_hud, text=f'Lava Protection Skill Cost: {self.lava_protection_cost}', position=(-0.4,0.16,-1))
-        self.lava_protection_button = Button(parent=self.skill_hud, color=color.lime, text='Buy', position=(0,0.16,-1), scale=(0.1,0.1), on_click=lambda: self.buy('Lava Protection'))
+        self.lava_protection_button = Button(parent=self.skill_hud, color=color.lime, text='Buy', position=(-0.1,0.16,-1), scale=(0.1,0.1), on_click=lambda: self.buy('Lava Protection'))
 
 
         self.exit_text = Text(parent=self, text='Press E to exit', color=color.white, position=(-0.2, -0.2,-1))
@@ -86,7 +86,7 @@ class Store(Entity):
                  'Gorgon Gaze': self.gorgon_gaze_cost,
                  'Lava Protection': self.lava_protection_cost}
 
-        if self.manager.player.gold >= costs[stat][0]:
+        if self.manager.player.gold >= costs[stat]:
             if stat == 'Health':
                 self.manager.player.health += 5
                 self.health_upgrade_cost *= 1.2
@@ -128,19 +128,21 @@ class Store(Entity):
                 self.weapon_upgrade_cost = round(self.weapon_upgrade_cost)
                 self.weapon_text.text = f'{stat} Level Cost: {self.weapon_upgrade_cost}'
             elif stat == 'Regeneration':
-                self.manager.player.regeneration += 0.1
+                self.manager.player.regeneration_value += 0.1
                 self.regeneration_upgrade_cost *= 5
                 self.regeneration_upgrade_cost = round(self.regeneration_upgrade_cost)
                 self.regeneration_text.text = f'{stat} Increase Cost: {self.regeneration_upgrade_cost}'
             elif stat == 'Gorgon Gaze':
                 self.manager.player.gorgon_protection = True
                 self.gorgon_gaze_text.text = f'{stat} Skill Cost: Bought'
+                self.gorgon_gaze_button.disable()
             elif stat == 'Lava Protection':
                 self.manager.player.lava_protection = True
-                self.weapon_text.text = f'{stat} Skill Cost: Bought'
+                self.lava_protection.text = f'{stat} Skill Cost: Bought'
+                self.lava_protection_button.disable()
 
 
-            self.manager.player.gold -= costs[stat][0]
+            self.manager.player.gold -= costs[stat]
 
 if __name__ == '__main__':
     app=Ursina()
