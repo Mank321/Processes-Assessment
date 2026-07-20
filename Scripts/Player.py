@@ -28,7 +28,7 @@ class Player(Entity):
         self.gold = 0
         self.max_gold = 10
         self.inventory = None
-        self.weapon_level = 0
+        self.weapon_level = 1
         self.basereach = 2
         self.distance = float('inf')
         self.movement_locked = False
@@ -52,6 +52,7 @@ class Player(Entity):
         self.position = Vec3(0,10,0)
         self.max_health = self.max_health - self.level * 2 if self.max_health - self.level*2 >= 20 else self.max_health
         self.health = self.max_health
+        self.gold = self.gold // 2
         self.xp =self.xp // 2
         if self.level > 1:
             self.level -= 1
@@ -88,6 +89,8 @@ class Player(Entity):
         self.basereach += 0.1
     
     def teleport(self, location):
+        self.at_stall = False
+        self.store_icon.alpha = 0
         self.manager.switch_scenes(f'{self.manager.location}.{location}')
     
     def punch(self):

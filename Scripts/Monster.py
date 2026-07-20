@@ -12,6 +12,10 @@ class Monster(Entity):
         self.collision_box = Entity(model='cube', parent=self, position=monster_stats['collider_position'],
                                     scale=monster_stats['collider_scale'], visible=manager.debug_mode,
                                     wireframe=True, name=f'{monster_stats["name"]}.collider')
+        
+        self.look_at_box = Entity(model='cube', parent=self, x=monster_stats['collider_position'][0],
+                                  z=monster_stats['collider_position'][2], y=1,
+                                  scale=1, color=color.red, visible=manager.debug_mode)
 
         self.manager = manager
         self.parent = parent
@@ -36,7 +40,7 @@ class Monster(Entity):
         self.gate = gate
 
         if self.is_boss:
-            self.model = f'Assets/Models/{self.name}/Boss/boss3.{boss_type}'
+            self.model = f'Assets/Models/{self.name}/Boss/bosss.{boss_type}'
             self.texture = f'Assets/Models/{self.name}/Boss/texture.png'
             self.scale = monster_stats['boss_scale']
             self.collision_box.scale = monster_stats['boss_collider_scale']
@@ -64,7 +68,6 @@ class Monster(Entity):
     
     def respawn(self):
         self.position = self.origin_position
-        #self.rotation = self.origin_rotation
         self.visible = True
         self.collision_box.visible = self.manager.debug_mode
         self.enabled = True
@@ -77,7 +80,7 @@ class Monster(Entity):
         """This triggers when the mouse clicks the monster."""
         self.distance = distance(self, self.manager.player)
         if self.distance <= self.manager.player.basereach + self.closeness:
-            self.health -= self.manager.player.damage
+            self.health -= self.manager.player.damage * self.manager.player.weapon_level
             self.manager.player.punch()
 
             # Flash Red Effect
@@ -106,11 +109,12 @@ class Monster(Entity):
         self.distance = distance(self, self.manager.player)
         if self.closeness < self.distance <= self.sight:
             self.look_at_2d(self.manager.player, 'y')
+            self.look_at_box.look_at(self.manager.player)
             self.position += self.forward * time.dt * self.speed
             if self.is_boss:
                 self.rotation_y += self.boss_rotation
             if self.name == 'Gorgon' and not self.manager.player.gorgon_protection:
-                self.manager.player.health -= 100
+                self.manager.player.health -= 100 * time.dt
 
         if self.distance <= self.closeness:
             damage_delt = self.damage - self.manager.player.armor

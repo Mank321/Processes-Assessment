@@ -9,7 +9,7 @@ class TutorialWorld(Entity):
         self.ground = Entity(parent=self,model='plane', collider='box', scale=200, texture='grass', texture_scale=(4,4))
 
         self.wall = Entity(parent=self,model='Assets/Models/Wall/Wall.obj', texture='Assets/Models/Wall/texture.png',
-                    double_sided=True,scale=(0.005,0.01,0.005), collider='mesh', position=(0,5,10))
+                    double_sided=True,scale=(0.5,1,0.5), collider='mesh', position=(0,5,15))
         
         self.gate = Gate(manager, parent=self, position=(0,-0.7,30), locations='tutorial.market')
 

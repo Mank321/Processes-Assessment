@@ -32,13 +32,13 @@ class Store(Entity):
         self.bag_upgrade_markup = 2
         self.armor_upgrade_cost = 15
         self.armor_upgrade_markup = 3
-        self.weapon_upgrade_cost = 15
+        self.weapon_upgrade_cost = 50
         self.weapon_upgrade_markup = 5
 
         self.regeneration_upgrade_cost = 10
         self.regeneration_upgrade_markup = 2
-        self.gorgon_gaze_cost = 50
-        self.lava_protection_cost = 500
+        self.gorgon_gaze_cost = 500
+        self.lava_protection_cost = 2000
 
         self.health_text = Text(parent=self.player_hud, text=f'Health Increase Cost: {self.health_upgrade_cost}', position=(-0.4,0.4,-1))
         self.health_button = Button(parent=self.player_hud, color=color.lime, text='Buy', position=(0.2,0.4,-1), scale=(0.1,0.1), on_click=lambda: self.buy('Health'))
@@ -55,7 +55,7 @@ class Store(Entity):
         self.bag_button = Button(parent=self.shop_hud, color=color.lime, text='Buy', position=(0.2,0.4,-1), scale=(0.1,0.1), on_click=lambda: self.buy('Bag'))
         self.armor_text = Text(parent=self.shop_hud, text=f'Armor Increase Cost: {self.armor_upgrade_cost}', position=(-0.4,0.28,-1))
         self.armor_button = Button(parent=self.shop_hud, color=color.lime, text='Buy', position=(0.2,0.28,-1), scale=(0.1,0.1), on_click=lambda: self.buy('Armor'))
-        self.weapon_text = Text(parent=self.shop_hud, text=f'Weapon Level Cost: {self.weapon_upgrade_cost}', position=(-0.4,0.16,-1))
+        self.weapon_text = Text(parent=self.shop_hud, text=f'Weapon Level Cost (W.I.P): {self.weapon_upgrade_cost}', position=(-0.4,0.16,-1))
         self.weapon_button = Button(parent=self.shop_hud, color=color.lime, text='Buy', position=(0.2,0.16,-1), scale=(0.1,0.1), on_click=lambda: self.buy('Weapon'))
 
         self.regeneration_text = Text(parent=self.skill_hud, text=f'Regeneration Increase Cost: {self.regeneration_upgrade_cost}', position=(-0.4,0.4,-1))
@@ -88,6 +88,7 @@ class Store(Entity):
 
         if self.manager.player.gold >= costs[stat]:
             if stat == 'Health':
+                self.manager.player.max_health += 5
                 self.manager.player.health += 5
                 self.health_upgrade_cost *= 1.2
                 self.health_upgrade_cost = round(self.health_upgrade_cost)
@@ -104,7 +105,7 @@ class Store(Entity):
                 self.speed_text.text = f'{stat} Increase Cost: {self.speed_upgrade_cost}'
             elif stat == 'Experience':
                 self.manager.player.xp_multi *= 1.2
-                self.experience_upgrade_cost *= 2
+                self.experience_upgrade_cost *= 1.6
                 self.experience_upgrade_cost = round(self.experience_upgrade_cost)
                 self.experience_text.text = f'{stat} Multiplier Cost: {self.experience_upgrade_cost}'
             elif stat == 'Reach':
@@ -119,14 +120,14 @@ class Store(Entity):
                 self.bag_text.text = f'{stat} Multiplier Cost: {self.bag_upgrade_cost}'
             elif stat == 'Armor':
                 self.manager.player.armor += 0.25
-                self.armor_upgrade_cost *= 3
+                self.armor_upgrade_cost *= 2
                 self.armor_upgrade_cost = round(self.armor_upgrade_cost)
                 self.armor_text.text = f'{stat} Increase Cost: {self.armor_upgrade_cost}'
             elif stat == 'Weapon':
-                self.manager.player.weapon_level += 1
-                self.weapon_upgrade_cost *= 5
+                self.manager.player.weapon_level *= 2
+                self.weapon_upgrade_cost *= 3
                 self.weapon_upgrade_cost = round(self.weapon_upgrade_cost)
-                self.weapon_text.text = f'{stat} Level Cost: {self.weapon_upgrade_cost}'
+                self.weapon_text.text = f'{stat} Level Cost (W.I.P): {self.weapon_upgrade_cost}'
             elif stat == 'Regeneration':
                 self.manager.player.regeneration_value += self.manager.player.max_health * 0.01
                 self.regeneration_upgrade_cost *= 5
@@ -138,7 +139,7 @@ class Store(Entity):
                 self.gorgon_gaze_button.disable()
             elif stat == 'Lava Protection':
                 self.manager.player.lava_protection = True
-                self.lava_protection.text = f'{stat} Skill Cost: Bought'
+                self.lava_protection_text.text = f'{stat} Skill Cost: Bought'
                 self.lava_protection_button.disable()
 
 
