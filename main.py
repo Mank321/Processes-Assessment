@@ -59,14 +59,16 @@ class GameManager(Entity):
     def pause_game(self):
         mouse.locked = False
         self.ui_state.teleport_hud.enabled = False
+        self.store.enabled = False
         main_menu.start_buttons.enabled = False
         main_menu.pause_buttons.enabled = True
         main_menu.background.enabled = True
         main_menu.enabled = True
-        main_menu.background.z = -1
+        main_menu.background.z = -2
         application.paused = True
 
     def resume_game(self):
+        self.player.movement_locked = False
         main_menu.enabled = False
         main_menu.background.enabled = False
         mouse.locked = True
@@ -176,6 +178,7 @@ class UIState(Entity):
 
     def input(self, key):
         if key == 't' and not self.manager.store.enabled:
+            self.player.movement_locked = not self.player.movement_locked
             self.teleport_hud.enabled = not self.teleport_hud.enabled
             mouse.locked = not self.teleport_hud.enabled
 

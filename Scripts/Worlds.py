@@ -54,4 +54,4 @@ class MarketWorld(Entity):
 
         self.stall = Stall(manager,parent=self, position=(5,0,5), rotation_y=-90)
 
-        self.colliders = [self.tutorial_gate.collision_box, self.stall.collision_box, self.centaur_gate.collision_box, self.stall.collision_box]
+        self.colliders = [self.tutorial_gate.collision_box, self.stall.collision_box, self.centaur_gate.collision_box]

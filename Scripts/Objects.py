@@ -21,7 +21,7 @@ class Stall(Entity):
         self.props = Entity(model='Assets/Models/Stall/Props/props.fbx', texture='Assets/Models/Stall/Props/props_texture.png',
                             parent=self, double_sided=True,scale=(1,1,1), position=(0,0,0))
 
-        self.collision_box = Entity(model='cube', parent=self, name=self.name,
+        self.collision_box = Entity(model='cube', parent=self, name='Stall',
                                     position=(0,0,0), scale=(40,50,40),
                                     collider='box', visible=manager.debug_mode,
                                     wireframe=True)

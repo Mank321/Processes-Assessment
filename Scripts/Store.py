@@ -41,29 +41,29 @@ class Store(Entity):
         self.lava_protection_cost = 500
 
         self.health_text = Text(parent=self.player_hud, text=f'Health Increase Cost: {self.health_upgrade_cost}', position=(-0.4,0.4,-1))
-        self.health_button = Button(parent=self.player_hud, color=color.lime, text='Buy', position=(0,0.4,-1), scale=(0.1,0.1), on_click=lambda: self.buy('Health'))
+        self.health_button = Button(parent=self.player_hud, color=color.lime, text='Buy', position=(0.2,0.4,-1), scale=(0.1,0.1), on_click=lambda: self.buy('Health'))
         self.damage_text = Text(parent=self.player_hud, text=f'Damage Increase Cost: {self.damage_upgrade_cost}', position=(-0.4,0.28,-1))
-        self.damage_button = Button(parent=self.player_hud, color=color.lime, text='Buy', position=(0,0.28,-1), scale=(0.1,0.1), on_click=lambda: self.buy('Damage'))
+        self.damage_button = Button(parent=self.player_hud, color=color.lime, text='Buy', position=(0.2,0.28,-1), scale=(0.1,0.1), on_click=lambda: self.buy('Damage'))
         self.speed_text = Text(parent=self.player_hud, text=f'Speed Increase Cost: {self.speed_upgrade_cost}', position=(-0.4,0.16,-1))
-        self.speed_button = Button(parent=self.player_hud, color=color.lime, text='Buy', position=(0,0.16,-1), scale=(0.1,0.1), on_click=lambda: self.buy('Speed'))
+        self.speed_button = Button(parent=self.player_hud, color=color.lime, text='Buy', position=(0.2,0.16,-1), scale=(0.1,0.1), on_click=lambda: self.buy('Speed'))
         self.experience_text = Text(parent=self.player_hud, text=f'Experience Multiplier Cost: {self.experience_upgrade_cost}', position=(-0.4,0.04,-1))
-        self.experience_button = Button(parent=self.player_hud, color=color.lime, text='Buy', position=(0,0.04,-1), scale=(0.1,0.1), on_click=lambda: self.buy('Experience'))
+        self.experience_button = Button(parent=self.player_hud, color=color.lime, text='Buy', position=(0.2,0.04,-1), scale=(0.1,0.1), on_click=lambda: self.buy('Experience'))
         self.reach_text = Text(parent=self.player_hud, text=f'Reach Increase Cost: {self.reach_upgrade_cost}', position=(-0.4,-0.08,-1))
-        self.reach_button = Button(parent=self.player_hud, color=color.lime, text='Buy', position=(0,-0.08,-1), scale=(0.1,0.1), on_click=lambda: self.buy('Reach'))
+        self.reach_button = Button(parent=self.player_hud, color=color.lime, text='Buy', position=(0.2,-0.08,-1), scale=(0.1,0.1), on_click=lambda: self.buy('Reach'))
 
         self.bag_text = Text(parent=self.shop_hud, text=f'Bag Multiplier Cost: {self.bag_upgrade_cost}', position=(-0.4,0.4,-1))
-        self.bag_button = Button(parent=self.shop_hud, color=color.lime, text='Buy', position=(0,0.4,-1), scale=(0.1,0.1), on_click=lambda: self.buy('Bag'))
+        self.bag_button = Button(parent=self.shop_hud, color=color.lime, text='Buy', position=(0.2,0.4,-1), scale=(0.1,0.1), on_click=lambda: self.buy('Bag'))
         self.armor_text = Text(parent=self.shop_hud, text=f'Armor Increase Cost: {self.armor_upgrade_cost}', position=(-0.4,0.28,-1))
-        self.armor_button = Button(parent=self.shop_hud, color=color.lime, text='Buy', position=(0,0.28,-1), scale=(0.1,0.1), on_click=lambda: self.buy('Armor'))
+        self.armor_button = Button(parent=self.shop_hud, color=color.lime, text='Buy', position=(0.2,0.28,-1), scale=(0.1,0.1), on_click=lambda: self.buy('Armor'))
         self.weapon_text = Text(parent=self.shop_hud, text=f'Weapon Level Cost: {self.weapon_upgrade_cost}', position=(-0.4,0.16,-1))
-        self.weapon_button = Button(parent=self.shop_hud, color=color.lime, text='Buy', position=(0,0.16,-1), scale=(0.1,0.1), on_click=lambda: self.buy('Weapon'))
+        self.weapon_button = Button(parent=self.shop_hud, color=color.lime, text='Buy', position=(0.2,0.16,-1), scale=(0.1,0.1), on_click=lambda: self.buy('Weapon'))
 
         self.regeneration_text = Text(parent=self.skill_hud, text=f'Regeneration Increase Cost: {self.regeneration_upgrade_cost}', position=(-0.4,0.4,-1))
-        self.regeneration_button = Button(parent=self.skill_hud, color=color.lime, text='Buy', position=(-0.1,0.4,-1), scale=(0.1,0.1), on_click=lambda: self.buy('Regeneration'))
+        self.regeneration_button = Button(parent=self.skill_hud, color=color.lime, text='Buy', position=(0.2,0.4,-1), scale=(0.1,0.1), on_click=lambda: self.buy('Regeneration'))
         self.gorgon_gaze_text = Text(parent=self.skill_hud, text=f'Gorgon Protection Skill Cost: {self.gorgon_gaze_cost}', position=(-0.4,0.28,-1))
-        self.gorgon_gaze_button = Button(parent=self.skill_hud, color=color.lime, text='Buy', position=(-0.1,0.28,-1), scale=(0.1,0.1), on_click=lambda: self.buy('Gorgon Gaze'))
+        self.gorgon_gaze_button = Button(parent=self.skill_hud, color=color.lime, text='Buy', position=(0.2,0.28,-1), scale=(0.1,0.1), on_click=lambda: self.buy('Gorgon Gaze'))
         self.lava_protection_text = Text(parent=self.skill_hud, text=f'Lava Protection Skill Cost: {self.lava_protection_cost}', position=(-0.4,0.16,-1))
-        self.lava_protection_button = Button(parent=self.skill_hud, color=color.lime, text='Buy', position=(-0.1,0.16,-1), scale=(0.1,0.1), on_click=lambda: self.buy('Lava Protection'))
+        self.lava_protection_button = Button(parent=self.skill_hud, color=color.lime, text='Buy', position=(0.2,0.16,-1), scale=(0.1,0.1), on_click=lambda: self.buy('Lava Protection'))
 
 
         self.exit_text = Text(parent=self, text='Press E to exit', color=color.white, position=(-0.2, -0.2,-1))
@@ -128,7 +128,7 @@ class Store(Entity):
                 self.weapon_upgrade_cost = round(self.weapon_upgrade_cost)
                 self.weapon_text.text = f'{stat} Level Cost: {self.weapon_upgrade_cost}'
             elif stat == 'Regeneration':
-                self.manager.player.regeneration_value += 0.1
+                self.manager.player.regeneration_value += self.manager.player.max_health * 0.01
                 self.regeneration_upgrade_cost *= 5
                 self.regeneration_upgrade_cost = round(self.regeneration_upgrade_cost)
                 self.regeneration_text.text = f'{stat} Increase Cost: {self.regeneration_upgrade_cost}'

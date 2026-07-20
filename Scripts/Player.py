@@ -32,6 +32,7 @@ class Player(Entity):
         self.basereach = 2
         self.distance = float('inf')
         self.movement_locked = False
+        self.at_stall = False
         self.regeneration_value = 0
         self.gorgon_protection = False
         self.lava_protection = False
@@ -103,7 +104,7 @@ class Player(Entity):
         self.check_max_gold()
         self.check_max_health()
         
-        self.health += self.regeneration_value
+        self.health += self.regeneration_value * time.dt
 
         # Allow jumping only when the player is on the ground
         ground_ray = raycast(self.position + Vec3(0,0.5,0), direction=Vec3(0,-1,0), distance=2, ignore=[self], debug=self.manager.debug_mode)
@@ -146,13 +147,13 @@ class Player(Entity):
         for collider in colliders:
             if self.intersects(collider).hit:
                 collider.color = color.red
-                if collider.name == 'stall':
+                if collider.name == 'Stall':
                     self.store_icon.alpha = 1
                     self.at_stall = True
                         
             else:
                 collider.color = color.white
-                if collider.name == 'stall':
+                if collider.name == 'Stall':
                     self.store_icon.alpha = 0
                     self.at_stall = False
         
@@ -169,7 +170,7 @@ class Player(Entity):
                 scenes = name[5:]
                 self.manager.switch_scenes(scenes)
     def input(self, key):
-        if key == 'e' and self.at_stall:
+        if key == 'e' and self.at_stall and not self.ui_state.teleport_hud.enabled:
             self.manager.store.enabled = not self.manager.store.enabled
             self.movement_locked = not self.movement_locked
             mouse.locked = not mouse.locked

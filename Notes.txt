@@ -279,6 +279,16 @@ the model to be of the base monster, and it appeared correctly(with boss scallin
 confirm that it was the centaur boss model, I changed the model to the basilisk boss model and it worked
 fine too. I went back into version history and got an old version of the boss monster, and that fixed the
 issue.
+-
+FIXED: When I stopped working on my PC and started doing some work on my laptop, I suddenly couldn't
+open the store. I also got an error saying at_stall hadn't been initiated yet - an error I hadn't seen
+before due to lack of testing. This told me that the laptop version, with exact same code, couldn't
+touch the stall. Through debugging using print statements, I determined I was touching the stall, but
+that the stall's collision name had been erased, and come up as " ". Before it had worked just fine with
+name = self.name, where self is an entity, but to fix the issue and have it working for both devices,
+I changed name to simply equal 'stall'. This made the store open, but when I walked away, the open
+store icon stayed on screen, unlike on the PC where it became fully transparent. This was a simple fix
+as I'd forgotten to change another stall name check to the new stall name
 
 USER INTERFACE PROBLEMS
 FIXED: When coding the UI, I wanted to display the health as a resourcebar on screen, so I used the built-in
