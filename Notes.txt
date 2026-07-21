@@ -110,6 +110,7 @@ setting the movement_locked variable to equal teleport_hud.enabled, so it will o
 is open.
 
 
+
 WORLD CREATION PROBLEMS
 FIXED: When creating the forest in the tutorial area, I started with a massive list containing the
 pre-chosen position of each tree. Then I looped through the list to plant each tree. This was
@@ -187,6 +188,7 @@ but creating a text at the top of my screen and displaying the player coordinate
 simply walked to were ever I wanted the monster, record the player coordinates, and list them in an array.
 
 
+
 COMBAT SYSTEM PROBLEMS
 FIXED: When creating the combat system, I added in the monster, gave it a hitbox, damage, and
 health, and gave it movement and distance checks, allowing it to move up to the player and attack
@@ -240,6 +242,7 @@ depending on how fast I clicked. They even kept this colour after death. The cau
 blink code.
 
 
+
 PLAYER SYSTEMS
 FIXED: When building the levelup system, I created a healthbar in the UI, and created a method to
 levelup. When leveling up, the player's health returns to max, and when printed out, it does. But on
@@ -261,6 +264,7 @@ FIXED: When building the teleport feature, I tried disabling all the buttons at 
 their on_click functions when the player had been created. But this still let the player use the
 button. I moved the addition of an on_click function inside the switch_scenes method so that the
 button would do nothing until the world had actually been visited.
+
 
 
 COMPUTER/DEVICE AND SOFTWARE PROBLEMS
@@ -307,6 +311,7 @@ name = self.name, where self is an entity, but to fix the issue and have it work
 I changed name to simply equal 'stall'. This made the store open, but when I walked away, the open
 store icon stayed on screen, unlike on the PC where it became fully transparent. This was a simple fix
 as I'd forgotten to change another stall name check to the new stall name
+
 
 
 USER INTERFACE PROBLEMS

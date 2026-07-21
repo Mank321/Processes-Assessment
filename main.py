@@ -140,14 +140,16 @@ class UIState(Entity):
         self.player_experience_bar = HealthBar(max_value=10, value=0, position=(-0.89, -0.45,0), colour=color.green, scale=(1.8, 0.05))
         self.player_gold_text = Text(parent=camera.ui, text=f'<gold>Gold', position=(-0.45, -0.34,0))
         self.player_health_text = Text(parent=camera.ui, text=f'<red>Health', position=(-0.45, -0.4,0))
-        self.level_display = Text(parent=camera.ui, text=1, position=(0, -0.35), size=0.12, font='Assets/Fonts/barber-chop/BarberChop.otf', color=color.lime)
+        self.level_display = Text(parent=camera.ui, text='Level: 1', position=(-0.1, -0.35), size=0.12, font='Assets/Fonts/barber-chop/BarberChop.otf', color=color.lime)
         self.level_display.scale = 0.5
+        self.teleport_text = Text(parent=camera.ui, text='Press T to open teleporter', position=(0.4, -0.4, 0), scale=1.5, color=color.red, enabled=False)
+        self.reach_text = Text(parent=camera.ui, text=f'Reach: 2', position=(-0.85, -0.1, 0), size=0.04)
         self.death_screen_background = Entity(parent=camera.ui, model='quad', color=(255,0,0, 0.4), scale=(2,2), position=(0,0,-1), enabled=False)
         self.death_menu = MainMenu(None, None, bg=self.death_screen_background, header='You Died', text='Respawn', y=-0.2, enabled=False)
         #self.position_text = Text(parent=camera.ui, text=f'Position: Null', position=(-0.5, 0.5), size=0.04)
 
         self.teleport_hud = Panel(parent=camera.ui, color=color.black, enabled=False, scale=(0.7,0.6), position=(0,0,1))
-        self.teleport_hud_text = Text(parent=self.teleport_hud, text='Teleport to the following', color=color.red, size=1, origin=(0,0,0), position=(0,0.45,-1))
+        self.teleport_hud_text = Text(parent=self.teleport_hud, text='Teleport to the following', color=color.red, scale=3, origin=(0,0,0), position=(0,0.45,-1))
         self.teleport_buttons = {
             'Tutorial': Button(parent=self.teleport_hud, text='Tutorial', text_size=2, color=color.lime, scale=(0.4,0.15), position=(-0.25,0.3,-1)),
             'Market': Button(parent=self.teleport_hud, text='Market', text_size=2, color=color.lime, scale=(0.4,0.15), position=(-0.25,0.05,-1), disabled=True),
@@ -173,7 +175,8 @@ class UIState(Entity):
             self.player_experience_bar.value = round(self.player.xp)
             self.damage_text.text = f'Damage: {self.player.damage}(+{self.player.damage * (self.player.weapon_level - 1)})'
             self.armor_text.text = f'Armor: {self.player.armor}'
-            self.level_display.text = self.player.level
+            self.level_display.text = f'Level: {self.player.level}'
+            self.reach_text.text = f'Reach: {round(self.player.basereach)}'
             #self.position_text.text = f'Position: {self.player.position}'
 
             if self.player.health <= 0 and not self.death_menu.enabled:
@@ -187,6 +190,7 @@ class UIState(Entity):
             self.teleport_hud.enabled = not self.teleport_hud.enabled
             self.player.movement_locked = self.teleport_hud.enabled
             mouse.locked = not self.teleport_hud.enabled
+            self.teleport_text.enabled = False
 
 
 class LevelCreator(Entity):
@@ -279,6 +283,8 @@ main_menu = MainMenu(manager.start_game, manager.resume_game)
 def input(key):
     if key == 'c':
         manager.debug_mode = not manager.debug_mode
+    if key == 'l':
+        manager.player.position=(0,1,0)
 
 def update():
     if held_keys['escape']:

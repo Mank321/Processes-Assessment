@@ -3,7 +3,7 @@ from ursina import Entity, color, Text, Button, Tooltip, Ursina, camera
 #Make an upgrades class and create an object for each upgrade
 class Store(Entity):
     def __init__(self, manager, enabled=False):
-        super().__init__(parent=camera.ui, model='quad', color=color.black, position=(0,0.1,0), scale=(0.9, 0.7, 1), enabled=enabled)
+        super().__init__(parent=camera.ui, model='quad', color=color.black, position=(0.1,0.1,0), scale=(0.9, 0.7, 1), enabled=enabled)
 
         self.manager = manager
         self.player_hud = Entity(parent=self, enabled=True)
@@ -59,8 +59,8 @@ class Store(Entity):
         self.lava_protection_text = Text(parent=self.skill_hud, text=f'Lava Protection Skill Cost: {self.lava_protection_cost}', position=(-0.4,0.04,-1))
         self.lava_protection_button = Button(parent=self.skill_hud, color=color.lime, text='Buy', position=(0.2,0.04,-1), scale=(0.1,0.1), on_click=lambda: self.buy('Lava Protection'))
 
-
-        self.exit_text = Text(parent=self, text='Press E to exit', color=color.white, position=(-0.4, -0.4,-1))
+        self.help_text = Entity(parent=self, model='quad', texture='Assets/store help text.png', position=(-0.8,-0.2,-2), scale=(0.5,0.5,0.5))
+        self.exit_text = Text(parent=self, text='Press E to exit', color=color.white, position=(0.2, -0.4,-1))
 
     def switch(self, new, old1, old2):
         new.enable()
@@ -132,6 +132,7 @@ class Store(Entity):
                 self.manager.player.can_teleport = True
                 self.teleportation_text.text = f'{stat} Skill Cost: Bought'
                 self.teleportation_button.disable()
+                self.manager.ui_state.teleport_text.enabled=True
             elif stat == 'Gorgon Gaze':
                 self.manager.player.gorgon_protection = True
                 self.gorgon_gaze_text.text = f'{stat} Skill Cost: Bought'

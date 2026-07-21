@@ -16,7 +16,9 @@ class Sign(Entity):
     def __init__(self, parent, position, text, rotation_y=90):
         super().__init__(parent=parent, model='Assets/Models/Sign/signV2.fbx', texture='Assets/Models/Sign/sign texture.jpg',
                          double_sided=True, scale=(.001,.002,.001), position=position, rotation_y=rotation_y)
-        self.text = Text(parent=scene, text=text, scale=13, position=(position[0]-0.6, position[1]+0.5, position[2]-0.3), color=color.white, rotation_y=rotation_y-90)
+        self.text = Text(parent=self, text=text, scale=13000, 
+                         position=(300,800,-600),
+                         color=color.white, rotation_y=-90)
 
 class Stall(Entity):
     def __init__(self, manager, parent, position, rotation_y):
