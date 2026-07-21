@@ -57,6 +57,7 @@ class GameManager(Entity):
 
 
     def pause_game(self):
+        """."""
         mouse.locked = False
         self.ui_state.teleport_hud.enabled = False
         self.store.enabled = False
@@ -68,6 +69,7 @@ class GameManager(Entity):
         application.paused = True
 
     def resume_game(self):
+        """."""
         self.player.movement_locked = False
         main_menu.enabled = False
         main_menu.background.enabled = False
@@ -77,6 +79,7 @@ class GameManager(Entity):
     
     def switch_scenes(self, gate):
         """."""
+        self.player.movement_locked = True
         self.player.position = (0,1,0)
         new_scene_name = gate.split('.')[1]
         old_scene_name = gate.split('.')[0]
@@ -122,6 +125,7 @@ class GameManager(Entity):
             old_scene.disable()
 
         print_on_screen(f'--{new_scene_name.title()}--', position=(-0.1,0.45), scale=3, duration=2)
+        self.player.movement_locked = False
 
 
 class UIState(Entity):
@@ -134,10 +138,12 @@ class UIState(Entity):
         self.player_health_bar = HealthBar(max_value=20,value=20,position=(-0.85, -0.39,0),colour=color.red,scale=(0.4,0.05))
         self.player_gold_bar = HealthBar(max_value=10,value=0,position=(-0.85, -0.33,0),colour=color.gold,scale=(0.4,0.05))
         self.player_experience_bar = HealthBar(max_value=10, value=0, position=(-0.89, -0.45,0), colour=color.green, scale=(1.8, 0.05))
+        self.player_gold_text = Text(parent=camera.ui, text=f'<gold>Gold', position=(-0.45, -0.34,0))
+        self.player_health_text = Text(parent=camera.ui, text=f'<red>Health', position=(-0.45, -0.4,0))
         self.level_display = Text(parent=camera.ui, text=1, position=(0, -0.35), size=0.12, font='Assets/Fonts/barber-chop/BarberChop.otf', color=color.lime)
         self.level_display.scale = 0.5
         self.death_screen_background = Entity(parent=camera.ui, model='quad', color=(255,0,0, 0.4), scale=(2,2), position=(0,0,-1), enabled=False)
-        self.death_menu = MainMenu(None, None, bg=self.death_screen_background, header='You Died', text='Respawn', enabled=False)
+        self.death_menu = MainMenu(None, None, bg=self.death_screen_background, header='You Died', text='Respawn', y=-0.2, enabled=False)
         #self.position_text = Text(parent=camera.ui, text=f'Position: Null', position=(-0.5, 0.5), size=0.04)
 
         self.teleport_hud = Panel(parent=camera.ui, color=color.black, enabled=False, scale=(0.7,0.6), position=(0,0,1))
@@ -177,9 +183,9 @@ class UIState(Entity):
                 self.teleport_hud.enabled=False
 
     def input(self, key):
-        if key == 't' and not self.manager.store.enabled:
-            self.player.movement_locked = not self.player.movement_locked
+        if key == 't' and not self.manager.store.enabled and self.player.can_teleport:
             self.teleport_hud.enabled = not self.teleport_hud.enabled
+            self.player.movement_locked = self.teleport_hud.enabled
             mouse.locked = not self.teleport_hud.enabled
 
 
@@ -273,6 +279,8 @@ main_menu = MainMenu(manager.start_game, manager.resume_game)
 def input(key):
     if key == 'c':
         manager.debug_mode = not manager.debug_mode
+    if key == 'j':
+        print(manager.player.movement_locked)
 
 def update():
     if held_keys['escape']:

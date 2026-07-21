@@ -4,7 +4,7 @@ app = Ursina()
 ORIGIN_BACKGROUND = Entity(model='quad', texture='Assets/menu background.jpg', z=1, scale=(1.8,1))
 
 class MainMenu(Entity):
-    def __init__(self, start_func, resume_func, bg=ORIGIN_BACKGROUND, header='Main Menu', text='Start', enabled=True):
+    def __init__(self, start_func, resume_func, bg=ORIGIN_BACKGROUND, header='Main Menu', text='Start', y=0, enabled=True):
         super().__init__(parent=camera.ui, ignore_paused=True, enabled=enabled)
 
         self.main_menu = Entity(parent=self, enabled=True, ignore_paused=True)
@@ -21,12 +21,12 @@ class MainMenu(Entity):
         self.start_buttons = ButtonList(button_dict={
             text: Func(self.execute_start),
             "Exit": Func(lambda: application.quit())
-        },y=0, z=-10,parent=self.main_menu, ignore_paused=True)
+        },y=y, z=-10,parent=self.main_menu, ignore_paused=True)
 
         self.pause_buttons = ButtonList(button_dict={
             "Resume": Func(resume_func),
             "Exit": Func(lambda: application.quit())
-        },y=0, z=-10, parent=self.main_menu, enabled=False, ignore_paused=True)
+        },y=y, z=-10, parent=self.main_menu, enabled=False, ignore_paused=True)
     
     def execute_start(self):
         if self.start_function:

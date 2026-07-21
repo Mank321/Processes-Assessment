@@ -97,6 +97,17 @@ that when disbaled, the player could walk right through the gate, which made me 
 back to the name approach. When I changed self.gate.name, I forgot to realise that the raycast was
 actually hiting the collision_box entity, so after a bit of debugging I changed the collision_box
 name to gate.location.complete, set the raycast to look for the complete, and it worked.
+-
+FIXED: When I was trying to disable player movement while going through the gates so they wouldn't
+shoot forward into other portals or out of bounds, I ran into a problem where teleporting disabled the 
+player's movement. Through debugging prints I realised that immediantly after the teleport method, the
+movement_locked variable was False, but when I tried to do anything, it became True. I tried debugging
+my entire code and running through it, but the variable never changed to True. I assigned a keybind to 
+print out the variable value, and I used it the moment I teleported - it showed False, which was good.
+But as soon as I closed the teleport hud, it printed True. This finally showed me that I was setting
+movement_locked to be not movement_locked everytime I open/closed the teleport hud. I fixed the issue by
+setting the movement_locked variable to equal teleport_hud.enabled, so it will only be true when the hud
+is open.
 
 WORLD CREATION PROBLEMS
 FIXED: When creating the forest in the tutorial area, I started with a massive list containing the
@@ -270,7 +281,7 @@ anchorpoints doing. To fix it, I had to go and redownload the image from where I
 -
 NOT_CRITICAL: Sometimes I would spawn in facing a slightly different direction, sometimes not.
 -
-NOT-FIXED: When I worked on the game at home during the holidays, I could see the centaur boss.
+FIXED: When I worked on the game at home during the holidays, I could see the centaur boss.
 But when I loaded up the game at school, the boss became invisible. I confirmed that all the other
 bosses remained visible. I tried recreating the file and naming it differently so ursina didn't try
 to use old models, but it was still invisible. I tried changing the boss file location code line,

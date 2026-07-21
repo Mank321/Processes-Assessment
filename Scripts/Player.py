@@ -34,6 +34,7 @@ class Player(Entity):
         self.movement_locked = False
         self.at_stall = False
         self.regeneration_value = 0
+        self.can_teleport = False
         self.gorgon_protection = False
         self.lava_protection = False
         
@@ -172,6 +173,7 @@ class Player(Entity):
             if name.startswith('gate') and name.split('.')[-1] == 'complete':
                 scenes = name[5:]
                 self.manager.switch_scenes(scenes)
+
     def input(self, key):
         if key == 'e' and self.at_stall and not self.ui_state.teleport_hud.enabled:
             self.manager.store.enabled = not self.manager.store.enabled
