@@ -125,7 +125,7 @@ class Player(Entity):
         
         # Double speed while sprinting
         if held_keys['left shift']:
-            self.speed = self.default_speed * 2
+            self.speed = self.default_speed * 1.5
         else:
             self.speed = self.default_speed
         

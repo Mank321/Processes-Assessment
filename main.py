@@ -279,8 +279,6 @@ main_menu = MainMenu(manager.start_game, manager.resume_game)
 def input(key):
     if key == 'c':
         manager.debug_mode = not manager.debug_mode
-    if key == 'j':
-        print(manager.player.movement_locked)
 
 def update():
     if held_keys['escape']:

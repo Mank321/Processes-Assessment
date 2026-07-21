@@ -3,7 +3,7 @@ from ursina import Entity, color, Text, Button, Tooltip, Ursina, camera
 #Make an upgrades class and create an object for each upgrade
 class Store(Entity):
     def __init__(self, manager, enabled=False):
-        super().__init__(parent=camera.ui, model='quad', color=color.black, position=(0,0,0), scale=(0.9, 0.7, 1), enabled=enabled)
+        super().__init__(parent=camera.ui, model='quad', color=color.black, position=(0,0.1,0), scale=(0.9, 0.7, 1), enabled=enabled)
 
         self.manager = manager
         self.player_hud = Entity(parent=self, enabled=True)
@@ -18,28 +18,19 @@ class Store(Entity):
                                    on_click=lambda: self.switch(self.skill_hud, self.player_hud, self.shop_hud))
 
         self.health_upgrade_cost = 5
-        self.health_upgrade_markup = 1.2
         self.damage_upgrade_cost = 5
-        self.damage_upgrade_markup = 2
         self.speed_upgrade_cost = 5
-        self.speed_upgrade_markup = 2
         self.experience_upgrade_cost = 15
-        self.experience_upgrade_markup = 1.5
         self.reach_upgrade_cost = 5
-        self.reach_upgrade_markup = 1.5
 
         self.bag_upgrade_cost = 10
-        self.bag_upgrade_markup = 2
         self.armor_upgrade_cost = 15
-        self.armor_upgrade_markup = 3
         self.weapon_upgrade_cost = 50
-        self.weapon_upgrade_markup = 5
 
         self.regeneration_upgrade_cost = 10
-        self.regeneration_upgrade_markup = 2
-        self.teleport_cost = 250
-        self.gorgon_gaze_cost = 500
-        self.lava_protection_cost = 2000
+        self.teleport_cost = 50
+        self.gorgon_gaze_cost = 400
+        self.lava_protection_cost = 1500
 
         self.health_text = Text(parent=self.player_hud, text=f'Health Increase Cost: {self.health_upgrade_cost}', position=(-0.4,0.4,-1))
         self.health_button = Button(parent=self.player_hud, color=color.lime, text='Buy', position=(0.2,0.4,-1), scale=(0.1,0.1), on_click=lambda: self.buy('Health'))
@@ -69,7 +60,7 @@ class Store(Entity):
         self.lava_protection_button = Button(parent=self.skill_hud, color=color.lime, text='Buy', position=(0.2,0.04,-1), scale=(0.1,0.1), on_click=lambda: self.buy('Lava Protection'))
 
 
-        self.exit_text = Text(parent=self, text='Press E to exit', color=color.white, position=(-0.2, -0.2,-1))
+        self.exit_text = Text(parent=self, text='Press E to exit', color=color.white, position=(-0.4, -0.4,-1))
 
     def switch(self, new, old1, old2):
         new.enable()
@@ -113,8 +104,8 @@ class Store(Entity):
                 self.experience_upgrade_cost = round(self.experience_upgrade_cost)
                 self.experience_text.text = f'{stat} Multiplier Cost: {self.experience_upgrade_cost}'
             elif stat == 'Reach':
-                self.manager.player.basereach += 0.5
-                self.reach_upgrade_cost *= 1.2
+                self.manager.player.basereach += 0.25
+                self.reach_upgrade_cost *= 1.4
                 self.reach_upgrade_cost = round(self.reach_upgrade_cost)
                 self.reach_text.text = f'{stat} Increase Cost: {self.reach_upgrade_cost}'
             elif stat == 'Gold Bag':

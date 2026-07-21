@@ -1,4 +1,4 @@
-from ursina import Entity, time, color
+from ursina import Entity, Text, time, color, scene
 
 class Tree(Entity):
     def __init__(self, manager, position, parent, scale=1):
@@ -12,6 +12,11 @@ class Tree(Entity):
                                     collider='box', visible=manager.debug_mode,
                                     wireframe=True)
 
+class Sign(Entity):
+    def __init__(self, parent, position, text, rotation_y=90):
+        super().__init__(parent=parent, model='Assets/Models/Sign/signV2.fbx', texture='Assets/Models/Sign/sign texture.jpg',
+                         double_sided=True, scale=(.001,.002,.001), position=position, rotation_y=rotation_y)
+        self.text = Text(parent=scene, text=text, scale=13, position=(position[0]-0.6, position[1]+0.5, position[2]-0.3), color=color.white, rotation_y=rotation_y-90)
 
 class Stall(Entity):
     def __init__(self, manager, parent, position, rotation_y):
@@ -35,7 +40,10 @@ class Gate(Entity):
 
         self.complete = complete
         self.name = f'gate.{locations}.incomplete' if not self.complete else f'gate.{locations}.complete'
+        self.to_where = locations.split('.')[1]
         
+        # Sign
+        self.sign = Sign(self, position=(position[0]+3, position[1]+3, position[2]), text=self.to_where.title(), rotation_y=rotation_y+90)
 
         # Vertex
         self.anchor = Entity(parent=parent, model='cube', scale=(0.5,1,0.5), position=position, y=position[1]-1)
@@ -58,6 +66,7 @@ class Gate(Entity):
                               double_sided=True,scale=scale, rotation_y=rotation_y+90, position=position, z=position[2]-0.33)
         self.pattern.color = color.green if self.complete else color.red
         self.pattern.z = position[2]-0.33 if rotation_y == 0 else position[2]+0.33
+
         self.collision_box = Entity(parent=parent, model='cube', name=self.name, rotation_y=rotation_y, position=position, scale=(4,11,1),
                                     origin=(0,-.5,0), collider='box', visible=manager.debug_mode, wireframe=True)
 

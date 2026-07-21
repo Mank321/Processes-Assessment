@@ -109,6 +109,7 @@ movement_locked to be not movement_locked everytime I open/closed the teleport h
 setting the movement_locked variable to equal teleport_hud.enabled, so it will only be true when the hud
 is open.
 
+
 WORLD CREATION PROBLEMS
 FIXED: When creating the forest in the tutorial area, I started with a massive list containing the
 pre-chosen position of each tree. Then I looped through the list to plant each tree. This was
@@ -185,6 +186,7 @@ and I'd have to guess the y-level. I came up with my most efficient and easiest 
 but creating a text at the top of my screen and displaying the player coordinates live. This allowed me to
 simply walked to were ever I wanted the monster, record the player coordinates, and list them in an array.
 
+
 COMBAT SYSTEM PROBLEMS
 FIXED: When creating the combat system, I added in the monster, gave it a hitbox, damage, and
 health, and gave it movement and distance checks, allowing it to move up to the player and attack
@@ -232,6 +234,10 @@ monster, and invokes a respawn method that will reenable the monster after some 
 original position, rotation, and health. But for some reason, this disabled the gates after a
 few monster kills. I fixed this by disabling the fact that it was considered a boss/tutorial
 monster, which was messing with the portals.
+-
+NOT-FIXED: If I spam-click the monsters, they start turning red. It would go from faint to blood red
+depending on how fast I clicked. They even kept this colour after death. The cause is definitely the
+blink code.
 
 
 PLAYER SYSTEMS
@@ -255,6 +261,7 @@ FIXED: When building the teleport feature, I tried disabling all the buttons at 
 their on_click functions when the player had been created. But this still let the player use the
 button. I moved the addition of an on_click function inside the switch_scenes method so that the
 button would do nothing until the world had actually been visited.
+
 
 COMPUTER/DEVICE AND SOFTWARE PROBLEMS
 NOT-FIXED: While working on the game, I would sometimes change computers. I'd build a feature,
@@ -300,6 +307,7 @@ name = self.name, where self is an entity, but to fix the issue and have it work
 I changed name to simply equal 'stall'. This made the store open, but when I walked away, the open
 store icon stayed on screen, unlike on the PC where it became fully transparent. This was a simple fix
 as I'd forgotten to change another stall name check to the new stall name
+
 
 USER INTERFACE PROBLEMS
 FIXED: When coding the UI, I wanted to display the health as a resourcebar on screen, so I used the built-in
