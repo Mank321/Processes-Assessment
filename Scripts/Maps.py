@@ -1,5 +1,5 @@
 from ursina import Entity
-from Scripts.Objects import Tree
+from Scripts.Objects import Tree, Sign
 
 class CentaurMap(Entity):
     def __init__(self, manager, parent):
@@ -152,6 +152,8 @@ class BasiliskMap(Entity):
         self.out_position = 3
         self.manager = manager
 
+        self.emergency_sign1 = Sign(parent=self, position=(0,16,4), text=f'Press L!', rotation_y=-90)
+
     def update(self):
         if self.manager.player.y <= -21:
             self.manager.player.position=(0,0,0)
@@ -174,7 +176,7 @@ class GorgonMap(Entity):
                           (70, -0.5, 233),(60.4, -0.5, 259.9),(48.8, -0.5, 249.7),(41.8, -0.5, 263),(39.4, -0.5, 275.8),(24.2, -0.5, 265.3),(25.9, -0.5, 278),
                           (17, -0.5, 279.8),(12, -0.5, 261),(1.9, -0.5, 252.6),(-6.5, -0.5, 236.5),(-10.8, -0.5, 239.4),(-19.4, -0.5, 251.2),(-1.7, -0.5, 264.2),
                           (-0.6, -0.5, 279.3),(12.2, -0.5, 288.7),(-15.1, -0.5, 288.8),(-25.1, -0.5, 268.8),(-21.5, -0.5, 283.2),(-29.3, -0.5, 296),(-24.4, -0.5, 300.4),
-                          (-30, -0.5, 314.7),(-47.6, -0.5, 294.6),(-56.8, -0.5, 296.2),(-65.2, -0.5, 200.5),(-78.3, -0.5, 204.9),(-73.5, -0.5, 219),(-57.7, -0.5, -0.5, 223.3),
+                          (-30, -0.5, 314.7),(-47.6, -0.5, 294.6),(-56.8, -0.5, 296.2),(-65.2, -0.5, 200.5),(-78.3, -0.5, 204.9),(-73.5, -0.5, 219),(-57.7, -0.5, 223.3),
                           (-68.1, -0.5, 237.7),(-56.9, -0.5, 249.6),(-64, -0.5, 264.7),(-62, -0.5, 307),(-43.5, -0.5, 315.3),(-50, -0.5, 331.5),(-60, -0.5, 322.5),
                           (-71, -0.5, 333.3),(-57, -0.5, 342.5),(-83.1, -0.5, 343.8),(-92.1, -0.5, 334.9),(-47.2, -0.5, 358.2),(-78, -0.5, 361.8),(-92.3, -0.5, 375.5),
                           (-59.8, -0.5, 373.4),(-46.4, -0.5, 389),(-30.3, -0.5, 373.4),(-81.2, -0.5, 390.9),(-72.4, -0.5, 406.2),(-102.8, -0.5, 392.1),(-110, -0.5, 412.9),
@@ -182,6 +184,9 @@ class GorgonMap(Entity):
         self.next_gate_position = (-87,4,514)
         self.boss_position = (-87,5,510)
         self.manager = manager
+
+        self.emergency_sign1 = Sign(parent=self, position=(-5,10,10), text=f'Press L!', rotation_y=180)
+        self.emergency_sign2 = Sign(parent=self, position=(-5,30,15), text=f'Press L!', rotation_y=180)
 
     def update(self):
         if self.manager.player.y <= -21:

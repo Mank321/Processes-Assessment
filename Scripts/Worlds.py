@@ -1,5 +1,5 @@
 from ursina import Entity, Text, color, Vec3
-from Scripts.Objects import Stall, Tree, Gate
+from Scripts.Objects import Stall, Tree, Gate, Sign
 from Scripts.Monster import Monster
 from Scripts.MonsterStats import CENTAUR_STATS
 
@@ -53,5 +53,6 @@ class MarketWorld(Entity):
         self.centaur_gate = Gate(manager, parent=self, position=(0,-0.7,20), locations='market.centaur', complete=True)
 
         self.stall = Stall(manager,parent=self, position=(5,0,5), rotation_y=-90)
+        self.emergency_sign = Sign(parent=self, position=(0,1,40), text=f'Press L!', rotation_y=90)
 
         self.colliders = [self.tutorial_gate.collision_box, self.stall.collision_box, self.centaur_gate.collision_box]

@@ -17,7 +17,7 @@ class Player(Entity):
         self.armor = 0
         self.health = 20
         self.max_health = self.health
-        self.damage = 1
+        self.damage = 1000
         self.level = 1
         self.old_req = 3
         self.levelup_req = 5
