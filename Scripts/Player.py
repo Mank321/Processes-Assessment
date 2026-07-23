@@ -104,7 +104,7 @@ class Player(Entity):
         """."""
         if self.xp >= self.levelup_req:
             self.levelup()
-        
+
         self.check_max_gold()
         self.check_max_health()
         
@@ -113,7 +113,7 @@ class Player(Entity):
         # Allow jumping only when the player is on the ground
         ground_ray = raycast(self.position + Vec3(0,0.5,0), direction=Vec3(0,-1,0), distance=2, ignore=[self], debug=self.manager.debug_mode)
         self.grounded = ground_ray.hit
-        
+
         if self.grounded:
             self.velocity_y = max(0, self.velocity_y)
             if held_keys['space']:

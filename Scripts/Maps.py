@@ -152,7 +152,7 @@ class BasiliskMap(Entity):
         self.out_position = 3
         self.manager = manager
 
-        self.emergency_sign1 = Sign(parent=self, position=(0,16,4), text=f'Press L!', rotation_y=-90)
+        self.emergency_sign1 = Sign(parent=self, position=(-14.5,15.5,3.5), text=f'Press L!', rotation_y=0)
 
     def update(self):
         if self.manager.player.y <= -21:
@@ -185,8 +185,8 @@ class GorgonMap(Entity):
         self.boss_position = (-87,5,510)
         self.manager = manager
 
-        self.emergency_sign1 = Sign(parent=self, position=(-5,10,10), text=f'Press L!', rotation_y=180)
-        self.emergency_sign2 = Sign(parent=self, position=(-5,30,15), text=f'Press L!', rotation_y=180)
+        self.emergency_sign1 = Sign(parent=self, position=(-1,10,-10), text=f'Press L!', rotation_y=-90)
+        self.emergency_sign2 = Sign(parent=self, position=(-1,37,-10), text=f'Press L!', rotation_y=-90)
 
     def update(self):
         if self.manager.player.y <= -21:
