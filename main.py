@@ -86,7 +86,7 @@ class GameManager(Entity):
         if new_scene_name != old_scene_name:
             self.player.movement_locked = True
             self.location = new_scene_name
-            
+
             self.scenes = {'tutorial': self.tutorial_world, 'market': self.market_world,
                         'centaur': self.centaur_world, 'basilisk': self.basilisk_world,
                         'gorgon': self.gorgon_world, 'chimera': self.chimera_world}
@@ -288,6 +288,8 @@ def spectator_input(key):
 app = Ursina()
 
 window.icon = 'Assets/ursina.ico'
+window.exit_button.visible = False
+window.editor_ui.enabled = False
 spectator_mode = EditorCamera(enabled = False, ignore_paused=True)
 pause_handler = Entity(ignore_paused=True, input=spectator_input)
 manager = GameManager()
@@ -302,7 +304,7 @@ def input(key):
 def update():
     if held_keys['escape']:
         manager.pause_game()
-    if manager.player is not None:
+    if manager.player is not None and manager.debug_mode:
         if held_keys['g']:
             manager.player.gold += 10
         if held_keys['x']:
