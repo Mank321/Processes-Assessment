@@ -40,6 +40,8 @@ class Gate(Entity):
     def __init__(self, manager, position, locations, parent, complete=False, scale=(0.002,0.004,0.002), rotation_y=0):
         super().__init__(parent=parent, complete=complete, position=(0,-1,0))
 
+        self.portal_position = position
+
         self.complete = complete
         self.name = f'gate.{locations}.incomplete' if not self.complete else f'gate.{locations}.complete'
         self.to_where = locations.split('.')[1]

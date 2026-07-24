@@ -3,19 +3,19 @@ from ursina.shaders import unlit_shader
 
 class Monster(Entity):
     def __init__(self, manager, parent, monster_stats, is_boss=False, is_tutorial=False, gate=None, position=Vec3(0,0,0), rotation=Vec3(0,0,0), boss_type='fbx', scale=1, enabled=True):
-        super().__init__(model=f'Assets/Models/{monster_stats["name"]}/base_monster.fbx',
+        super().__init__(model=f'Assets/Models/{monster_stats["name"]}/base_monsterV2.fbx',
                        texture=f'Assets/Models/{monster_stats["name"]}/texture.png',
                        position=position, double_sided=True, scale=monster_stats['scale']*scale,
                        rotation=rotation, name=monster_stats["name"], parent=parent, enabled=enabled,
                        shader=unlit_shader, cache_compiled_model=False)
 
-        self.collision_box = Entity(model='cube', parent=self, position=monster_stats['collider_position'],
-                                    scale=monster_stats['collider_scale'], visible=manager.debug_mode,
-                                    wireframe=True, name=f'{monster_stats["name"]}.collider')
+        #self.collision_box = Entity(model='cube', parent=self, position=monster_stats['collider_position'],
+        #                            scale=monster_stats['collider_scale'], visible=manager.debug_mode,
+        #                            wireframe=True, name=f'{monster_stats["name"]}.collider')
         
-        self.look_at_box = Entity(model='cube', parent=self, x=monster_stats['collider_position'][0],
-                                  z=monster_stats['collider_position'][2], y=1,
-                                  scale=1, color=color.red, visible=manager.debug_mode)
+        #self.look_at_box = Entity(model='cube', parent=self, x=monster_stats['collider_position'][0],
+        #                          z=monster_stats['collider_position'][2], y=1,
+        #                          scale=1, color=color.red, visible=manager.debug_mode)
 
         self.manager = manager
         self.parent = parent
@@ -43,8 +43,8 @@ class Monster(Entity):
             self.model = f'Assets/Models/{self.name}/Boss/bosss.{boss_type}'
             self.texture = f'Assets/Models/{self.name}/Boss/texture.png'
             self.scale = monster_stats['boss_scale']
-            self.collision_box.scale = monster_stats['boss_collider_scale']
-            self.collision_box.position = monster_stats['boss_collider_pos']
+            #self.collision_box.scale = monster_stats['boss_collider_scale']
+            #self.collision_box.position = monster_stats['boss_collider_pos']
             self.speed = monster_stats['boss_speed']
             self.closeness = monster_stats['boss_closeness']
             self.sight = monster_stats['boss_sight']
@@ -57,11 +57,11 @@ class Monster(Entity):
 
     def death(self):
         self.visible = False
-        self.collision_box.visible = False
+        #self.collision_box.visible = False
         self.enabled = False
-        self.collision_box.enabled = False
+        #self.collision_box.enabled = False
         self.ignore = True
-        self.collision_box.ignore = True
+        #self.collision_box.ignore = True
         self.is_boss = False
         self.is_tutorial = False
         invoke(self.respawn, delay=self.monster_delay)
@@ -69,11 +69,11 @@ class Monster(Entity):
     def respawn(self):
         self.position = self.origin_position
         self.visible = True
-        self.collision_box.visible = self.manager.debug_mode
+        #self.collision_box.visible = self.manager.debug_mode
         self.enabled = True
-        self.collision_box.enabled = self.manager.debug_mode
+        #self.collision_box.enabled = self.manager.debug_mode
         self.ignore = False
-        self.collision_box.ignore = False
+        #self.collision_box.ignore = False
         self.health = self.max_health
 
     def on_click(self):
@@ -109,8 +109,8 @@ class Monster(Entity):
         self.distance = distance(self, self.manager.player)
         if self.closeness < self.distance <= self.sight:
             self.look_at_2d(self.manager.player, 'y')
-            self.look_at_box.look_at(self.manager.player)
-            self.position += self.forward * time.dt * self.speed
+            #self.look_at_box.look_at(self.manager.player)
+            #self.position += self.forward * time.dt * self.speed
             if self.is_boss:
                 self.rotation_y += self.boss_rotation
             if self.name == 'Gorgon' and not self.manager.player.gorgon_protection:

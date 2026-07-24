@@ -76,9 +76,6 @@ class GameManager(Entity):
         mouse.locked = True
         main_menu.background.z = 1
         application.paused = False
-    
-    def player_spawn(self):
-        self.player.position = (0,1,0)
 
     def switch_scenes(self, gate):
         """."""
@@ -131,12 +128,10 @@ class GameManager(Entity):
                     self.ui_state.teleport_buttons['Chimera'].on_click = lambda: self.player.teleport('chimera')
                     self.ui_state.teleport_buttons['Chimera'].disabled = False
 
-                invoke(self.player_spawn, delay=1)
-
             elif self.scene_weights[new_scene_name] < self.scene_weights[old_scene_name]:
-                position = new_scene.next_gate.position
-                self.player.position = (position[0], position[1]+5, position[2]-5)
-
+                position = new_scene.next_gate.portal_position
+                print(new_scene.name, new_scene.next_gate.name, position)
+                self.player.position = (position[0], position[1]+5, position[2]-3)
 
             new_scene.enable()
             old_scene.disable()
@@ -309,7 +304,7 @@ def update():
         manager.pause_game()
     if manager.player is not None:
         if held_keys['g']:
-            manager.player.gold += 1
+            manager.player.gold += 10
         if held_keys['x']:
             manager.player.xp += 100
 
