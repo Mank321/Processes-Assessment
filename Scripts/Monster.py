@@ -1,4 +1,4 @@
-from ursina import Entity, Vec3, color, time, curve, invoke, distance, print_on_screen, camera
+from ursina import Entity, Vec3, color, time, curve, invoke, distance, print_on_screen, camera, mouse
 from ursina.shaders import unlit_shader
 
 class Monster(Entity):
@@ -7,7 +7,7 @@ class Monster(Entity):
                        texture=f'Assets/Models/{monster_stats["name"]}/texture.png',
                        position=position, double_sided=True, scale=monster_stats['scale']*scale,
                        rotation=rotation, name=monster_stats["name"], parent=parent, enabled=enabled,
-                       shader=unlit_shader, cache_compiled_model=False)
+                       shader=unlit_shader, cache_compiled_model=False, collider='box')
         
         #self.look_at_box = Entity(model='cube', parent=self, x=monster_stats['collider_position'][0],
         #                          z=monster_stats['collider_position'][2], y=1,
@@ -64,10 +64,11 @@ class Monster(Entity):
         self.ignore = False
         self.health = self.max_health
 
-    def on_click(self):
+    def onClick(self):
         """This triggers when the mouse clicks the monster."""
         self.distance = distance(self, self.manager.player)
-        if self.distance <= self.manager.player.basereach + self.closeness:
+        print(mouse.hovered_entity)
+        if self.distance <= self.manager.player.basereach + self.closeness and mouse.hovered_entity == self: # disable mouse for AoE
             self.health -= self.manager.player.damage * self.manager.player.weapon_level
             self.manager.player.punch()
 
@@ -111,4 +112,4 @@ class Monster(Entity):
 
     def input(self, key):
         if key == 'left mouse up':
-            self.on_click()
+            self.onClick()

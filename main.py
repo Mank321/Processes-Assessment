@@ -308,7 +308,7 @@ def update():
         manager.pause_game()
     if manager.player is not None and manager.debug_mode:
         if held_keys['g']:
-            manager.player.gold += 10
+            manager.player.gold += 1000
         if held_keys['x']:
             manager.player.xp += 100
 

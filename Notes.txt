@@ -248,6 +248,14 @@ monster, which was messing with the portals.
 NOT-FIXED: If I spam-click the monsters, they start turning red. It would go from faint to blood red
 depending on how fast I clicked. They even kept this colour after death. The cause is definitely the
 blink code.
+-
+FIXED: When I tried to find out why I could hit monsters without looking at them, and multiple
+monsters at once, I concluded that every monster in my radius was being hit when ever I clicked. My
+first thought was to add a check to see if my mouse was hovering over the specific monster when I was
+attacking, but that didn't work because the monster no longer had a hitbox collider. I also thought that
+my on_click() method might be interfering with ursina's builtin on_click method, so I changed the name
+but nothing happened(literally, I couldn't click on the monster). I added a simple box collider to each
+monster, and it worked - I could only attack one monster at a time.
 
 
 
