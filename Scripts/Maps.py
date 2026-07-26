@@ -9,19 +9,19 @@ class CentaurMap(Entity):
         self.manager = manager
         self.ground_collider = Entity(model='cube', parent=self, collider='box', position=(0,0,0), scale=(5000,1,5000),
                                       visible=manager.debug_mode, wireframe=True)
-        self.left_collider = Entity(model='cube', parent=self, collider='box', position=(0,0,-1500), scale=(5,500,5000), rotation=(0,85,0),
+        self.left_collider = Entity(model='cube', parent=self, collider='box', position=(0,200,-1500), scale=(5,500,5000), rotation=(0,85,0),
                                       visible=manager.debug_mode, wireframe=True)
-        self.right_collider = Entity(model='cube', parent=self, collider='box', position=(0,0,1600), scale=(5,500,5000), rotation=(0,85,0),
+        self.right_collider = Entity(model='cube', parent=self, collider='box', position=(0,200,1600), scale=(5,500,5000), rotation=(0,85,0),
                                       visible=manager.debug_mode, wireframe=True)
-        self.front_collider = Entity(model='cube', parent=self, collider='box', position=(-1700,0,0), scale=(5,500,5000), rotation=(0,5,0),
+        self.front_collider = Entity(model='cube', parent=self, collider='box', position=(-1700,200,0), scale=(5,500,5000), rotation=(0,5,0),
                                       visible=manager.debug_mode, wireframe=True)
-        self.back_collider = Entity(model='cube', parent=self, collider='box', position=(1800,0,0), scale=(5,500,5000), rotation=(0,-5,0),
+        self.back_collider = Entity(model='cube', parent=self, collider='box', position=(1800,200,0), scale=(5,500,5000), rotation=(0,-5,0),
                                       visible=manager.debug_mode, wireframe=True)
-        self.front_left_collider = Entity(model='cube', parent=self, collider='box', position=(-1500,0,450), scale=(400,500,2000), rotation=(0,-80,0),
+        self.front_left_collider = Entity(model='cube', parent=self, collider='box', position=(-1500,200,450), scale=(400,500,2000), rotation=(0,-80,0),
                                       visible=manager.debug_mode, wireframe=True)
-        self.front_left_collider2 = Entity(model='cube', parent=self, collider='box', position=(-1500,0,700), scale=(300,500,800), rotation=(0,-40,0),
+        self.front_left_collider2 = Entity(model='cube', parent=self, collider='box', position=(-1500,200,700), scale=(300,500,800), rotation=(0,-40,0),
                                       visible=manager.debug_mode, wireframe=True)
-        self.front_right_collider = Entity(model='cube', parent=self, collider='box', position=(-1350,0,-750), scale=(350,500,2000), rotation=(0,70,0),
+        self.front_right_collider = Entity(model='cube', parent=self, collider='box', position=(-1350,200,-750), scale=(350,500,2000), rotation=(0,70,0),
                                       visible=manager.debug_mode, wireframe=True)
         self.map = ['TTTWWTTTTTTWWWWW',
                     '  TWWWTO TWWWWT ',
@@ -56,7 +56,7 @@ class CentaurMap(Entity):
 
     def update(self):
         if self.manager.player.y <= -21:
-            self.manager.player.position=(0,0,0)
+            self.manager.player.position=(0,1,0)
 
 
 class BasiliskMap(Entity):
