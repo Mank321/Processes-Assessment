@@ -17,7 +17,7 @@ class Player(Entity):
         self.armor = 0
         self.health = 20
         self.max_health = self.health
-        self.damage = 1000
+        self.damage = 1
         self.level = 1
         self.old_req = 3
         self.levelup_req = 5
@@ -102,7 +102,7 @@ class Player(Entity):
 
     def update(self):
         """."""
-        if self.xp >= self.levelup_req:
+        if round(self.xp) >= round(self.levelup_req):
             self.levelup()
 
         self.check_max_gold()

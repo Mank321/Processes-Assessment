@@ -1,4 +1,4 @@
-from ursina import Entity
+from ursina import Entity, Text, color
 from Scripts.Objects import Tree, Sign
 
 class CentaurMap(Entity):
@@ -185,6 +185,7 @@ class GorgonMap(Entity):
         self.boss_position = (-87,5,510)
         self.manager = manager
 
+        self.help_text = Text(parent=self, text='Did you buy the \ngorgon protection skill?!', scale=20, rotation_y=170, position=(6,2,-6), color=color.red)
         self.emergency_sign1 = Sign(parent=self, position=(-1,10,-10), text=f'Press L!', rotation_y=-90)
         self.emergency_sign2 = Sign(parent=self, position=(-1,37,-10), text=f'Press L!', rotation_y=-90)
 

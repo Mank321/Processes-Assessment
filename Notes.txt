@@ -186,7 +186,15 @@ but a problem with it was that it didn't work with the y-axis, meaning cubes wou
 and I'd have to guess the y-level. I came up with my most efficient and easiest strategy to get around this,
 but creating a text at the top of my screen and displaying the player coordinates live. This allowed me to
 simply walked to were ever I wanted the monster, record the player coordinates, and list them in an array.
-
+-
+FIXED(This was used in a trial that ended up not being used): When swapping the centaur world .fbx file
+for a .obj one, for 1.6 hitbox test, I started off by swapping the world file, but since .obj was different
+to .fbx, the scaling was messed up, which in turn messed up the centaurs and trees. After a bit of tweaking,
+I got the world the correct size based off the centaur positions, but then when I tried resizing the trees,
+the tree locations were reversed. I figured that since I'd had to rotate the terrain 180 degrees due to the
+file change, thats why the trees where all rotated, and that the centaurs weren't affected since they were
+played using different code. To fix this, I created a copy of the map array for the sole purpose of placing
+the trees, and reversed it, leaving the centaurs alone but fixing the trees.
 
 
 COMBAT SYSTEM PROBLEMS
@@ -264,15 +272,21 @@ FIXED: When building the teleport feature, I tried disabling all the buttons at 
 their on_click functions when the player had been created. But this still let the player use the
 button. I moved the addition of an on_click function inside the switch_scenes method so that the
 button would do nothing until the world had actually been visited.
+-
+BOUNDRYTEST-FIXED: When I leveled up, my xp was displayed as 21 and my levelup_req was also 21. I was
+initially confused on why I hadn't leveled up, but soon realised that what was displayed on screen
+wasn't the actual values, but rounded ones. To fix this, I set the levelup checker to check the rounded
+versions just like what was being displayed.
 
 
 
 COMPUTER/DEVICE AND SOFTWARE PROBLEMS
-NOT-FIXED: While working on the game, I would sometimes change computers. I'd build a feature,
+FIXED: While working on the game, I would sometimes change computers. I'd build a feature,
 save it, then pull it on another computer, and the feature would be slightly different(wall in
 different position, portals and stalls rotated 90 degrees in market), but when I returned to the 
 computer I made the feature on, even after changing nothing, or 'fixing' it to make it return to 
-normal, the feature returned to what it was, even after saving properly.
+normal, the feature returned to what it was, even after saving properly. This eventually disappeared
+after I came back from working in the holidays for unknown reasons.
 -
 NOT-CRITICAL: Although I often did work on VSC, I would sometimes get swap to thonny to debug. This
 would however sometimes cause problems. I would get crashes in thonny I never got in VSC. For 

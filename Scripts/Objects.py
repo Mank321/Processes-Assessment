@@ -29,7 +29,7 @@ class Stall(Entity):
                             parent=self, double_sided=True,scale=(1,1,1), position=(0,0,0))
 
         self.collision_box = Entity(model='cube', parent=self, name='Stall',
-                                    position=(0,0,0), scale=(40,50,40),
+                                    position=(0,0,0), scale=(40,70,40),
                                     collider='box', visible=manager.debug_mode,
                                     wireframe=True)
         self.merchant = Entity(model='Assets/Models/Stall/Merchant/merchant.fbx', texture='Assets/Models/Stall/Merchant/texture.jpg',

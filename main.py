@@ -179,6 +179,8 @@ class UIState(Entity):
 
     def update(self):
         if self.player != None:
+            self.teleport_buttons['Gorgon'].on_click = lambda: self.player.teleport('gorgon')
+            self.teleport_buttons['Gorgon'].disabled = False
             self.teleport_buttons['Tutorial'].on_click = lambda: self.player.teleport('tutorial')
             self.player_gold_bar.max_value = self.player.max_gold
             self.player_gold_bar.value = self.player.gold
