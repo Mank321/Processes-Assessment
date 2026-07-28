@@ -160,6 +160,7 @@ class UIState(Entity):
         self.death_screen_background = Entity(parent=camera.ui, model='quad', color=(255,0,0, 0.4), scale=(2,2), position=(0,0,-1), enabled=False)
         self.death_menu = MainMenu(None, None, bg=self.death_screen_background, header='You Died', text='Respawn', y=-0.2, enabled=False)
         self.position_text = Text(parent=camera.ui, text=f'Position: Null', position=(-0.5, 0.5), size=0.04)
+        self.crosshair = Entity(parent=camera.ui, model='quad', texture='Assets/crosshair.png', scale=0.05)
 
         self.teleport_hud = Panel(parent=camera.ui, color=color.black, enabled=False, scale=(0.7,0.6), position=(0,0,1))
         self.teleport_hud_text = Text(parent=self.teleport_hud, text='Teleport to the following', color=color.red, scale=3, origin=(0,0,0), position=(0,0.45,-1))

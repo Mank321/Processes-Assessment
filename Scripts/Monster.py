@@ -8,7 +8,7 @@ class Monster(Entity):
                        position=position, double_sided=True, scale=monster_stats['scale']*scale,
                        rotation=rotation, name=monster_stats["name"], parent=parent, enabled=enabled,
                        shader=unlit_shader, cache_compiled_model=False, collider='box')
-        #self.collider=BoxCollider(self, center=Vec3(0,0,0), size=Vec3(1,2,1))
+        self.collider = BoxCollider(self, size=(1,1,1))
         
         #self.look_at_box = Entity(model='cube', parent=self, x=monster_stats['collider_position'][0],
         #                          z=monster_stats['collider_position'][2], y=1,
@@ -68,7 +68,7 @@ class Monster(Entity):
     def onClick(self):
         """This triggers when the mouse clicks the monster."""
         self.distance = distance(self, self.manager.player)
-        if self.distance <= self.manager.player.basereach + self.closeness and mouse.hovered_entity == self: # disable mouse for AoE
+        if self.distance <= self.manager.player.basereach + self.closeness:
             self.health -= self.manager.player.damage * self.manager.player.weapon_level
             self.manager.player.punch()
 
