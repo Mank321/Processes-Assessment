@@ -165,9 +165,9 @@ class UIState(Entity):
         #self.position_text = Text(parent=camera.ui, text=f'Position: Null', position=(-0.5, 0.5), size=0.04)
         self.crosshair = Entity(parent=camera.ui, model='quad', texture='Assets/crosshair.png', scale=0.05, position=(0,0,10))
 
-        self.loading_hud = Entity(parent=camera.ui, position=(0,0,-0.1), scale=2, enabled=False)
-        self.loading_screen = Entity(parent=self.loading_hud, model='quad', color=color.black, scale=(10,10,1))
-        self.loading_text = Text(parent=self.loading_hud, text='Loading New World...', scale=2, position=(-0.22,0.05,0),color=color.white)
+        self.loading_hud = Entity(parent=camera.ui, position=(0,0,0), scale=2, enabled=False)
+        self.loading_screen = Entity(parent=self.loading_hud, model='quad', color=color.black, scale=(10,10,1), position=(0,0,-0.1))
+        self.loading_text = Text(parent=self.loading_hud, text='Loading New World...', scale=2, position=(-0.22,0.05,-0.2),color=color.white)
 
         self.teleport_hud = Panel(parent=camera.ui, color=color.black, enabled=False, scale=(0.7,0.6), position=(0,0,1))
         self.teleport_hud_text = Text(parent=self.teleport_hud, text='Teleport to the following', color=color.red, scale=3, origin=(0,0,0), position=(0,0.45,-1))

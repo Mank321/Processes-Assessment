@@ -29,7 +29,7 @@ class Player(Entity):
         self.max_gold = 10
         self.inventory = None
         self.weapon_level = 1
-        self.basereach = 3
+        self.basereach = 30
         self.distance = float('inf')
         self.movement_locked = False
         self.at_stall = False
@@ -46,7 +46,7 @@ class Player(Entity):
 
         self.hand = Entity(model='Assets/Models/Hands/handv5.fbx',texture='Assets/Models/Hands/skin.jpg',
                             parent=self, scale=0.05, collider='box',position=(1,0.5, -1), rotation=(1,1,-25), double_sided = True)
-        self.store_icon = Entity(parent=camera.ui, model='quad', texture='Assets/Store Icon.png', position=(0,0,10), scale=(0.4,0.1), alpha=0)
+        self.store_icon = Entity(parent=camera.ui, model='quad', texture='Assets/Store Icon.png', position=(0,0,5), scale=(0.4,0.1), alpha=0)
 
     def death(self):
         application.paused = False
@@ -172,9 +172,11 @@ class Player(Entity):
             name = hit_info.entity.name
             if name.startswith('gate') and name.split('.')[-1] == 'complete':
                 scenes = name[5:]
+                delay = 0.01
                 if dictionary[scenes.split('.')[1]] == None:
                     self.manager.ui_state.loading_hud.enabled = True
-                invoke(lambda: self.manager.switch_scenes(scenes), delay=0.01)
+                    delay = 0.05
+                invoke(lambda: self.manager.switch_scenes(scenes), delay=delay)
 
     def input(self, key):
         if key == 'e' and self.at_stall and not self.ui_state.teleport_hud.enabled:

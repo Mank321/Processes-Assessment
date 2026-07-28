@@ -7,8 +7,9 @@ class Monster(Entity):
                        texture=f'Assets/Models/{monster_stats["name"]}/texture.png',
                        position=position, double_sided=True, scale=monster_stats['scale']*scale,
                        rotation=rotation, name=monster_stats["name"], parent=parent, enabled=enabled,
-                       shader=unlit_shader, cache_compiled_model=False, collider='box')
-        self.collider = BoxCollider(self, size=(1,1,1))
+                       shader=unlit_shader, cache_compiled_model=False, collider='box', on_click=lambda: self.onClick())
+        self.collider = BoxCollider(self, center=monster_stats["collider_position"], size=monster_stats["collider_scale"])
+        self.collider.visible = manager.debug_mode
         
         #self.look_at_box = Entity(model='cube', parent=self, x=monster_stats['collider_position'][0],
         #                          z=monster_stats['collider_position'][2], y=1,
@@ -68,6 +69,7 @@ class Monster(Entity):
     def onClick(self):
         """This triggers when the mouse clicks the monster."""
         self.distance = distance(self, self.manager.player)
+        print(mouse.hovered_entity)
         if self.distance <= self.manager.player.basereach + self.closeness:
             self.health -= self.manager.player.damage * self.manager.player.weapon_level
             self.manager.player.punch()
@@ -111,5 +113,5 @@ class Monster(Entity):
                 self.manager.player.health -= damage_delt * time.dt * self.attack_speed
 
     def input(self, key):
-        if key == 'left mouse up':
+        if key == 'left mouse up' and mouse.hovered_entity == self:
             self.onClick()
