@@ -3,18 +3,19 @@ from ursina.shaders import unlit_shader
 
 class Monster(Entity):
     def __init__(self, manager, parent, monster_stats, is_boss=False, is_tutorial=False, gate=None, position=Vec3(0,0,0), rotation=Vec3(0,0,0), boss_type='fbx', scale=1, enabled=True):
+        self.manager = manager
         super().__init__(model=f'Assets/Models/{monster_stats["name"]}/base_monsterV2.fbx',
                        texture=f'Assets/Models/{monster_stats["name"]}/texture.png',
                        position=position, double_sided=True, scale=monster_stats['scale']*scale,
                        rotation=rotation, name=monster_stats["name"], parent=parent, enabled=enabled,
-                       shader=unlit_shader, cache_compiled_model=False, collider='box')
+                       shader=unlit_shader, cache_compiled_model=False)#, on_click=lambda: self.onClick(self))
         #self.collider=BoxCollider(self, center=Vec3(0,0,0), size=Vec3(1,2,1))
         
         #self.look_at_box = Entity(model='cube', parent=self, x=monster_stats['collider_position'][0],
         #                          z=monster_stats['collider_position'][2], y=1,
         #                          scale=1, color=color.red, visible=manager.debug_mode)
 
-        self.manager = manager
+        
         self.parent = parent
         self.monster_stats = monster_stats
         self.name = monster_stats['name']
@@ -68,7 +69,7 @@ class Monster(Entity):
     def onClick(self):
         """This triggers when the mouse clicks the monster."""
         self.distance = distance(self, self.manager.player)
-        if self.distance <= self.manager.player.basereach + self.closeness and mouse.hovered_entity == self: # disable mouse for AoE
+        if self.distance <= self.manager.player.basereach + self.closeness:# and mouse.hovered_entity == self: # disable mouse for AoE
             self.health -= self.manager.player.damage * self.manager.player.weapon_level
             self.manager.player.punch()
 
@@ -111,5 +112,5 @@ class Monster(Entity):
                 self.manager.player.health -= damage_delt * time.dt * self.attack_speed
 
     def input(self, key):
-        if key == 'left mouse up':
+        if key == 'left mouse up' and self.hovered:
             self.onClick()
