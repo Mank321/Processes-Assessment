@@ -1,4 +1,4 @@
-from ursina import Entity, color, application, Vec3, time, held_keys, curve, invoke, raycast, camera, mouse
+from ursina import Entity, Text, color, application, Vec3, time, held_keys, curve, invoke, raycast, camera, mouse
 
 class Player(Entity):
     def __init__(self, ui_state, manager):
@@ -29,7 +29,7 @@ class Player(Entity):
         self.max_gold = 10
         self.inventory = None
         self.weapon_level = 1
-        self.basereach = 2
+        self.basereach = 3
         self.distance = float('inf')
         self.movement_locked = False
         self.at_stall = False
@@ -172,7 +172,9 @@ class Player(Entity):
             name = hit_info.entity.name
             if name.startswith('gate') and name.split('.')[-1] == 'complete':
                 scenes = name[5:]
-                self.manager.switch_scenes(scenes)
+                if dictionary[scenes.split('.')[1]] == None:
+                    self.manager.ui_state.loading_hud.enabled = True
+                invoke(lambda: self.manager.switch_scenes(scenes), delay=0.01)
 
     def input(self, key):
         if key == 'e' and self.at_stall and not self.ui_state.teleport_hud.enabled:

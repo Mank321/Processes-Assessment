@@ -108,6 +108,21 @@ But as soon as I closed the teleport hud, it printed True. This finally showed m
 movement_locked to be not movement_locked everytime I open/closed the teleport hud. I fixed the issue by
 setting the movement_locked variable to equal teleport_hud.enabled, so it will only be true when the hud
 is open.
+-
+FIXED: When I was trying to add a loading screen to the gates, I created a hud with a simple
+background and text. I set them to appear if the new location had never been created yet, and to
+vanish right after. But nothing happened. I tried debugging by adding a keybind that enabled the hud
+on command and that worked fine. I tried enabled just the background in the switch_scenes function even
+when the world had already been created. Nothing. I tried turning the hud on before I even called the
+switch_scenes function, and turning it off after. Still nothing. I added some print statements to
+confirm that the hud had been enabled, and they reported true. I tried moving the hud code from the 
+ui_state to the player state which had the switch_scenes method call. Nothing. I tried using invoke,
+setattr, and getattr to manually set the enabled to True. Still nothing. My going theory is that in
+the ursina sequence, the switch_scenes code is being called before the loading_hud can be displayed
+on screen, and turns it off instantly afterword, but that would be illogical. Through more testing,
+this theory actually turned out to be correct. I fixed this by first turning the loading_hud on,
+then having an invoke function delay the switch_scenes call by a single frame, allowing them to run
+correctly in the sequence.
 
 
 

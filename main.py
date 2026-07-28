@@ -79,6 +79,7 @@ class GameManager(Entity):
 
     def switch_scenes(self, gate):
         """."""
+        #self.ui_state.loading_hud.enabled=True
         self.player.position = (0,1,0)
         new_scene_name = gate.split('.')[1]
         old_scene_name = gate.split('.')[0]
@@ -102,6 +103,7 @@ class GameManager(Entity):
             old_scene = self.scenes[old_scene_name]
 
             if new_scene == None:
+                
                 if new_scene_name == 'market':
                     self.market_world = MarketWorld(self)
                     new_scene = self.market_world
@@ -127,6 +129,7 @@ class GameManager(Entity):
                     new_scene = self.chimera_world
                     self.ui_state.teleport_buttons['Chimera'].on_click = lambda: self.player.teleport('chimera')
                     self.ui_state.teleport_buttons['Chimera'].disabled = False
+                #self.ui_state.loading_hud.enabled=False
 
             elif self.scene_weights[new_scene_name] < self.scene_weights[old_scene_name]:
                 position = new_scene.next_gate.portal_position
@@ -138,6 +141,7 @@ class GameManager(Entity):
             print_on_screen(f'--{new_scene_name.title()}--', position=(-0.2,0.45), scale=3, duration=2)
             
             self.player.movement_locked = False
+            self.ui_state.loading_hud.enabled=False
 
 
 class UIState(Entity):
@@ -158,8 +162,12 @@ class UIState(Entity):
         self.reach_text = Text(parent=camera.ui, text=f'Reach: 2', position=(-0.85, -0.1, 0), size=0.04)
         self.death_screen_background = Entity(parent=camera.ui, model='quad', color=(255,0,0, 0.4), scale=(2,2), position=(0,0,-1), enabled=False)
         self.death_menu = MainMenu(None, None, bg=self.death_screen_background, header='You Died', text='Respawn', y=-0.2, enabled=False)
-        self.position_text = Text(parent=camera.ui, text=f'Position: Null', position=(-0.5, 0.5), size=0.04)
+        #self.position_text = Text(parent=camera.ui, text=f'Position: Null', position=(-0.5, 0.5), size=0.04)
         self.crosshair = Entity(parent=camera.ui, model='quad', texture='Assets/crosshair.png', scale=0.05, position=(0,0,10))
+
+        self.loading_hud = Entity(parent=camera.ui, position=(0,0,-0.1), scale=2, enabled=False)
+        self.loading_screen = Entity(parent=self.loading_hud, model='quad', color=color.black, scale=(10,10,1))
+        self.loading_text = Text(parent=self.loading_hud, text='Loading New World...', scale=2, position=(-0.22,0.05,0),color=color.white)
 
         self.teleport_hud = Panel(parent=camera.ui, color=color.black, enabled=False, scale=(0.7,0.6), position=(0,0,1))
         self.teleport_hud_text = Text(parent=self.teleport_hud, text='Teleport to the following', color=color.red, scale=3, origin=(0,0,0), position=(0,0.45,-1))
@@ -192,7 +200,7 @@ class UIState(Entity):
             self.armor_text.text = f'Armor: {self.player.armor}'
             self.level_display.text = f'Level: {self.player.level}'
             self.reach_text.text = f'Reach: {round(self.player.basereach, 2)}'
-            self.position_text.text = f'Position: {self.player.position}'
+            #self.position_text.text = f'Position: {self.player.position}'
 
             if self.player.health <= 0 and not self.death_menu.enabled:
                 if self.death_menu.start_function is None:
@@ -276,6 +284,7 @@ class LevelCreator(Entity):
         self.boss.gate = self.next_gate
 
         self.colliders = [self.return_gate.collision_box, self.next_gate.collision_box]
+
 
 #---------------------------------------------------#
 def spectator_input(key):
