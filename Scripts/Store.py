@@ -29,8 +29,8 @@ class Store(Entity):
 
         self.regeneration_upgrade_cost = 10
         self.teleport_cost = 50
-        self.gorgon_gaze_cost = 400
-        self.lava_protection_cost = 1500
+        self.gorgon_gaze_cost = 100
+        self.lava_protection_cost = 500
 
         self.health_text = Text(parent=self.player_hud, text=f'Health Increase Cost: {self.health_upgrade_cost}', position=(-0.4,0.4,-1))
         self.health_button = Button(parent=self.player_hud, color=color.lime, text='Buy', position=(0.2,0.4,-1), scale=(0.1,0.1), on_click=lambda: self.buy('Health'))
