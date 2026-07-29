@@ -185,7 +185,7 @@ class UIState(Entity):
             'Basilisk': Button(parent=self.teleport_hud, text='Basilisk', text_size=2, color=color.lime, scale=(0.4,0.15), position=(0.25,0.3,-1), disabled=True),
             'Gorgon': Button(parent=self.teleport_hud, text='Gorgon', text_size=2, color=color.lime, scale=(0.4,0.15), position=(0.25,0.05,-1), disabled=True),
             'Chimera': Button(parent=self.teleport_hud, text='Chimera', text_size=2, color=color.lime, scale=(0.4,0.15), position=(0.25,-0.2,-1), disabled=True),
-            'Rebirth': Button(parent=self.teleport_hud, text='Rebirth', text_size=2, color=color.lime, scale=(0.4,0.15), position=(-0.25, -0.4), disabled=False)}
+            'Rebirth': Button(parent=self.teleport_hud, text='Rebirth', text_size=2, color=color.lime, scale=(0.4,0.15), position=(-0.25, -0.4, -1), disabled=False)}
 
     def death_screen(self):
         mouse.locked = False

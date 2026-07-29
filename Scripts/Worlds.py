@@ -77,10 +77,10 @@ class RebirthWorld(Entity):
                              double_sided=True, scale=(0.4,0.78,0.4), position=(0,0,50), collider='mesh', rotation_y=-90)
     
         self.cloud = Entity(parent=self, model='Assets/Models/Temple/cloud.obj', texture='Assets/Models/Temple/cloudtexture.png', double_sided=True,
-                            scale=(20,20,20), position=(20,-18,0), shader=unlit_shader, collider='mesh')
+                            scale=(40,20,40), position=(20,-20,0), shader=unlit_shader, collider='box')
         self.statue = Entity(parent=self.temple, model='Assets/Models/Temple/zeusStatue.obj', texture='Assets/Models/Temple/zeusTexture.png',
                              double_sided=True, scale=(0.6,0.6,0.6), position=(17,8,0), collider='box', rotation_y=90)
-        self.stall = Stall(self.manager, parent=self.temple, position=(17,8,15), scale=(1.3,1.3,1.3), rotation_y=-90)
+        self.stall = Stall(self.manager, parent=self.temple, position=(17,10,15), scale=(0.3,0.4,0.3), rotation_y=-90)
 
         self.return_gate = Gate(self.manager, parent=self, position=(0,-0.7,-5), locations='rebirth.chimera', complete=True, rotation_y=180)
 
