@@ -4,7 +4,7 @@ from Scripts.HealthBar import HealthBar
 from Scripts.MainMenu import MainMenu
 from Scripts.Maps import CentaurMap, BasiliskMap, GorgonMap, ChimeraMap
 from Scripts.Objects import Gate
-from Scripts.Worlds import TutorialWorld, MarketWorld
+from Scripts.Worlds import TutorialWorld, MarketWorld, RebirthWorld
 from Scripts.Monster import Monster
 from Scripts.Player import Player
 from Scripts.Store import Store
@@ -23,6 +23,7 @@ class GameManager(Entity):
         self.basilisk_world = None
         self.gorgon_world = None
         self.chimera_world = None
+        self.rebirth_world = None
 
         self.locations = [
             'Tutorial',
@@ -31,7 +32,7 @@ class GameManager(Entity):
             'Basilisk',
             'Gorgon',
             'Chimera',
-            'Hydra',
+            'Rebirth',
         ]
 
         self.location = None
@@ -90,14 +91,16 @@ class GameManager(Entity):
 
             self.scenes = {'tutorial': self.tutorial_world, 'market': self.market_world,
                         'centaur': self.centaur_world, 'basilisk': self.basilisk_world,
-                        'gorgon': self.gorgon_world, 'chimera': self.chimera_world}
+                        'gorgon': self.gorgon_world, 'chimera': self.chimera_world,
+                        'rebirth': self.rebirth_world}
 
             self.scene_weights = {'tutorial':0,
                                   'market':1,
                                   'centaur':2,
                                   'basilisk':3,
                                   'gorgon':4,
-                                  'chimera':5}
+                                  'chimera':5,
+                                  'rebirth':6}
 
             new_scene = self.scenes[new_scene_name]
             old_scene = self.scenes[old_scene_name]
@@ -129,7 +132,11 @@ class GameManager(Entity):
                     new_scene = self.chimera_world
                     self.ui_state.teleport_buttons['Chimera'].on_click = lambda: self.player.teleport('chimera')
                     self.ui_state.teleport_buttons['Chimera'].disabled = False
-                #self.ui_state.loading_hud.enabled=False
+                elif new_scene_name == 'rebirth':
+                    self.rebirth_world = RebirthWorld(self)
+                    new_scene = self.rebirth_world
+                    self.ui_state.teleport_buttons['Rebirth'].on_click = lambda: self.player.teleport('rebirth')
+                    self.ui_state.teleport_buttons['Rebirth'].disbaled = False
 
             elif self.scene_weights[new_scene_name] < self.scene_weights[old_scene_name]:
                 position = new_scene.next_gate.portal_position
@@ -177,7 +184,8 @@ class UIState(Entity):
             'Centaur': Button(parent=self.teleport_hud, text='Centaur', text_size=2, color=color.lime, scale=(0.4,0.15), position=(-0.25,-0.2,-1), disabled=True),
             'Basilisk': Button(parent=self.teleport_hud, text='Basilisk', text_size=2, color=color.lime, scale=(0.4,0.15), position=(0.25,0.3,-1), disabled=True),
             'Gorgon': Button(parent=self.teleport_hud, text='Gorgon', text_size=2, color=color.lime, scale=(0.4,0.15), position=(0.25,0.05,-1), disabled=True),
-            'Chimera': Button(parent=self.teleport_hud, text='Chimera', text_size=2, color=color.lime, scale=(0.4,0.15), position=(0.25,-0.2,-1), disabled=True)}
+            'Chimera': Button(parent=self.teleport_hud, text='Chimera', text_size=2, color=color.lime, scale=(0.4,0.15), position=(0.25,-0.2,-1), disabled=True),
+            'Rebirth': Button(parent=self.teleport_hud, text='Rebirth', text_size=2, color=color.lime, scale=(0.4,0.15), position=(-0.25, -0.4), disabled=False)}
 
     def death_screen(self):
         mouse.locked = False
@@ -187,8 +195,8 @@ class UIState(Entity):
 
     def update(self):
         if self.player != None:
-            self.teleport_buttons['Gorgon'].on_click = lambda: self.player.teleport('gorgon')
-            self.teleport_buttons['Gorgon'].disabled = False
+            self.teleport_buttons['Rebirth'].on_click = lambda: self.player.teleport('rebirth')
+            self.teleport_buttons['Rebirth'].disabled = False
             self.teleport_buttons['Tutorial'].on_click = lambda: self.player.teleport('tutorial')
             self.player_gold_bar.max_value = self.player.max_gold
             self.player_gold_bar.value = self.player.gold

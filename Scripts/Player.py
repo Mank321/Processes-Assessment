@@ -145,7 +145,8 @@ class Player(Entity):
                       'centaur': self.manager.centaur_world,
                       'basilisk': self.manager.basilisk_world,
                       'gorgon': self.manager.gorgon_world,
-                      'chimera': self.manager.chimera_world}
+                      'chimera': self.manager.chimera_world,
+                      'rebirth': self.manager.rebirth_world}
 
         colliders = dictionary[self.manager.location].colliders
         for collider in colliders:

@@ -1,4 +1,5 @@
 from ursina import Entity, Text, color, Vec3
+from ursina.shaders import unlit_shader
 from Scripts.Objects import Stall, Tree, Gate, Sign
 from Scripts.Monster import Monster
 from Scripts.MonsterStats import CENTAUR_STATS
@@ -65,4 +66,26 @@ class MarketWorld(Entity):
 
     def update(self):
         if self.manager.player.y <= -20:
+            self.manager.player.position=(0,1,0)
+
+class RebirthWorld(Entity):
+    def __init__(self, manager):
+        super().__init__()
+        self.manager = manager
+
+        self.temple = Entity(parent=self, model='Assets/Models/Temple/temple.obj', texture='Assets/Models/Temple/texture.png',
+                             double_sided=True, scale=(0.4,0.78,0.4), position=(0,0,50), collider='mesh', rotation_y=-90)
+    
+        self.cloud = Entity(parent=self, model='Assets/Models/Temple/cloud.obj', texture='Assets/Models/Temple/cloudtexture.png', double_sided=True,
+                            scale=(20,20,20), position=(20,-18,0), shader=unlit_shader, collider='mesh')
+        self.statue = Entity(parent=self.temple, model='Assets/Models/Temple/zeusStatue.obj', texture='Assets/Models/Temple/zeusTexture.png',
+                             double_sided=True, scale=(0.6,0.6,0.6), position=(17,8,0), collider='box', rotation_y=90)
+        self.stall = Stall(self.manager, parent=self.temple, position=(17,8,15), scale=(1.3,1.3,1.3), rotation_y=-90)
+
+        self.return_gate = Gate(self.manager, parent=self, position=(0,-0.7,-5), locations='rebirth.chimera', complete=True, rotation_y=180)
+
+        self.colliders = [self.return_gate.collision_box]
+
+    def update(self):
+        if self.manager.player.y <= -40:
             self.manager.player.position=(0,1,0)
