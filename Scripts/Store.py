@@ -145,6 +145,18 @@ class Store(Entity):
 
             self.manager.player.gold -= costs[stat]
 
+class RebirthStore(Entity):
+    def __init__(self, manager, enabled=False):
+        super().__init__(parent=camera.ui, model='quad', color=color.black, position=(0.1,0.1,0), scale=(0.9, 0.7, 1), enabled=enabled)
+        self.manager = manager
+
+        desc = 'Hi'
+        self.rebirth_text = Text(parent=self, text=desc, position=(0,0,-1), scale=1)
+        self.button = Button(parent=self, color=color.lime, text='Rebirth', position=(), scale=(0.3,0.3), on_click=lambda: self.rebirth())
+
+    def rebirth(self):
+        print(1)
+
 if __name__ == '__main__':
     app=Ursina()
 
@@ -168,10 +180,11 @@ if __name__ == '__main__':
     manager = Manager()
 
     store = Store(manager)
+    rebirth = RebirthStore(manager)
 
     def input(key):
         if key =='e':
-            store.enabled = not store.enabled
+            rebirth.enabled = not rebirth.enabled
         if key == 'm':
             manager.player.gold += 10
         if key =='s':

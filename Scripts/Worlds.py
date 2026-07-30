@@ -59,7 +59,7 @@ class MarketWorld(Entity):
         self.return_gate = Gate(self.manager, parent=self, position=(0,-0.7,-5), locations='market.tutorial', complete=True, rotation_y=180)
         self.next_gate = Gate(self.manager, parent=self, position=(0,-0.7,20), locations='market.centaur', complete=True)
 
-        self.stall = Stall(self.manager,parent=self, position=(5,0,5), rotation_y=-90)
+        self.stall = Stall(self.manager,parent=self, position=(5,0,5), name='Stall')
         self.emergency_sign = Sign(parent=self, position=(0,1,40), text=f'Press L!', rotation_y=90)
 
         self.colliders = [self.return_gate.collision_box, self.stall.collision_box, self.next_gate.collision_box]
@@ -80,7 +80,7 @@ class RebirthWorld(Entity):
 
         self.statue = Entity(parent=self.temple, model='Assets/Models/Temple/zeusStatue.obj', texture='Assets/Models/Temple/zeusTexture.png',
                              double_sided=True, scale=(0.6,0.6,0.6), position=(17,8,0), collider='box', rotation_y=90)
-        self.stall = Stall(self.manager, parent=self.temple, position=(17,10,15), scale=(0.25,0.35,0.25), rotation_y=-90)
+        self.stall = Stall(self.manager, parent=self.temple, position=(17,10,15), scale=(0.25,0.35,0.25), name='Rebirth')
 
         self.cloud_box = Entity(parent=self, model='cube', color=color.white, wireframe=True, visible=self.manager.debug_mode,
                                 collider='box', scale=(120,50,120), position=(0,25,50))
@@ -88,7 +88,7 @@ class RebirthWorld(Entity):
 
         self.sky = Entity(parent=self, model='Assets/Models/Temple/sky.fbx', texture='Assets/Models/Temple/night.jpg',
                           double_sided=True, scale=0.8, position=(0,0,0), rotation_z=180)
-        self.colliders = [self.return_gate.collision_box]
+        self.colliders = [self.return_gate.collision_box, self.stall.collision_box]
 
     def update(self):
         if self.manager.player.y <= -40:
