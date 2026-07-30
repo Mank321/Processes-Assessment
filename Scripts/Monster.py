@@ -9,7 +9,6 @@ class Monster(Entity):
                        rotation=rotation, name=monster_stats["name"], parent=parent, enabled=enabled,
                        shader=unlit_shader, cache_compiled_model=False, collider='box', on_click=lambda: self.onClick())
         self.collider = BoxCollider(self, center=monster_stats["collider_position"], size=monster_stats["collider_scale"])
-        self.collider.visible = manager.debug_mode
         
         #self.look_at_box = Entity(model='cube', parent=self, x=monster_stats['collider_position'][0],
         #                          z=monster_stats['collider_position'][2], y=1,

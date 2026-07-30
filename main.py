@@ -308,7 +308,7 @@ app = Ursina()
 
 window.icon = 'Assets/ursina.ico'
 window.exit_button.visible = False
-window.editor_ui.enabled = False
+#window.editor_ui.enabled = False
 spectator_mode = EditorCamera(enabled = False, ignore_paused=True)
 pause_handler = Entity(ignore_paused=True, input=spectator_input)
 manager = GameManager()

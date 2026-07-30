@@ -73,17 +73,21 @@ class RebirthWorld(Entity):
         super().__init__()
         self.manager = manager
 
-        self.temple = Entity(parent=self, model='Assets/Models/Temple/temple.obj', texture='Assets/Models/Temple/texture.png',
-                             double_sided=True, scale=(0.4,0.78,0.4), position=(0,0,50), collider='mesh', rotation_y=-90)
-    
+        self.temple = Entity(parent=self, model='Assets/Models/Temple/templeV3.obj', texture='Assets/Models/Temple/texture.png',
+                             double_sided=True, scale=(0.4,0.78,0.4), position=(0,-6.5,50), collider='mesh', rotation_y=-90)
         self.cloud = Entity(parent=self, model='Assets/Models/Temple/cloud.obj', texture='Assets/Models/Temple/cloudtexture.png', double_sided=True,
-                            scale=(40,20,40), position=(20,-20,0), shader=unlit_shader, collider='box')
+                            scale=(40,20,40), position=(70,-20,0), shader=unlit_shader)
+
         self.statue = Entity(parent=self.temple, model='Assets/Models/Temple/zeusStatue.obj', texture='Assets/Models/Temple/zeusTexture.png',
                              double_sided=True, scale=(0.6,0.6,0.6), position=(17,8,0), collider='box', rotation_y=90)
-        self.stall = Stall(self.manager, parent=self.temple, position=(17,10,15), scale=(0.3,0.4,0.3), rotation_y=-90)
+        self.stall = Stall(self.manager, parent=self.temple, position=(17,10,15), scale=(0.25,0.35,0.25), rotation_y=-90)
 
+        self.cloud_box = Entity(parent=self, model='cube', color=color.white, wireframe=True, visible=self.manager.debug_mode,
+                                collider='box', scale=(120,50,120), position=(0,25,50))
         self.return_gate = Gate(self.manager, parent=self, position=(0,-0.7,-5), locations='rebirth.chimera', complete=True, rotation_y=180)
 
+        self.sky = Entity(parent=self, model='Assets/Models/Temple/sky.fbx', texture='Assets/Models/Temple/night.jpg',
+                          double_sided=True, scale=0.8, position=(0,0,0), rotation_z=180)
         self.colliders = [self.return_gate.collision_box]
 
     def update(self):
