@@ -59,7 +59,7 @@ class MarketWorld(Entity):
         self.return_gate = Gate(self.manager, parent=self, position=(0,-0.7,-5), locations='market.tutorial', complete=True, rotation_y=180)
         self.next_gate = Gate(self.manager, parent=self, position=(0,-0.7,20), locations='market.centaur', complete=True)
 
-        self.stall = Stall(self.manager,parent=self, position=(5,0,5), name='Stall')
+        self.stall = Stall(self.manager,parent=self, position=(5,0,5), name='Market')
         self.emergency_sign = Sign(parent=self, position=(0,1,40), text=f'Press L!', rotation_y=90)
 
         self.colliders = [self.return_gate.collision_box, self.stall.collision_box, self.next_gate.collision_box]

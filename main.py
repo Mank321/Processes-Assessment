@@ -1,5 +1,5 @@
 import random
-from ursina import Entity, Sky, application, Text, color, Button, Panel, Ursina, EditorCamera, held_keys, print_on_screen, invoke, mouse, camera, window
+from ursina import Entity, Sky, application, Text, color, Button, Panel, Ursina, EditorCamera, held_keys, print_on_screen, destroy, mouse, camera, window
 from Scripts.HealthBar import HealthBar
 from Scripts.MainMenu import MainMenu
 from Scripts.Maps import CentaurMap, BasiliskMap, GorgonMap, ChimeraMap
@@ -47,10 +47,12 @@ class GameManager(Entity):
         # Initialize the main classes
         self.ui_state = UIState(self, None)
         self.player = Player(self.ui_state, self)
-        self.ui_state.player = self.player         
+        self.ui_state.player = self.player
+        self.player.rotation = (0,0,0)
 
         # Load the tutorial world at the beginning 
         self.tutorial_world = TutorialWorld(self)
+        self.store = Store(self)
 
         self.location = 'tutorial'
         self.sky = Sky()
@@ -77,10 +79,20 @@ class GameManager(Entity):
         main_menu.background.z = 1
         application.paused = False
 
+    def rebirth(self):
+        self.player.teleport('tutorial')
+        destroy(self.player)
+        self.player = Player(self.ui_state, self)
+        self.ui_state.player = self.player
+        self.player.xp_multi *= 2
+        self.player.gold_multi *= 2
+        self.rebirth_store.enabled = False
+        self.store = Store(self)
+
     def switch_scenes(self, gate):
         """."""
         #self.ui_state.loading_hud.enabled=True
-        self.player.position = (0,1,0)
+        self.player.position = (0,1.5,0)
         new_scene_name = gate.split('.')[1]
         old_scene_name = gate.split('.')[0]
 
@@ -105,10 +117,8 @@ class GameManager(Entity):
             old_scene = self.scenes[old_scene_name]
 
             if new_scene == None:
-                
                 if new_scene_name == 'market':
                     self.market_world = MarketWorld(self)
-                    self.store = Store(self)
                     new_scene = self.market_world
                     self.ui_state.teleport_buttons['Market'].on_click = lambda: self.player.teleport('market')
                     self.ui_state.teleport_buttons['Market'].disabled = False
@@ -192,6 +202,7 @@ class UIState(Entity):
         mouse.locked = False
         self.death_menu.enabled = True
         self.death_menu.background.enabled = True
+        self.player.is_dead = True
         application.paused = True
 
     def update(self):

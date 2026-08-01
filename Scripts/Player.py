@@ -1,4 +1,5 @@
-from ursina import Entity, Text, color, application, Vec3, time, held_keys, curve, invoke, raycast, camera, mouse
+from ursina import Entity, color, application, Vec3, time, held_keys, curve, invoke, raycast, scene, camera, mouse
+from Scripts.Monster import Monster
 
 class Player(Entity):
     def __init__(self, ui_state, manager):
@@ -23,13 +24,12 @@ class Player(Entity):
         self.levelup_req = 5
         self.xp = 0
         self.xp_multi = 1
-        self.stamina = 5
-        self.max_stamina = self.stamina
         self.gold = 0
         self.max_gold = 10
+        self.gold_multi = 1
         self.inventory = None
         self.weapon_level = 1
-        self.basereach = 30
+        self.basereach = 3
         self.distance = float('inf')
         self.movement_locked = False
         self.store = None
@@ -38,6 +38,7 @@ class Player(Entity):
         self.can_teleport = False
         self.gorgon_protection = False
         self.lava_protection = False
+        self.is_dead = False
         
         camera.position = (0,1,0)
         camera.rotation = (0,0,0)
@@ -49,7 +50,10 @@ class Player(Entity):
                             parent=self, scale=0.05, collider='box',position=(1,0.5, -1), rotation=(1,1,-25), double_sided = True)
         self.store_icon = Entity(parent=camera.ui, model='quad', texture='Assets/Store Icon.png', position=(0,0,5), scale=(0.4,0.1), alpha=0)
 
+        self.ignore_list = [self, self.hand]
+
     def death(self):
+        self.is_dead = False
         application.paused = False
         self.position = Vec3(0,10,0)
         self.max_health = self.max_health - self.level * 2 if self.max_health - self.level*2 >= 20 else self.max_health
@@ -85,7 +89,6 @@ class Player(Entity):
         self.xp -= self.levelup_req
         self.level += 1
         self.old_req, self.levelup_req = self.levelup_req, self.old_req + self.levelup_req
-        self.max_stamina += 2
         self.damage += 1
         self.armor += 0.25
         self.basereach += 0.1
@@ -112,7 +115,7 @@ class Player(Entity):
         self.health += self.regeneration_value * time.dt
 
         # Allow jumping only when the player is on the ground
-        ground_ray = raycast(self.position + Vec3(0,0.5,0), direction=Vec3(0,-1,0), distance=2, ignore=[self], debug=self.manager.debug_mode)
+        ground_ray = raycast(self.position + Vec3(0,0.5,0), direction=Vec3(0,-1,0), distance=2, ignore=self.ignore_list, debug=self.manager.debug_mode)
         self.grounded = ground_ray.hit
 
         if self.grounded:
@@ -153,23 +156,22 @@ class Player(Entity):
         for collider in colliders:
             if self.intersects(collider).hit:
                 collider.color = color.red
-                if collider.name == 'Stall' or collider.name == 'Rebirth':
+                if collider.name == 'Market' or collider.name == 'Rebirth':
                     self.store = collider.name
                     self.store_icon.alpha = 1
                     self.at_stall = True
                         
             else:
                 collider.color = color.white
-                if collider.name == 'Stall' or collider.name == 'Rebirth':
+                if collider.name == 'Market' or collider.name == 'Rebirth':
                     self.store = None
                     self.store_icon.alpha = 0
                     self.at_stall = False
 
         # Check if nothing is infront of the player before moving
-        ignore = [self, self.hand]
-        hit_info = raycast(self.world_position, movement, distance=0.5, debug=self.manager.debug_mode, ignore=ignore)
+        hit_info = raycast(self.world_position, movement, distance=0.5, debug=self.manager.debug_mode, ignore=self.ignore_list)
         if not hit_info.hit:
-            if not self.movement_locked:
+            if not self.movement_locked or self.is_dead:
                 move_amount = movement * self.speed * time.dt
                 self.position += move_amount
         else:

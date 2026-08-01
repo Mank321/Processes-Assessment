@@ -1,4 +1,4 @@
-from ursina import Entity, color, Text, Button, Tooltip, Ursina, camera
+from ursina import Entity, color, Text, Button, Tooltip, Ursina, application, camera
 
 #Make an upgrades class and create an object for each upgrade
 class Store(Entity):
@@ -147,15 +147,17 @@ class Store(Entity):
 
 class RebirthStore(Entity):
     def __init__(self, manager, enabled=False):
-        super().__init__(parent=camera.ui, model='quad', color=color.black, position=(0.1,0.1,0), scale=(0.9, 0.7, 1), enabled=enabled)
+        super().__init__(parent=camera.ui, model='quad', color=color.black, position=(0,0,0), scale=(1.5, 0.7, 1), enabled=enabled)
         self.manager = manager
 
-        desc = 'Hi'
-        self.rebirth_text = Text(parent=self, text=desc, position=(0,0,-1), scale=1)
-        self.button = Button(parent=self, color=color.lime, text='Rebirth', position=(), scale=(0.3,0.3), on_click=lambda: self.rebirth())
-
-    def rebirth(self):
-        print(1)
+        desc = "                                       CONGRATULATIONS\n" \
+        "You've killed the final boss and reached the end... or have you?\n" \
+        "You could end your journey here, or, you could go around again\n" \
+        "by being born through rebirth! But don't worry, this time will\n" \
+        "be easier! Each time you rebirth, you'll get a 2x increase in\n" \
+        "your experience and gold gain!"
+        self.rebirth_text = Text(parent=self, text=desc, position=(-0.48,0.45,-1), scale=(1.3,2.6))
+        self.button = Button(parent=self, color=color.red, text='Rebirth', position=(0,-0.2,-1), scale=(0.4,0.3), text_size=4, on_click=lambda: self.manager.rebirth())
 
 if __name__ == '__main__':
     app=Ursina()
@@ -198,5 +200,7 @@ if __name__ == '__main__':
             print(f'Bag {manager.player.max_gold}')
             print(f'Armor {manager.player.armor}')
             print(f'Weapon {manager.player.weapon_level}')
+        if key == 'escape':
+            application.quit()
 
     app.run()

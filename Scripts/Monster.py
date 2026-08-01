@@ -8,8 +8,6 @@ class Monster(Entity):
                        position=position, double_sided=True, scale=monster_stats['scale']*scale,
                        rotation=rotation, name=monster_stats["name"], parent=parent, enabled=enabled,
                        shader=unlit_shader, cache_compiled_model=False, collider='box', on_click=lambda: self.onClick())
-        self.collider = BoxCollider(self, center=monster_stats["collider_position"], size=monster_stats["collider_scale"])
-        
         #self.look_at_box = Entity(model='cube', parent=self, x=monster_stats['collider_position'][0],
         #                          z=monster_stats['collider_position'][2], y=1,
         #                          scale=1, color=color.red, visible=manager.debug_mode)
@@ -44,11 +42,15 @@ class Monster(Entity):
             self.closeness = monster_stats['boss_closeness']
             self.sight = monster_stats['boss_sight']
             self.boss_rotation = monster_stats['boss_rotation']
+            self.collider = 'box'
             self.origin_rotation = self.boss_rotation
             self.damage *= 5
             self.health *= 10
             self.max_health = self.health
             self.worth *= 10
+
+        #self.collider.visible = True
+        self.manager.player.ignore_list.append(self)
 
     def death(self):
         self.visible = False
@@ -68,8 +70,7 @@ class Monster(Entity):
     def onClick(self):
         """This triggers when the mouse clicks the monster."""
         self.distance = distance(self, self.manager.player)
-        print(mouse.hovered_entity)
-        if self.distance <= self.manager.player.basereach + self.closeness:
+        if self.distance <= self.manager.player.basereach + self.closeness and not self.manager.player.is_dead:
             self.health -= self.manager.player.damage * self.manager.player.weapon_level
             self.manager.player.punch()
 
@@ -88,7 +89,7 @@ class Monster(Entity):
                     self.gate.name = f'{self.gate.name[:-10]}complete'
                     self.gate.collision_box.name = self.gate.name
                     camera.shake(duration=1)
-                self.manager.player.gold += self.worth
+                self.manager.player.gold += self.worth * self.manager.player.gold_multi
                 self.manager.ui_state.player_gold_bar.value += self.worth
                 self.manager.player.xp += self.worth * 2 * self.manager.player.xp_multi
                 self.manager.ui_state.player_experience_bar.value += self.worth
@@ -97,7 +98,7 @@ class Monster(Entity):
     def update(self):
         """."""
         self.distance = distance(self, self.manager.player)
-        if self.closeness < self.distance <= self.sight:
+        if self.closeness < self.distance <= self.sight and not self.manager.player.is_dead:
             self.look_at_2d(self.manager.player, 'y')
             #self.look_at_box.look_at(self.manager.player)
             self.position += self.forward * time.dt * self.speed
@@ -106,7 +107,7 @@ class Monster(Entity):
             if self.name == 'Gorgon' and not self.manager.player.gorgon_protection:
                 self.manager.player.health -= 100 * time.dt
 
-        if self.distance <= self.closeness:
+        if self.distance <= self.closeness and not self.manager.player.is_dead:
             damage_delt = self.damage - self.manager.player.armor
             if damage_delt >= 0:
                 self.manager.player.health -= damage_delt * time.dt * self.attack_speed
