@@ -35,6 +35,11 @@ class GameManager(Entity):
             'Rebirth',
         ]
 
+        self.scenes = {'tutorial': self.tutorial_world, 'market': self.market_world,
+                       'centaur': self.centaur_world, 'basilisk': self.basilisk_world,
+                       'gorgon': self.gorgon_world, 'chimera': self.chimera_world,
+                       'rebirth': self.rebirth_world}
+
         self.scene_weights = {'tutorial':0,
                               'market':1,
                               'centaur':2,
@@ -271,26 +276,18 @@ class LevelCreator(Entity):
             self.x_add = -60
             self.z_multi = 8
             self.z_add = -10
-            self.boss_type = 'fbx'
         elif self.name == 'Basilisk':
             self.world = BasiliskMap(manager, self)
             self.x_multi = 2
             self.x_add = -36.5
             self.z_multi = 2
             self.z_add = -3
-            self.boss_type = 'obj'
         elif self.name == 'Gorgon':
             self.world = GorgonMap(manager, parent=self)
-            self.boss_type = 'fbx'
         elif self.name == 'Chimera':
             self.world = ChimeraMap(manager, parent=self)
-            self.x_multi = 1
-            self.x_add = 0
-            self.z_multi = 1
-            self.z_add = 0
-            self.boss_type = 'fbx'
 
-        if hasattr(self.world, 'map') and self.world.map:
+        if hasattr(self.world, 'map'):
             self.world.map.reverse()
             for z, row in enumerate(self.world.map):
                 for x, col in enumerate(row):
@@ -302,7 +299,7 @@ class LevelCreator(Entity):
                     elif col == 'I':
                         self.return_gate = Gate(manager, parent=self, position=position, locations=f'{self.location}.{self.previous_scene}', complete=True, rotation_y=180)
                     elif col == 'B':
-                        self.boss = Monster(manager, parent=self, monster_stats=monster_stats, is_boss=True, gate=None, position=position, boss_type=self.boss_type)
+                        self.boss = Monster(manager, parent=self, monster_stats=monster_stats, is_boss=True, gate=None, position=position)
 
         elif hasattr(self.world, 'positions'):
             for position in self.world.positions:
@@ -310,15 +307,10 @@ class LevelCreator(Entity):
     
             self.next_gate = Gate(manager, parent=self, position=self.world.next_gate_position, locations=f'{self.location}.{self.next_scene}')
             self.return_gate = Gate(manager, parent=self, position=(0,0,-5), locations=f'{self.location}.{self.previous_scene}', complete=True, rotation_y=180)
-            self.boss = Monster(manager, parent=self, monster_stats=monster_stats, is_boss=True, gate=None, position=self.world.boss_position, boss_type=self.boss_type)
-        else:
-            self.next_gate = Gate(manager, parent=self, position=(0,0,10), locations=f'{self.location}.{self.next_scene}')
-            self.return_gate = Gate(manager, parent=self, position=(0,0,-2), locations=f'{self.location}.{self.previous_scene}', complete=True, rotation_y=180)
-            self.boss = Monster(manager, parent=self, monster_stats=monster_stats, is_boss=True, gate=None, position=(0,0,8))
+            self.boss = Monster(manager, parent=self, monster_stats=monster_stats, is_boss=True, gate=None, position=self.world.boss_position)
 
         self.boss.gate = self.next_gate
 
-        self.colliders = [self.return_gate.collision_box, self.next_gate.collision_box]
         manager.incomplete_gates.append(self.next_gate)
         manager.portal_monsters.append(self.boss)
 

@@ -1,8 +1,8 @@
-from ursina import Entity, Vec3, BoxCollider, color, time, curve, invoke, distance, print_on_screen, camera, mouse
+from ursina import Entity, Vec3, color, time, curve, invoke, distance, print_on_screen, camera, mouse
 from ursina.shaders import unlit_shader
 
 class Monster(Entity):
-    def __init__(self, manager, parent, monster_stats, is_boss=False, is_tutorial=False, gate=None, position=Vec3(0,0,0), rotation=Vec3(0,0,0), boss_type='fbx', scale=1, enabled=True):
+    def __init__(self, manager, parent, monster_stats, is_boss=False, is_tutorial=False, gate=None, position=Vec3(0,0,0), rotation=Vec3(0,180,0), scale=1, enabled=True):
         super().__init__(model=f'Assets/Models/{monster_stats["name"]}/base_monsterV2.fbx',
                        texture=f'Assets/Models/{monster_stats["name"]}/texture.png',
                        position=position, double_sided=True, scale=monster_stats['scale']*scale,
@@ -26,22 +26,25 @@ class Monster(Entity):
         self.origin_position = position
         self.rotation = rotation
         self.origin_rotation = rotation
-        self.boss_rotation = 0
         self.is_boss = is_boss
         self.is_boss_true = is_boss
         self.is_tutorial = is_tutorial
         self.gate = gate
+        boss = 'bosss'
+        if self.name == 'Basilisk':
+            boss = 'bossV5'
+        
 
         if self.is_boss:
-            self.model = f'Assets/Models/{self.name}/Boss/bosss.{boss_type}'
+            self.model = f'Assets/Models/{self.name}/Boss/{boss}.fbx'
             self.texture = f'Assets/Models/{self.name}/Boss/texture.png'
             self.scale = monster_stats['boss_scale']
             self.speed = monster_stats['boss_speed']
             self.closeness = monster_stats['boss_closeness']
             self.sight = monster_stats['boss_sight']
-            self.boss_rotation = monster_stats['boss_rotation']
+            #self.boss_rotation = monster_stats['boss_rotation']
             self.collider = 'box'
-            self.origin_rotation = self.boss_rotation
+            #self.origin_rotation = self.boss_rotation
             self.damage *= 5
             self.health *= 10
             self.max_health = self.health
@@ -63,6 +66,7 @@ class Monster(Entity):
     
     def respawn(self):
         self.position = self.origin_position
+        self.rotation = self.origin_rotation
         self.visible = True
         self.enabled = True
         self.ignore = False
@@ -103,8 +107,8 @@ class Monster(Entity):
             self.look_at_2d(self.manager.player, 'y')
             #self.look_at_box.look_at(self.manager.player)
             self.position += self.forward * time.dt * self.speed
-            if self.is_boss:
-                self.rotation_y += self.boss_rotation
+            #if self.is_boss:
+            #    self.rotation_y += self.boss_rotation
             if self.name == 'Gorgon' and not self.manager.player.gorgon_protection:
                 self.manager.player.health -= 100 * time.dt
 
@@ -114,5 +118,5 @@ class Monster(Entity):
                 self.manager.player.health -= damage_delt * time.dt * self.attack_speed
 
     def input(self, key):
-        if key == 'left mouse up' and mouse.hovered_entity == self:
+        if (key == 'left mouse up' or key == 'right mouse up') and mouse.hovered_entity == self:
             self.onClick()

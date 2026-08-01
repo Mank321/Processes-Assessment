@@ -21,9 +21,8 @@ class TutorialWorld(Entity):
         self.desc2 = 'Attack the monster up ahead by left clicking!\n                     Try not to get hit!'
         self.text2 = Text(parent=self, text=self.desc2, position=(-8,4,19), scale=30, color=color.white)
 
-        self.monster = Monster(self.manager, parent=self, monster_stats=CENTAUR_STATS, is_tutorial=True, gate=self.next_gate, position=Vec3(0,0,25), rotation=Vec3(0,180,0))
+        self.monster = Monster(self.manager, parent=self, monster_stats=CENTAUR_STATS, is_tutorial=True, gate=self.next_gate, position=Vec3(0,0,25))
 
-        self.colliders = []
         self.map = ['        TTTTTTTT        ',
                     '       TTTT  TTTT       ',
                     '      TTTT    TTTT      ',

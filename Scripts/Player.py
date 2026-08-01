@@ -145,27 +145,23 @@ class Player(Entity):
                         + self.right * (held_keys['d'] - held_keys['a'])).normalized()
         
         # Change hitbox colours when colliding for testing purposes
-        dictionary = {'tutorial': self.manager.tutorial_world,
-                      'market': self.manager.market_world,
-                      'centaur': self.manager.centaur_world,
-                      'basilisk': self.manager.basilisk_world,
-                      'gorgon': self.manager.gorgon_world,
-                      'chimera': self.manager.chimera_world,
-                      'rebirth': self.manager.rebirth_world}
+        markets = {'market': self.manager.market_world,
+                   'rebirth': self.manager.rebirth_world}
 
-        colliders = dictionary[self.manager.location].colliders
-        for collider in colliders:
-            if self.intersects(collider).hit:
-                collider.color = color.red
-                self.store = collider.name
-                self.store_icon.alpha = 1
-                self.at_stall = True
-                        
-            else:
-                collider.color = color.white
-                self.store = None
-                self.store_icon.alpha = 0
-                self.at_stall = False
+        if self.manager.location in markets:
+            colliders = markets[self.manager.location].colliders
+            for collider in colliders:
+                if self.intersects(collider).hit:
+                    collider.color = color.red
+                    self.store = collider.name
+                    self.store_icon.alpha = 1
+                    self.at_stall = True
+                            
+                else:
+                    collider.color = color.white
+                    self.store = None
+                    self.store_icon.alpha = 0
+                    self.at_stall = False
 
         # Check if nothing is infront of the player before moving
         hit_info = raycast(self.world_position, movement, distance=0.5, debug=self.manager.debug_mode, ignore=self.manager.ignore_list)
@@ -178,7 +174,7 @@ class Player(Entity):
             if name.startswith('gate') and name.split('.')[-1] == 'complete':
                 scenes = name[5:]
                 delay = 0.01
-                if dictionary[scenes.split('.')[1]] == None:
+                if self.manager.scenes[scenes.split('.')[1]] == None:
                     self.manager.ui_state.loading_hud.enabled = True
                     delay = 0.05
                 invoke(lambda: self.manager.switch_scenes(scenes), delay=delay)
