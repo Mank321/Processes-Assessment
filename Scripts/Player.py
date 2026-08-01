@@ -50,7 +50,8 @@ class Player(Entity):
                             parent=self, scale=0.05, collider='box',position=(1,0.5, -1), rotation=(1,1,-25), double_sided = True)
         self.store_icon = Entity(parent=camera.ui, model='quad', texture='Assets/Store Icon.png', position=(0,0,5), scale=(0.4,0.1), alpha=0)
 
-        self.ignore_list = [self, self.hand]
+        self.manager.ignore_list.append(self)
+        self.manager.ignore_list.append(self.hand)
 
     def death(self):
         self.is_dead = False
@@ -115,7 +116,7 @@ class Player(Entity):
         self.health += self.regeneration_value * time.dt
 
         # Allow jumping only when the player is on the ground
-        ground_ray = raycast(self.position + Vec3(0,0.5,0), direction=Vec3(0,-1,0), distance=2, ignore=self.ignore_list, debug=self.manager.debug_mode)
+        ground_ray = raycast(self.position + Vec3(0,0.5,0), direction=Vec3(0,-1,0), distance=2, ignore=self.manager.ignore_list, debug=self.manager.debug_mode)
         self.grounded = ground_ray.hit
 
         if self.grounded:
@@ -156,20 +157,18 @@ class Player(Entity):
         for collider in colliders:
             if self.intersects(collider).hit:
                 collider.color = color.red
-                if collider.name == 'Market' or collider.name == 'Rebirth':
-                    self.store = collider.name
-                    self.store_icon.alpha = 1
-                    self.at_stall = True
+                self.store = collider.name
+                self.store_icon.alpha = 1
+                self.at_stall = True
                         
             else:
                 collider.color = color.white
-                if collider.name == 'Market' or collider.name == 'Rebirth':
-                    self.store = None
-                    self.store_icon.alpha = 0
-                    self.at_stall = False
+                self.store = None
+                self.store_icon.alpha = 0
+                self.at_stall = False
 
         # Check if nothing is infront of the player before moving
-        hit_info = raycast(self.world_position, movement, distance=0.5, debug=self.manager.debug_mode, ignore=self.ignore_list)
+        hit_info = raycast(self.world_position, movement, distance=0.5, debug=self.manager.debug_mode, ignore=self.manager.ignore_list)
         if not hit_info.hit:
             if not self.movement_locked or self.is_dead:
                 move_amount = movement * self.speed * time.dt

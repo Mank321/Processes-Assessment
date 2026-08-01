@@ -8,9 +8,6 @@ class Monster(Entity):
                        position=position, double_sided=True, scale=monster_stats['scale']*scale,
                        rotation=rotation, name=monster_stats["name"], parent=parent, enabled=enabled,
                        shader=unlit_shader, cache_compiled_model=False, collider='box', on_click=lambda: self.onClick())
-        #self.look_at_box = Entity(model='cube', parent=self, x=monster_stats['collider_position'][0],
-        #                          z=monster_stats['collider_position'][2], y=1,
-        #                          scale=1, color=color.red, visible=manager.debug_mode)
 
         self.manager = manager
         self.parent = parent
@@ -29,6 +26,7 @@ class Monster(Entity):
         self.origin_position = position
         self.rotation = rotation
         self.origin_rotation = rotation
+        self.boss_rotation = 0
         self.is_boss = is_boss
         self.is_boss_true = is_boss
         self.is_tutorial = is_tutorial
@@ -49,8 +47,11 @@ class Monster(Entity):
             self.max_health = self.health
             self.worth *= 10
 
+        if self.is_boss or self.is_tutorial:
+            self.manager.portal_monsters.append(self)
+
         #self.collider.visible = True
-        self.manager.player.ignore_list.append(self)
+        self.manager.ignore_list.append(self)
 
     def death(self):
         self.visible = False

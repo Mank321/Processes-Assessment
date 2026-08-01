@@ -1,5 +1,5 @@
 import random
-from ursina import Entity, Sky, application, Text, color, Button, Panel, Ursina, EditorCamera, held_keys, print_on_screen, destroy, mouse, camera, window
+from ursina import Entity, Sky, application, Text, color, Button, Panel, Ursina, EditorCamera, held_keys, print_on_screen, destroy, mouse, camera, window, scene
 from Scripts.HealthBar import HealthBar
 from Scripts.MainMenu import MainMenu
 from Scripts.Maps import CentaurMap, BasiliskMap, GorgonMap, ChimeraMap
@@ -35,8 +35,20 @@ class GameManager(Entity):
             'Rebirth',
         ]
 
+        self.scene_weights = {'tutorial':0,
+                              'market':1,
+                              'centaur':2,
+                              'basilisk':3,
+                              'gorgon':4,
+                              'chimera':5,
+                              'rebirth':6}
+
         self.location = None
         self.debug_mode = False
+
+        self.incomplete_gates = []
+        self.portal_monsters = []
+        self.ignore_list = []
 
     def start_game(self):
         """."""
@@ -88,6 +100,17 @@ class GameManager(Entity):
         self.player.gold_multi *= 2
         self.rebirth_store.enabled = False
         self.store = Store(self)
+        for gate in self.incomplete_gates:
+            name=gate.name.split('.')[:-1]
+            name=f'{".".join(name)}.incomplete'
+            gate.name = name
+            gate.collision_box.name = name
+            gate.complete=False
+            gate.portal.alpha = 0
+            gate.pattern.color = color.red
+        for monster in self.portal_monsters:
+            monster.is_tutorial = True
+            monster.is_boss = True
 
     def switch_scenes(self, gate):
         """."""
@@ -104,14 +127,6 @@ class GameManager(Entity):
                         'centaur': self.centaur_world, 'basilisk': self.basilisk_world,
                         'gorgon': self.gorgon_world, 'chimera': self.chimera_world,
                         'rebirth': self.rebirth_world}
-
-            self.scene_weights = {'tutorial':0,
-                                  'market':1,
-                                  'centaur':2,
-                                  'basilisk':3,
-                                  'gorgon':4,
-                                  'chimera':5,
-                                  'rebirth':6}
 
             new_scene = self.scenes[new_scene_name]
             old_scene = self.scenes[old_scene_name]
@@ -304,6 +319,8 @@ class LevelCreator(Entity):
         self.boss.gate = self.next_gate
 
         self.colliders = [self.return_gate.collision_box, self.next_gate.collision_box]
+        manager.incomplete_gates.append(self.next_gate)
+        manager.portal_monsters.append(self.boss)
 
 
 #---------------------------------------------------#

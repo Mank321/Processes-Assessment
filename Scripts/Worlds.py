@@ -23,7 +23,7 @@ class TutorialWorld(Entity):
 
         self.monster = Monster(self.manager, parent=self, monster_stats=CENTAUR_STATS, is_tutorial=True, gate=self.next_gate, position=Vec3(0,0,25), rotation=Vec3(0,180,0))
 
-        self.colliders = [self.next_gate.collision_box]
+        self.colliders = []
         self.map = ['        TTTTTTTT        ',
                     '       TTTT  TTTT       ',
                     '      TTTT    TTTT      ',
@@ -41,6 +41,8 @@ class TutorialWorld(Entity):
             for x, col in enumerate(row):
                 if col == 'T':
                     Tree(manager, ((x*4)-45, 0, (z*4)-7),parent=self)
+
+        manager.incomplete_gates.append(self.next_gate)
         
     def update(self):
         if self.manager.player.y <= -20:
@@ -62,7 +64,7 @@ class MarketWorld(Entity):
         self.stall = Stall(self.manager,parent=self, position=(5,0,5), name='Market')
         self.emergency_sign = Sign(parent=self, position=(0,1,40), text=f'Press L!', rotation_y=90)
 
-        self.colliders = [self.return_gate.collision_box, self.stall.collision_box, self.next_gate.collision_box]
+        self.colliders = [self.stall.collision_box]
 
     def update(self):
         if self.manager.player.y <= -20:
@@ -88,7 +90,7 @@ class RebirthWorld(Entity):
 
         self.sky = Entity(parent=self, model='Assets/Models/Temple/sky.fbx', texture='Assets/Models/Temple/night.jpg',
                           double_sided=True, scale=0.8, position=(0,0,0), rotation_z=180)
-        self.colliders = [self.return_gate.collision_box, self.stall.collision_box]
+        self.colliders = [self.stall.collision_box]
 
     def update(self):
         if self.manager.player.y <= -40:
