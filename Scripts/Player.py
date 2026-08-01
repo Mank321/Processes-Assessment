@@ -1,5 +1,5 @@
 from ursina import Entity, color, application, Vec3, time, held_keys, curve, invoke, raycast, scene, camera, mouse
-from Scripts.Monster import Monster
+from Scripts.Objects import Stall
 
 class Player(Entity):
     def __init__(self, ui_state, manager):
@@ -151,7 +151,8 @@ class Player(Entity):
         if self.manager.location in markets:
             colliders = markets[self.manager.location].colliders
             for collider in colliders:
-                if self.intersects(collider).hit:
+                if self.intersects(collider).hit and mouse.hovered_entity.name.lower() in markets:
+                    print(mouse.hovered_entity)
                     collider.color = color.red
                     self.store = collider.name
                     self.store_icon.alpha = 1

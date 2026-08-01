@@ -105,6 +105,7 @@ class GameManager(Entity):
         self.player.gold_multi *= 2
         self.rebirth_store.enabled = False
         self.store = Store(self)
+        self.ui_state.death_menu.start_function = self.player.death
         for gate in self.incomplete_gates:
             name=gate.name.split('.')[:-1]
             name=f'{".".join(name)}.incomplete'
@@ -229,6 +230,8 @@ class UIState(Entity):
         if self.player != None:
             self.teleport_buttons['Rebirth'].on_click = lambda: self.player.teleport('rebirth')
             self.teleport_buttons['Rebirth'].disabled = False
+            self.teleport_buttons['Chimera'].on_click = lambda: self.player.teleport('chimera')
+            self.teleport_buttons['Chimera'].disabled = False
             self.teleport_buttons['Tutorial'].on_click = lambda: self.player.teleport('tutorial')
             self.player_gold_bar.max_value = self.player.max_gold
             self.player_gold_bar.value = self.player.gold

@@ -204,6 +204,7 @@ class ChimeraMap(Entity):
                           (-112.3,-7.8,-118.5),(-138,-7.5,-146.4),(-34.6,6.3,94.9),(-86.4,2.6,126),(-82.9,51,192.2),(-49.4,17.4,169.5),(42.4,-7.8,98.4),(80.1,2.3,83.4),
                           (175.2,-4.1,189.5),(124.6,-0.8,24.1),(27.9,-0.2,136.3),(67.7,-0.8,165.1),(143.6,-3.7,170.4),(209,-0.1,115.1)]
 
+        self.help_text = Text(parent=self, text='Look around for the boss!', scale=20, rotation_y=0, position=(-3,3,5), color=color.lime)
         self.next_gate_position = (215.3,-4.8,171.3)
         self.boss_position = (205,-2.6,162.4)
         self.manager = manager
