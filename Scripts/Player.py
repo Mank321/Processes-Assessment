@@ -32,6 +32,7 @@ class Player(Entity):
         self.basereach = 30
         self.distance = float('inf')
         self.movement_locked = False
+        self.store = None
         self.at_stall = False
         self.regeneration_value = 0
         self.can_teleport = False
@@ -152,16 +153,18 @@ class Player(Entity):
         for collider in colliders:
             if self.intersects(collider).hit:
                 collider.color = color.red
-                if collider.name == 'Stall':
+                if collider.name == 'Stall' or collider.name == 'Rebirth':
+                    self.store = collider.name
                     self.store_icon.alpha = 1
                     self.at_stall = True
                         
             else:
                 collider.color = color.white
-                if collider.name == 'Stall':
+                if collider.name == 'Stall' or collider.name == 'Rebirth':
+                    self.store = None
                     self.store_icon.alpha = 0
                     self.at_stall = False
-        
+
         # Check if nothing is infront of the player before moving
         ignore = [self, self.hand]
         hit_info = raycast(self.world_position, movement, distance=0.5, debug=self.manager.debug_mode, ignore=ignore)
@@ -181,6 +184,10 @@ class Player(Entity):
 
     def input(self, key):
         if key == 'e' and self.at_stall and not self.ui_state.teleport_hud.enabled:
-            self.manager.store.enabled = not self.manager.store.enabled
+            if self.store == 'Market':
+                self.manager.store.enabled = not self.manager.store.enabled
+            elif self.store == 'Rebirth':
+                self.manager.rebirth_store.enabled = not self.manager.rebirth_store.enabled
+
             self.movement_locked = not self.movement_locked
             mouse.locked = not mouse.locked

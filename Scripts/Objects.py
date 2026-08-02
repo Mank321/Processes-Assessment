@@ -21,14 +21,14 @@ class Sign(Entity):
                          color=color.white, rotation_y=-90)
 
 class Stall(Entity):
-    def __init__(self, manager, parent, position, rotation_y, scale=(0.1,0.25,0.1)):
+    def __init__(self, manager, parent, position, name, rotation_y=-90, scale=(0.1,0.25,0.1)):
         super().__init__(parent=parent,model='Assets/Models/Stall/Stall/stall1.fbx', texture='Assets/Models/Stall/Stall/stall_texture.png',
                          double_sided=True, scale=scale, position=position, rotation_y=rotation_y)
 
         self.props = Entity(model='Assets/Models/Stall/Props/props.fbx', texture='Assets/Models/Stall/Props/props_texture.png',
                             parent=self, double_sided=True,scale=(1,1,1), position=(0,0,0))
 
-        self.collision_box = Entity(model='cube', parent=self, name='Stall',
+        self.collision_box = Entity(model='cube', parent=self, name=name,
                                     position=(0,0,0), scale=(40,70,40),
                                     collider='box', visible=manager.debug_mode,
                                     wireframe=True)

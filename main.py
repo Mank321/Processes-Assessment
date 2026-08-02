@@ -7,7 +7,7 @@ from Scripts.Objects import Gate
 from Scripts.Worlds import TutorialWorld, MarketWorld, RebirthWorld
 from Scripts.Monster import Monster
 from Scripts.Player import Player
-from Scripts.Store import Store
+from Scripts.Store import Store, RebirthStore
 from Scripts.MonsterStats import CENTAUR_STATS, BASILISK_STATS, GORGON_STATS, CHIMERA_STATS
 
 class GameManager(Entity):
@@ -45,7 +45,6 @@ class GameManager(Entity):
         main_menu.background.enabled = False
         
         # Initialize the main classes
-        self.store = Store(self)
         self.ui_state = UIState(self, None)
         self.player = Player(self.ui_state, self)
         self.ui_state.player = self.player         
@@ -109,6 +108,7 @@ class GameManager(Entity):
                 
                 if new_scene_name == 'market':
                     self.market_world = MarketWorld(self)
+                    self.store = Store(self)
                     new_scene = self.market_world
                     self.ui_state.teleport_buttons['Market'].on_click = lambda: self.player.teleport('market')
                     self.ui_state.teleport_buttons['Market'].disabled = False
@@ -134,6 +134,7 @@ class GameManager(Entity):
                     self.ui_state.teleport_buttons['Chimera'].disabled = False
                 elif new_scene_name == 'rebirth':
                     self.rebirth_world = RebirthWorld(self)
+                    self.rebirth_store = RebirthStore(self)
                     new_scene = self.rebirth_world
                     self.ui_state.teleport_buttons['Rebirth'].on_click = lambda: self.player.teleport('rebirth')
                     self.ui_state.teleport_buttons['Rebirth'].disbaled = False
@@ -185,7 +186,7 @@ class UIState(Entity):
             'Basilisk': Button(parent=self.teleport_hud, text='Basilisk', text_size=2, color=color.lime, scale=(0.4,0.15), position=(0.25,0.3,-1), disabled=True),
             'Gorgon': Button(parent=self.teleport_hud, text='Gorgon', text_size=2, color=color.lime, scale=(0.4,0.15), position=(0.25,0.05,-1), disabled=True),
             'Chimera': Button(parent=self.teleport_hud, text='Chimera', text_size=2, color=color.lime, scale=(0.4,0.15), position=(0.25,-0.2,-1), disabled=True),
-            'Rebirth': Button(parent=self.teleport_hud, text='Rebirth', text_size=2, color=color.lime, scale=(0.4,0.15), position=(-0.25, -0.4), disabled=False)}
+            'Rebirth': Button(parent=self.teleport_hud, text='Rebirth', text_size=2, color=color.lime, scale=(0.4,0.15), position=(-0.25, -0.4, -1), disabled=False)}
 
     def death_screen(self):
         mouse.locked = False
@@ -308,7 +309,7 @@ app = Ursina()
 
 window.icon = 'Assets/ursina.ico'
 window.exit_button.visible = False
-window.editor_ui.enabled = False
+#window.editor_ui.enabled = False
 spectator_mode = EditorCamera(enabled = False, ignore_paused=True)
 pause_handler = Entity(ignore_paused=True, input=spectator_input)
 manager = GameManager()
