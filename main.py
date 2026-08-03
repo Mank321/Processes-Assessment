@@ -314,8 +314,10 @@ class UIState(Entity):
             self.player_health_bar.value = round(self.player.health)
             self.player_experience_bar.max_value = self.player.levelup_req
             self.player_experience_bar.value = round(self.player.xp)
-            self.damage_text.text = f'Damage: {self.player.damage}',
-            '(+{self.player.damage * (self.player.weapon_level - 1)})'
+            if self.player.weapon_level > 1:
+                self.damage_text.text = f'Damage: {self.player.damage}(+{self.player.damage * (self.player.weapon_level - 1)})'
+            else:
+                self.daamge_text.text = f'Damage: {self.player.damage}'
             self.armor_text.text = f'Armor: {self.player.armor}'
             self.level_display.text = f'Level: {self.player.level}'
             self.reach_text.text = f'Reach: {round(self.player.basereach, 2)}'
