@@ -105,10 +105,7 @@ class Monster(Entity):
         self.distance = distance(self, self.manager.player)
         if self.closeness < self.distance <= self.sight and not self.manager.player.is_dead:
             self.look_at_2d(self.manager.player, 'y')
-            #self.look_at_box.look_at(self.manager.player)
             self.position += self.forward * time.dt * self.speed
-            #if self.is_boss:
-            #    self.rotation_y += self.boss_rotation
             if self.name == 'Gorgon' and not self.manager.player.gorgon_protection:
                 self.manager.player.health -= 100 * time.dt
 
