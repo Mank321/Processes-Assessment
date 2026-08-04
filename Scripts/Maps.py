@@ -1,28 +1,65 @@
+"""The monster maps used to create the monster world in the dungeon game."""
 from ursina import Entity, Text, color
 from Scripts.Objects import Tree, Sign
 
 class CentaurMap(Entity):
+    """."""
     def __init__(self, manager, parent):
-        super().__init__(parent=parent, model='Assets/Models/Centaur/World/ground.fbx', texture='Assets/Models/Centaur/World/ground.png',
-                         double_sided=True, scale=(.05,.05,.05), position=(5,0,80), rotation_y=90)
+        """."""
+        # Initialize the ground
+        super().__init__(parent=parent,
+                         model='Assets/Models/Centaur/World/ground.fbx',
+                         texture='Assets/Models/Centaur/World/ground.png',
+                         double_sided=True, scale=(.05,.05,.05),
+                         position=(5,0,80), rotation_y=90)
         
         self.manager = manager
-        self.ground_collider = Entity(model='cube', parent=self, collider='box', position=(0,0,0), scale=(5000,1,5000),
-                                      visible=manager.debug_mode, wireframe=True)
-        self.left_collider = Entity(model='cube', parent=self, collider='box', position=(0,200,-1500), scale=(5,500,5000), rotation=(0,85,0),
-                                      visible=manager.debug_mode, wireframe=True)
-        self.right_collider = Entity(model='cube', parent=self, collider='box', position=(0,200,1600), scale=(5,500,5000), rotation=(0,85,0),
-                                      visible=manager.debug_mode, wireframe=True)
-        self.front_collider = Entity(model='cube', parent=self, collider='box', position=(-1700,200,0), scale=(5,500,5000), rotation=(0,5,0),
-                                      visible=manager.debug_mode, wireframe=True)
-        self.back_collider = Entity(model='cube', parent=self, collider='box', position=(1800,200,0), scale=(5,500,5000), rotation=(0,-5,0),
-                                      visible=manager.debug_mode, wireframe=True)
-        self.front_left_collider = Entity(model='cube', parent=self, collider='box', position=(-1500,200,450), scale=(400,500,2000), rotation=(0,-80,0),
-                                      visible=manager.debug_mode, wireframe=True)
-        self.front_left_collider2 = Entity(model='cube', parent=self, collider='box', position=(-1500,200,700), scale=(300,500,800), rotation=(0,-40,0),
-                                      visible=manager.debug_mode, wireframe=True)
-        self.front_right_collider = Entity(model='cube', parent=self, collider='box', position=(-1350,200,-750), scale=(350,500,2000), rotation=(0,70,0),
-                                      visible=manager.debug_mode, wireframe=True)
+        
+        # Initialize the hitbox colliders
+        self.ground_collider = Entity(model='cube', parent=self,
+                                      collider='box', position=(0, 0, 0),
+                                      scale=(5000, 1, 5000),
+                                      visible=manager.debug_mode,
+                                      wireframe=True)
+        self.left_collider = Entity(model='cube', parent=self, collider='box',
+                                    position=(0, 200, -1500),
+                                    scale=(5, 500, 5000), rotation=(0, 85, 0),
+                                    visible=manager.debug_mode, wireframe=True)
+        self.right_collider = Entity(model='cube', parent=self, collider='box',
+                                     position=(0, 200, 1600),
+                                     scale=(5, 500, 5000), rotation=(0, 85, 0),
+                                     visible=manager.debug_mode, wireframe=True)
+        self.front_collider = Entity(model='cube', parent=self, collider='box',
+                                     position=(-1700, 200, 0),
+                                     scale=(5, 500, 5000), rotation=(0, 5, 0),
+                                     visible=manager.debug_mode, wireframe=True)
+        self.back_collider = Entity(model='cube', parent=self, collider='box',
+                                    position=(1800, 200, 0),
+                                    scale=(5, 500, 5000), rotation=(0, -5, 0),
+                                    visible=manager.debug_mode, wireframe=True)
+        self.front_left_collider = Entity(model='cube', parent=self,
+                                          collider='box',
+                                          position=(-1500, 200, 450),
+                                          scale=(400, 500, 2000),
+                                          rotation=(0, -80, 0),
+                                          visible=manager.debug_mode,
+                                          wireframe=True)
+        self.front_left_collider2 = Entity(model='cube', parent=self,
+                                           collider='box',
+                                           position=(-1500, 200, 700),
+                                           scale=(300, 500, 800),
+                                           rotation=(0, -40, 0),
+                                           visible=manager.debug_mode,
+                                           wireframe=True)
+        self.front_right_collider = Entity(model='cube', parent=self,
+                                           collider='box',
+                                           position=(-1350, 200, -750),
+                                           scale=(350,500,2000),
+                                           rotation=(0,70,0),
+                                           visible=manager.debug_mode,
+                                           wireframe=True)
+        
+        # Initialize the map telling where the trees and monsters go
         self.map = ['TTTWWTTTTTTWWWWW',
                     '  TWWWTO TWWWWT ',
                     ' M TWW B WWWTT  T',
@@ -44,6 +81,8 @@ class CentaurMap(Entity):
                     'WWWT    S     TT',
                     'WWWWMM  I  T T',
                     'WWWWW TT T']
+        
+        # Plant the trees in the world according to the map
         for x, row in enumerate(self.map):
             for z, col in enumerate(row):
                 if col == 'T':
@@ -55,6 +94,7 @@ class CentaurMap(Entity):
                             double_sided=True)
 
     def update(self):
+        """Check each frame if the player has fallen out of the world."""
         if self.manager.player.y <= -21:
             self.manager.player.position=(0,1,0)
 

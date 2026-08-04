@@ -1,15 +1,20 @@
+"""The player class used to create and handle the player of the dungeon game."""
 from ursina import Entity, color, application, Vec3, time, held_keys, curve, invoke, raycast, scene, camera, mouse
-from Scripts.Objects import Stall
 
 class Player(Entity):
+    """."""
     def __init__(self, ui_state, manager):
+        """."""
+        # Create a body to represent the player
         super().__init__(model='cube', scale=(1,2.5,1), position=(0,1,0),
                          collider='box', visible_self=manager.debug_mode,
                          color=color.orange)
 
+        # Intialize the passed-in main classes
         self.ui_state = ui_state
         self.manager = manager
 
+        # Intialize the player stats
         self.speed = 10
         self.default_speed = self.speed
         self.jump_height = 30
@@ -152,7 +157,6 @@ class Player(Entity):
             colliders = markets[self.manager.location].colliders
             for collider in colliders:
                 if self.intersects(collider).hit and mouse.hovered_entity.name.lower() in markets:
-                    print(mouse.hovered_entity)
                     collider.color = color.red
                     self.store = collider.name
                     self.store_icon.alpha = 1
