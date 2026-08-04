@@ -228,10 +228,6 @@ class UIState(Entity):
 
     def update(self):
         if self.player != None:
-            self.teleport_buttons['Rebirth'].on_click = lambda: self.player.teleport('rebirth')
-            self.teleport_buttons['Rebirth'].disabled = False
-            self.teleport_buttons['Chimera'].on_click = lambda: self.player.teleport('chimera')
-            self.teleport_buttons['Chimera'].disabled = False
             self.teleport_buttons['Tutorial'].on_click = lambda: self.player.teleport('tutorial')
             self.player_gold_bar.max_value = self.player.max_gold
             self.player_gold_bar.value = self.player.gold
@@ -333,6 +329,7 @@ app = Ursina()
 window.icon = 'Assets/ursina.ico'
 window.exit_button.visible = False
 #window.editor_ui.enabled = False
+window.fullscreen = True
 spectator_mode = EditorCamera(enabled = False, ignore_paused=True)
 pause_handler = Entity(ignore_paused=True, input=spectator_input)
 manager = GameManager()
