@@ -314,18 +314,21 @@ class UIState(Entity):
             self.player_health_bar.value = round(self.player.health)
             self.player_experience_bar.max_value = self.player.levelup_req
             self.player_experience_bar.value = round(self.player.xp)
-            if self.player.weapon_level > 1:
-                self.damage_text.text = f'Damage: {self.player.damage}(+{self.player.damage * (self.player.weapon_level - 1)})'
-            else:
-                self.daamge_text.text = f'Damage: {self.player.damage}'
             self.armor_text.text = f'Armor: {self.player.armor}'
             self.level_display.text = f'Level: {self.player.level}'
             self.reach_text.text = f'Reach: {round(self.player.basereach, 2)}'
 
+            # Change the damage text depending on the weapon level
+            if self.player.weapon_level > 1:
+                self.damage_text.text = f'Damage: {self.player.damage}(+{self.player.damage * (self.player.weapon_level - 1)})'
+            else:
+                self.damage_text.text = f'Damage: {self.player.damage}'
+
             # Handle the death menu when the player dies
             if self.player.health <= 0 and not self.death_menu.enabled:
                 if self.death_menu.start_function is None:
-                    self.death_menu.start_function = self.player.death
+                    self.death_menu.start_function = lambda: self.player.death()
+
                 self.death_screen()
                 self.teleport_hud.enabled=False
 
@@ -388,13 +391,11 @@ class LevelCreator(Entity):
                                     position[2])
                         self.next_gate = Gate(manager, parent=self,
                                               position=(position),
-                                              locations=(f'{self.location}.',
-                                              f'{self.next_scene}'))
+                                              locations=f'{self.location}.{self.next_scene}')
                     elif col == 'I':
                         self.return_gate = Gate(manager, parent=self,
                                                 position=position,
-                                                locations=(f'{self.location}.',
-                                                f'{self.prev_scene}'),
+                                                locations=f'{self.location}.{self.prev_scene}',
                                                 complete=True, rotation_y=180)
                     elif col == 'B':
                         self.boss = Monster(manager, parent=self,
@@ -411,11 +412,9 @@ class LevelCreator(Entity):
     
             self.next_gate = Gate(manager, parent=self,
                                   position=self.world.next_gate_position,
-                                  locations=(f'{self.location}.',
-                                  f'{self.next_scene}'))
+                                  locations=(f'{self.location}.{self.next_scene}'))
             self.return_gate = Gate(manager, parent=self, position=(0,0,-5),
-                                    locations=(f'{self.location}.',
-                                    f'{self.prev_scene}'), complete=True,
+                                    locations=(f'{self.location}.{self.prev_scene}'), complete=True,
                                     rotation_y=180)
             self.boss = Monster(manager, parent=self,
                                 monster_stats=monster_stats, is_boss=True,

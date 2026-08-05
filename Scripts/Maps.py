@@ -203,7 +203,7 @@ class GorgonMap(Entity):
     def __init__(self, manager, parent):
         super().__init__(parent=parent, model='Assets/Models/Gorgon/World/world.obj', texture='Assets/Models/Gorgon/World/texture.png', double_sided=True,
                          position=(0,2,0), scale=(1,1.2,1), rotation_y=180, collider='mesh')
-        self.statues = Entity(parent=self, model='Assets/Models/Gorgon/World/gorgon_statues.fbx', texture='Assets/Models/Gorgon/World/Statues/texture.png', double_sided=True,
+        self.statues = Entity(parent=self, model='Assets/Models/Gorgon/World/gorgon_statues.fbx', texture='Assets/Models/Gorgon/World/statueTexture.png', double_sided=True,
                               scale=(0.01,0.01,0.01))
         self.positions = [(-10, 0, 20), (-23.8, -0.5, 14.71), (-24.7, -0.5, 32.7),(-43.2, -0.5, 35.6),(-45.3, -0.5, 19.9), (-23.5, -0.5, 56.9),
                           (-47.3, -0.5, 45.6),(-73.5, -0.5, 56.9),(-38.6, -0.5, 77.9),(-46.4, -0.5, 81.3),(-69.8, -0.5, 71.8),(-24.7, -0.5, 95.1),

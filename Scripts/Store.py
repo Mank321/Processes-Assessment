@@ -10,11 +10,11 @@ class Store(Entity):
         self.shop_hud = Entity(parent=self, enabled=False)
         self.skill_hud = Entity(parent=self, enabled=False)
 
-        self.player_button = Button(parent=self, color=color.gray, scale=(0.17, 0.20), position=(-0.5, 0.37,-1), icon='Profile Icon.png', tooltip=Tooltip(f'<green>Player Stats'),
+        self.player_button = Button(parent=self, color=color.gray, scale=(0.17, 0.20), position=(-0.5, 0.37,-1), icon='Assets/Profile Icon.png', tooltip=Tooltip(f'<green>Player Stats'),
                                     on_click=lambda: self.switch(self.player_hud, self.shop_hud, self.skill_hud))
-        self.shop_button = Button(parent=self, color=color.gray, scale=(0.17,0.20), position=(-0.5, 0,-1), icon='store.png', tooltip=Tooltip(f'<green>Shop'),
+        self.shop_button = Button(parent=self, color=color.gray, scale=(0.17,0.20), position=(-0.5, 0,-1), icon='Assets/store.png', tooltip=Tooltip(f'<green>Shop'),
                                   on_click=lambda: self.switch(self.shop_hud, self.player_hud, self.skill_hud))
-        self.skill_button = Button(parent=self, color=color.gray, scale=(0.17,0.2), position=(-0.5, -0.37,-1), icon='fireball skill icon.jpg', tooltip=Tooltip(f'<green>Skills'),
+        self.skill_button = Button(parent=self, color=color.gray, scale=(0.17,0.2), position=(-0.5, -0.37,-1), icon='Assets/fireball skill icon.jpg', tooltip=Tooltip(f'<green>Skills'),
                                    on_click=lambda: self.switch(self.skill_hud, self.player_hud, self.shop_hud))
 
         self.health_upgrade_cost = 5

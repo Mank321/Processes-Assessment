@@ -156,7 +156,7 @@ class Player(Entity):
         if self.manager.location in markets:
             colliders = markets[self.manager.location].colliders
             for collider in colliders:
-                if self.intersects(collider).hit and mouse.hovered_entity.name.lower() in markets:
+                if self.intersects(collider).hit and (hasattr(mouse.hovered_entity, 'name') and mouse.hovered_entity.name.lower() in markets):
                     collider.color = color.red
                     self.store = collider.name
                     self.store_icon.alpha = 1

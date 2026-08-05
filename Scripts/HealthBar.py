@@ -2,16 +2,21 @@
 from ursina import Ursina, Entity, Text, color, application, camera
 
 class HealthBar(Entity):
+    """."""
     def __init__(self, max_value, value, position, scale, colour=color.red,
                  bg_colour=color.black, text_size=1, origin=(-.5,.5),
                  roundness=0.1):
+        """."""
         super().__init__()
+        
+        # Initialize the displayed bar
         self.bg = Entity(parent=camera.ui, model='quad', color=bg_colour,
                          scale=scale, position=position, origin=origin)
         self.bar = Entity(parent=camera.ui, model='quad', color=colour,
                           scale=scale, position=position, origin=origin,
                           z=-.005)
-
+        
+        # Initialize the bar values
         self.max_value = max_value
         self.value = value
         self.position = position
@@ -21,9 +26,13 @@ class HealthBar(Entity):
         self.color=colour
         self.bg_colour = bg_colour
 
-        self.text = Text(parent=camera.ui, text=f'{self.value}/{self.max_value}', text_size=text_size, position=((self.x+scale[0]/2)-Text.size, self.y-(scale[1]/2)+(Text.size)/2), z=-0.1)
+        self.text = Text(parent=camera.ui, text=(f'{self.value}/',
+                         f'{self.max_value}'), text_size=text_size,
+                         position=((self.x+scale[0]/2)-Text.size,
+                                   self.y-(scale[1]/2)+(Text.size)/2), z=-0.1)
 
     def update(self):
+        """Update the values every frame correctly."""
         if 0 <= self.value <= self.max_value:
             self.bar.scale_x = (self.value/self.max_value)*self.scale[0]
             self.text.text=f'{self.value}/{self.max_value}'

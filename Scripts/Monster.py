@@ -7,7 +7,7 @@ class Monster(Entity):
                        texture=f'Assets/Models/{monster_stats["name"]}/texture.png',
                        position=position, double_sided=True, scale=monster_stats['scale']*scale,
                        rotation=rotation, name=monster_stats["name"], parent=parent, enabled=enabled,
-                       shader=unlit_shader, cache_compiled_model=False, collider='box', on_click=lambda: self.onClick())
+                       shader=unlit_shader, cache_compiled_model=False, collider='box')# on_click=lambda: self.onClick())
 
         self.manager = manager
         self.parent = parent
